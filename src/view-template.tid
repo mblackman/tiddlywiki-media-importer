@@ -1,0 +1,139 @@
+title: $:/plugins/mblackman/media-importer/view-template
+tags: $:/tags/ViewTemplate
+list-before: $:/core/ui/ViewTemplate/body
+
+\whitespace trim
+<$list filter="[all[current]tag[MediaType]]">
+
+<div class="mi-view-container mi-card" style="display:flex; gap:20px; align-items: flex-start;">
+
+  <!-- LEFT COLUMN: IMAGE & ONLINE RATING -->
+  <div style="flex: 0 0 200px; display:flex; flex-direction:column; gap:10px;">
+    
+    <div style="border-radius:4px; overflow:hidden; box-shadow:0 2px 5px rgba(0,0,0,0.2); background: #000;">
+      <$image source={{!!image}} style="width:100%; display:block;" />
+    </div>
+    
+    <!-- ONLINE RATING -->
+    <div style="text-align:center; background:rgba(0,0,0,0.05); padding:8px; border-radius:4px;">
+       <small class="mi-sublabel" style="text-transform:uppercase; margin-bottom:0;">{{!!dataSource}} Score</small>
+       
+       <$vars rating={{{ [{!!onlineRating}round[]] }}}>
+         <div style="color:#f59e0b; font-size:1.4em; line-height:1.2;">
+           <$list filter="[range[1,5]]" variable="star">
+             <$list filter="[<rating>compare:number:gteq<star>]">★</$list>
+             <$list filter="[<rating>compare:number:lt<star>]">☆</$list>
+           </$list>
+         </div>
+         <div style="font-size:0.8em; opacity:0.8;">
+           {{!!onlineRating}} / 5
+         </div>
+       </$vars>
+    </div>
+  </div>
+
+  <!-- RIGHT COLUMN: DATA -->
+  <div style="flex:1;">
+    
+    <!-- HEADER -->
+    <div class="mi-section" style="border-bottom:1px solid <<colour table-border>>; padding-bottom:10px;">
+      <h1 style="margin:0; font-size:1.8em; line-height:1.2;">{{{ [{!!englishTitle}] ~[{!!title}] }}}</h1>
+      <div style="font-size:1em; color:<<colour muted-foreground>>; margin-top:5px;">
+         <span style="background:<<colour primary>>; color:<<colour background>>; padding:2px 8px; border-radius:10px; font-size:0.8em; text-transform:uppercase; font-weight:bold; margin-right:8px;">
+           {{!!media-type}}
+         </span>
+         {{!!year}}
+         <$list filter="[all[current]has[releaseDate]]"> • <$view field="releaseDate" format="date" template="DD MMM YYYY"/></$list>
+      </div>
+    </div>
+
+    <!-- METADATA GRID (READ ONLY) -->
+    <div class="mi-section" style="display:grid; grid-template-columns: minmax(80px, auto) 1fr; gap: 8px 15px; font-size:0.95em; align-items: start;">
+       <!-- Dynamic Fields based on Type -->
+       <$list filter="[all[current]media-type[Book]]">
+          <div class="mi-label">Author</div> <div><$text text={{{ [enlist{!!author}search-replace:g[_],[ ]join[, ]] }}}/></div>
+          <div class="mi-label">Pages</div> <div>{{!!pages}}</div>
+          <div class="mi-label">ISBN</div> <div>{{!!isbn}}</div>
+       </$list>
+       <$list filter="[all[current]media-type[Game]]">
+          <div class="mi-label">Developer</div> <div><$text text={{{ [enlist{!!developers}search-replace:g[_],[ ]join[, ]] }}}/></div>
+          <div class="mi-label">Publisher</div> <div><$text text={{{ [enlist{!!publishers}search-replace:g[_],[ ]join[, ]] }}}/></div>
+          <div class="mi-label">Genres</div> <div><$text text={{{ [enlist{!!genres}search-replace:g[_],[ ]join[, ]] }}}/></div>
+       </$list>
+       <$list filter="[all[current]media-type[Movie]]">
+          <div class="mi-label">Director</div> <div><$text text={{{ [enlist{!!director}search-replace:g[_],[ ]join[, ]] }}}/></div>
+          <div class="mi-label">Cast</div> <div><$text text={{{ [enlist{!!cast}search-replace:g[_],[ ]join[, ]] }}}/></div>
+          <div class="mi-label">Runtime</div> <div>{{!!runtime}} min</div>
+          <div class="mi-label">Genres</div> <div><$text text={{{ [enlist{!!genres}search-replace:g[_],[ ]join[, ]] }}}/></div>
+       </$list>
+       <$list filter="[all[current]media-type[TV Show]]">
+          <div class="mi-label">Creator</div> <div><$text text={{{ [enlist{!!creator}search-replace:g[_],[ ]join[, ]] }}}/></div>
+          <div class="mi-label">Cast</div> <div><$text text={{{ [enlist{!!cast}search-replace:g[_],[ ]join[, ]] }}}/></div>
+          <div class="mi-label">Seasons</div> <div>{{!!seasons}}</div>
+          <div class="mi-label">Episodes</div> <div>{{!!episodes}}</div>
+          <div class="mi-label">Genres</div> <div><$text text={{{ [enlist{!!genres}search-replace:g[_],[ ]join[, ]] }}}/></div>
+       </$list>
+       <$list filter="[all[current]media-type[Manga]]">
+          <div class="mi-label">Author</div> <div><$text text={{{ [enlist{!!author}search-replace:g[_],[ ]join[, ]] }}}/></div>
+          <div class="mi-label">Volumes</div> <div>{{!!volumes}}</div>
+          <div class="mi-label">Status</div> <div>{{!!status}}</div>
+          <div class="mi-label">Genres</div> <div><$text text={{{ [enlist{!!genres}search-replace:g[_],[ ]join[, ]] }}}/></div>
+       </$list>
+       <$list filter="[all[current]media-type[Comic]]">
+          <div class="mi-label">Publisher</div> <div><$text text={{{ [{!!publisher}search-replace:g[_],[ ]] }}}/></div>
+          <div class="mi-label">Issues</div> <div>{{!!count_of_issues}}</div>
+       </$list>
+       <div class="mi-label">Plot</div> 
+       <div style="max-height:150px; overflow-y:auto; line-height:1.4;">
+         <$transclude field="plot" mode="block"/>
+       </div>
+    </div>
+
+    <!-- USER CONTROLS (EDITABLE) -->
+    <div class="mi-card" style="background: linear-gradient(to bottom right, rgba(0,0,0,0.01), rgba(0,0,0,0.04)); border-left: 4px solid <<colour primary>>; padding: 12px;">
+       
+       <div style="margin-bottom:8px; padding-bottom:4px; border-bottom:1px solid rgba(0,0,0,0.05);">
+         <h3 style="margin:0; font-size:0.95em; text-transform:uppercase; letter-spacing:1px; color:<<colour primary>>;">
+           👤 Library Status
+         </h3>
+       </div>
+       
+       <div style="display:flex; flex-wrap:wrap; gap:8px 20px;">
+         
+         <!-- STATUS TOGGLE -->
+         <div style="flex: 1 0 120px; display:flex; flex-direction:column; gap:2px;">
+           <span class="mi-label" style="font-size:0.8em; text-transform:uppercase; color:<<colour muted-foreground>>;">Status</span>
+           <$select field="status" default="Backlog" class="mi-input" style="width:100%; height:32px; font-size:0.9em;">
+             <option value="Backlog">Backlog</option>
+             <option value="Active">Active</option>
+             <option value="Completed">Completed</option>
+             <option value="Dropped">Dropped</option>
+           </$select>
+         </div>
+
+         <!-- PERSONAL RATING -->
+         <div style="flex: 1 0 140px; display:flex; flex-direction:column; gap:2px;">
+            <span class="mi-label" style="font-size:0.8em; text-transform:uppercase; color:<<colour muted-foreground>>;">My Rating</span>
+            <$select field="personalRating" default="0" class="mi-input" style="width:100%; height:32px; font-size:0.9em;">
+               <option value="0">Unrated</option>
+               <option value="1">★☆☆☆☆ (1/5)</option>
+               <option value="2">★★☆☆☆ (2/5)</option>
+               <option value="3">★★★☆☆ (3/5)</option>
+               <option value="4">★★★★☆ (4/5)</option>
+               <option value="5">★★★★★ (5/5)</option>
+            </$select>
+         </div>
+
+         <!-- DATE PICKER -->
+         <div style="flex: 1 0 130px; display:flex; flex-direction:column; gap:2px;">
+            <span class="mi-label" style="font-size:0.8em; text-transform:uppercase; color:<<colour muted-foreground>>;">Date</span>
+            <$edit-text field="lastFinished" type="date" tag="input" default="" class="mi-input" style="width:100%; height:32px; padding: 4px 8px; font-size:0.9em;"/>
+         </div>
+
+       </div>
+    </div>
+
+  </div>
+</div>
+
+</$list>

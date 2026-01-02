@@ -1,0 +1,83 @@
+title: $:/plugins/mblackman/media-importer/macros/ui
+tags: $:/tags/Macro
+
+\define media-importer-ui(type, label, placeholder, loadingText, resultTag, imageField:"draft_image", imageStyle:"width:50px; height:auto;", subtitleContent)
+
+<$keyboard key="enter" actions="<$action-setfield $tiddler='$:/state/$type$-search-page' text='1'/><$action-sendmessage $message='tm-search-$type$' $param={{$:/temp/$type$-search-input}} page='1'/>">
+  <div class="mi-flex-row" style="margin-bottom:20px;">
+    <$edit-text tiddler="$:/temp/$type$-search-input" tag="input" focus="yes" default="" placeholder="$placeholder$" class="mi-input mi-flex-grow"/>
+    
+    <$button class="mi-btn mi-btn-primary" actions="<$action-setfield $tiddler='$:/state/$type$-search-page' text='1'/><$action-sendmessage $message='tm-search-$type$' $param={{$:/temp/$type$-search-input}} page='1'/>">
+      Search
+    </$button>
+    
+    <$button actions="""
+      <$action-deletetiddler $filter="[tag[$resultTag$]]"/>
+      <$action-setfield $tiddler="$:/state/$type$-search" text=""/>
+      <$action-setfield $tiddler="$:/state/$type$-search-page" text="1"/>
+      <$action-setfield $tiddler="$:/temp/$type$-search-input" text=""/>
+    """>
+      Clear
+    </$button>
+  </div>
+</$keyboard>
+
+<div style={{{ [[$:/state/$type$-search]get[text]!is[blank]then[min-height: 400px;]] }}}>
+<$list filter="[[$:/state/$type$-search]get[text]match[loading]]">
+  <div class="mi-section">
+    <p><i>$loadingText$</i></p>
+  </div>
+</$list>
+
+<$list filter="[tag[$resultTag$]sort[draft_title]]">
+  <div class="mi-card mi-flex-row mi-flex-between">
+    
+    <div style="flex-shrink:0;">
+       <$list filter="[all[current]has[$imageField$]]">
+          <img src={{!!$imageField$}} style="$imageStyle$"/>
+       </$list>
+    </div>
+
+    <div>
+       <b>{{!!draft_title}}</b> <small>({{!!draft_year}})</small><br/>
+       <small>$subtitleContent$</small>
+    </div>
+
+    <div class="mi-ml-auto">
+      <$button class="mi-btn mi-btn-primary" actions="<$action-sendmessage $message='tm-fetch-$type$' $param=<<currentTiddler>>/>">
+         Import
+      </$button>
+    </div>
+
+  </div>
+</$list>
+
+<$list filter="[[$:/state/$type$-search]text[done]]">
+  <$list filter="[tag[$resultTag$]count[]match[0]]">
+     <div class="mi-section"><p><i>No results found.</i></p></div>
+  </$list>
+</$list>
+</div>
+
+<$list filter="[tag[$resultTag$]limit[1]] [[$:/state/$type$-search-page]get[text]else[1]!match[1]] +[limit[1]]">
+  <div class="mi-flex-row" style="gap: 10px; margin-top: 15px; justify-content: center; align-items: center;">
+    
+    <$list filter="[[$:/state/$type$-search-page]get[text]else[1]!match[1]]">
+    <$button class="mi-btn">
+       ← Prev
+       <$action-setfield $tiddler="$:/state/$type$-search-page" $value={{{ [[$:/state/$type$-search-page]get[text]else[1]subtract[1]] }}} />
+       <$action-sendmessage $message="tm-search-$type$" $param={{$:/temp/$type$-search-input}} page={{{ [[$:/state/$type$-search-page]get[text]else[1]subtract[1]] }}}/>
+    </$button>
+    </$list>
+
+    <span style="font-size:0.9em; opacity:0.7;">Page <$text text={{{ [[$:/state/$type$-search-page]get[text]else[1]] }}}/></span>
+
+    <$button class="mi-btn" disabled={{{ [tag[$resultTag$]count[]match[0]then[yes]] }}}>
+       Next →
+       <$action-setfield $tiddler="$:/state/$type$-search-page" $value={{{ [[$:/state/$type$-search-page]get[text]else[1]add[1]] }}} />
+       <$action-sendmessage $message="tm-search-$type$" $param={{$:/temp/$type$-search-input}} page={{{ [[$:/state/$type$-search-page]get[text]else[1]add[1]] }}}/>
+    </$button>
+
+  </div>
+</$list>
+\end

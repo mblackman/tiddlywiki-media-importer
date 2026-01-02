@@ -1,0 +1,92 @@
+title: $:/plugins/mblackman/media-importer/styles
+tags: $:/tags/Stylesheet
+type: text/css
+
+/* --- Media Importer Button Styles --- */
+.mi-btn {
+  display: inline-block;
+  padding: 8px 16px;
+  border: 1px solid <<colour table-border>>;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.04);
+  color: <<colour muted-foreground>>;
+  font-weight: 600;
+  text-decoration: none;
+  font-size: 0.85em;
+  text-transform: uppercase;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.mi-btn:hover {
+  background: <<colour primary>>;
+  color: <<colour background>>;
+  border-color: <<colour primary>>;
+  text-decoration: none;
+}
+
+/* Primary Button */
+.mi-btn-primary {
+  background-color: <<colour primary>>;
+  color: <<colour background>>;
+  border-color: <<colour primary>>;
+  font-weight: bold;
+}
+
+.mi-btn-primary:hover {
+  background-color: <<colour page-background>>;
+  color: <<colour primary>>;
+}
+
+/* --- Media Importer Input Styles --- */
+.mi-input {
+  background: transparent;
+  color: <<colour foreground>>;
+  border: 1px solid <<colour table-border>>;
+  width: 100%;
+  padding: 8px;
+  border-radius: 4px;
+  line-height: 1.4em;
+  box-sizing: border-box; 
+}
+.mi-input::placeholder { color: <<colour foreground>>; opacity: 0.5; }
+
+/* Select Dropdown Styling */
+select.mi-input {
+  appearance: none;
+  -webkit-appearance: none;
+  background-color: <<colour tiddler-editor-background>>;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23888888' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  background-size: 16px;
+  padding: 4px 32px 4px 8px;
+  cursor: pointer;
+}
+
+/* --- Media Importer Layout & Typography --- */
+.mi-label { display: block; margin-bottom: 4px; font-weight: bold; opacity: 0.9; }
+.mi-sublabel { display: block; font-size: 0.85em; opacity: 0.7; margin-bottom: 4px; font-style: italic; }
+.mi-section { margin-bottom: 25px; }
+.mi-section-tight { margin-bottom: 10px; }
+.mi-flex-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 6px;
+  align-items: center;
+  width: 100%;
+}
+.mi-flex-grow { flex-grow: 1; }
+.mi-full-width { width: 100%; display: block; }
+.mi-ml-auto { margin-left: auto; }
+.mi-flex-between { justify-content: space-between; }
+
+/* --- Card Styles --- */
+.mi-card {
+  border: 1px solid <<colour table-border>>;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 10px;
+  background: <<colour tiddler-background>>;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
