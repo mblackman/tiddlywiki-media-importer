@@ -1,0 +1,85 @@
+title: Media Importer
+
+\import [[$:/macros/media-importer-ui]]
+
+<div style="max-width: 1000px; margin: 0 auto;">
+
+<div class="tw-section">
+  <div class="tw-flex-row" style="gap:10px; margin-bottom: 15px; border-bottom: 1px solid <<colour table-border>>; padding-bottom: 10px;">
+    <h2 style="margin:0; font-size: 1.5em; color:<<colour primary>>; line-height:1;">📥 Import Media</h2>
+  </div>
+  
+  <div style="margin-top: 10px;">
+    
+    <$let defaultTab={{{ [[$:/data/media-importers]indexes[]first[]] }}}>
+    <!-- Dynamic Tabs from Configuration -->
+    <div class="tc-tab-buttons">
+      <$list filter="[[$:/data/media-importers]indexes[]]" variable="importerType">
+        <$button class={{{ [[$:/state/media-importer-selected]get[text]else<defaultTab>match<importerType>then[tc-tab-selected]else[]] }}}>
+          <$action-setfield $tiddler="$:/state/media-importer-selected" text=<<importerType>> />
+          <!-- FIX: Explicitly get text before parsing JSON -->
+          <$text text={{{ [[$:/data/media-importers]get[text]jsonget<importerType>,[caption]] }}} />
+        </$button>
+      </$list>
+    </div>
+
+    <!-- Dynamic Content -->
+    <div class="tc-tab-content">
+      <$let type={{{ [[$:/state/media-importer-selected]get[text]!is[blank]else<defaultTab>] }}}>
+          <$macrocall $name="media-importer-ui" 
+              type=<<type>>
+              label={{{ [[$:/data/media-importers]get[text]jsonget<type>,[caption]] }}}
+              placeholder={{{ [[$:/data/media-importers]get[text]jsonget<type>,[placeholder]] }}}
+              loadingText={{{ [[$:/data/media-importers]get[text]jsonget<type>,[loadingText]] }}}
+              resultTag={{{ [[$:/data/media-importers]get[text]jsonget<type>,[resultTag]] }}}
+              imageField={{{ [[$:/data/media-importers]get[text]jsonget<type>,[imageField]] }}}
+              subtitleContent={{{ [[$:/data/media-importers]get[text]jsonget<type>,[subtitle]] }}}
+          />
+      </$let>
+    </div>
+    </$let>
+
+  </div>
+</div>
+
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 25px;">
+
+  <div style="grid-column: span 2;">
+    <h3 style="margin: 0 0 15px 0; font-size: 1.1em; text-transform: uppercase; letter-spacing: 1px; color: <<colour muted-foreground>>;">
+      ⏱️ Recently Added
+    </h3>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 15px;">
+      <$list filter="[tag[MediaType]!sort[created]limit[8]]" emptyMessage="<div style='grid-column: 1/-1; padding:20px; font-style:italic; text-align:center; opacity:0.6;'>No items added yet.</div>">
+        
+        <$link to={{!!title}} style="text-decoration: none; display: block; color: inherit;">
+        <div class="tw-card" style="padding: 0; overflow: hidden; position: relative; aspect-ratio: 1/1; margin-bottom: 0; border: none;">
+          
+          <$image source={{!!image}} style="width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0;" />
+          
+          <div style="position: absolute; bottom: 0; left: 0; right: 0; height: 70%; background: linear-gradient(to bottom, transparent, rgba(0,0,0,0.85)); pointer-events: none;"></div>
+
+          <span style="position: absolute; top: 6px; right: 6px; font-size:0.65em; font-weight: bold; text-transform:uppercase; background: rgba(0,0,0,0.75); color: #fff; padding: 2px 6px; border-radius: 4px;">
+            {{!!media-type}}
+          </span>
+
+          <div style="position: absolute; bottom: 0; left: 0; right: 0; padding: 10px; z-index: 1;">
+            <div style="font-weight: 600; font-size: 0.85em; line-height: 1.2; margin-bottom: 2px; text-shadow: 0 1px 2px rgba(0,0,0,0.8); color: #fff;">
+              <$view field="title"/>
+            </div>
+            <div style="font-size: 0.7em; color: rgba(255,255,255,0.75);">
+               <$view field="created" format="date" template="YYYY-0MM-0DD"/>
+            </div>
+          </div>
+          
+        </div>
+        </$link>
+      </$list>
+    </div>
+  </div>
+
+
+
+</div>
+
+</div>

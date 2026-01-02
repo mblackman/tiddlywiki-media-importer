@@ -1,0 +1,53 @@
+title: $:/plugins/mblackman/media-importer/data/importers
+type: application/json
+
+{
+    "Book": {
+        "caption": "Add Book",
+        "placeholder": "Enter Book Title",
+        "loadingText": "Searching OpenLibrary...",
+        "resultTag": "SearchResult",
+        "imageField": "draft_cover",
+        "subtitle": "By <$list filter='[list[!!draft_author]]'><$view field='title'/>, </$list>"
+    },
+    "Comic": {
+        "caption": "Add Comic",
+        "placeholder": "Enter Comic Name",
+        "loadingText": "Searching ComicVine...",
+        "resultTag": "ComicSearchResult",
+        "imageField": "draft_image",
+        "subtitle": "{{!!draft_publisher}}"
+    },
+    "Game": {
+        "caption": "Add Game",
+        "placeholder": "Enter Game Title",
+        "loadingText": "Searching RAWG...",
+        "resultTag": "GameSearchResult",
+        "imageField": "draft_image",
+        "subtitle": ""
+    },
+    "Manga": {
+        "caption": "Add Manga",
+        "placeholder": "Enter Manga Title",
+        "loadingText": "Searching AniList...",
+        "resultTag": "MangaSearchResult",
+        "imageField": "draft_image",
+        "subtitle": "{{!!draft_author}}"
+    },
+    "Movie": {
+        "caption": "Add Movie",
+        "placeholder": "Enter Movie Title",
+        "loadingText": "Searching TMDB...",
+        "resultTag": "MovieSearchResult",
+        "imageField": "draft_poster",
+        "subtitle": "{{!!draft_overview}}"
+    },
+    "TV Show": {
+        "caption": "Add TV Show",
+        "placeholder": "Enter TV Show Title",
+        "loadingText": "Searching TMDB...",
+        "resultTag": "TVShowSearchResult",
+        "imageField": "draft_poster",
+        "subtitle": "{{!!draft_overview}}"
+    }
+}

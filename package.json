@@ -1,0 +1,10 @@
+{
+  "name": "tiddlywiki-media-importer",
+  "version": "0.0.1",
+  "description": "Media Importer Plugin for TiddlyWiki",
+  "scripts": {
+    "build": "node scripts/build.js"
+  },
+  "author": "mblackman",
+  "license": "MIT"
+}

@@ -1,0 +1,146 @@
+title: $:/plugins/mblackman/media-importer/library
+caption: 📚 Media Library
+
+<$vars currentType={{{ [[$:/state/mblackman/media-importer/library/type]get[text]else[Book]] }}}>
+<$vars currentRating={{{ [[$:/state/mblackman/media-importer/library/rating]get[text]else[All]] }}}>
+<$vars currentSort={{{ [[$:/state/mblackman/media-importer/library/sort]get[text]else[title-asc]] }}}>
+<$vars currentYear={{{ [[$:/state/mblackman/media-importer/library/year]get[text]else[All]] }}}>
+
+<!-- Define filter logic strings -->
+<$vars 
+  logicAll="[all[current]]"
+  logicUnrated="[field:personalRating[0]] [!has[personalRating]]"
+  logicRated="[get[personalRating]compare:number:eq<currentRating>]"
+  logicYear="[get[lastFinished]prefix<currentYear>]"
+  yearRegex="-.*$"
+>
+
+<!-- Define sort logic strings -->
+<$vars
+  sortTitleAsc="[sort[title]]"
+  sortTitleDesc="[!sort[title]]"
+  sortRatingAsc="[sort[personalRating]]"
+  sortRatingDesc="[!sort[personalRating]]"
+  sortDateDesc="[has[lastFinished]!sort[lastFinished]]"
+  sortDateAsc="[has[lastFinished]sort[lastFinished]]"
+>
+
+<!-- Select which logic string to use -->
+<$vars ratingLogic={{{ 
+  [<currentRating>match[All]then<logicAll>] 
+  ~[<currentRating>match[0]then<logicUnrated>] 
+  ~[<currentRating>!match[All]!match[0]then<logicRated>] 
+}}}>
+
+<$vars yearLogic={{{ 
+  [<currentYear>match[All]then<logicAll>] 
+  ~[<currentYear>!match[All]then<logicYear>] 
+}}}>
+
+<!-- Select which sort string to use -->
+<$vars sortLogic={{{ 
+  [<currentSort>match[title-asc]then<sortTitleAsc>]
+  ~[<currentSort>match[title-desc]then<sortTitleDesc>]
+  ~[<currentSort>match[rating-asc]then<sortRatingAsc>]
+  ~[<currentSort>match[rating-desc]then<sortRatingDesc>]
+  ~[<currentSort>match[date-desc]then<sortDateDesc>]
+  ~[<currentSort>match[date-asc]then<sortDateAsc>]
+}}}>
+
+<div class="mi-section">
+  <div style="display: flex; flex-wrap: wrap; gap: 15px;">
+    
+    <!-- Type -->
+    <div style="flex: 1; min-width: 140px;">
+      <span class="mi-label">Type</span>
+      <$select tiddler="$:/state/mblackman/media-importer/library/type" default="Book" class="mi-input">
+        <$list filter="[[$:/plugins/mblackman/media-importer/data/importers]indexes[]]">
+          <$vars thisType=<<currentTiddler>>>
+            <option value=<<thisType>>><$text text=<<thisType>>/> (<$count filter="[tag[MediaType]media-type<thisType>]"/>)</option>
+          </$vars>
+        </$list>
+      </$select>
+    </div>
+
+    <!-- Rating -->
+    <div style="flex: 1; min-width: 140px;">
+      <span class="mi-label">Rating</span>
+      <$select tiddler="$:/state/mblackman/media-importer/library/rating" default="All" class="mi-input">
+        <option value="All">All Ratings</option>
+        <option value="5">⭐⭐⭐⭐⭐ (5)</option>
+        <option value="4">⭐⭐⭐⭐ (4)</option>
+        <option value="3">⭐⭐⭐ (3)</option>
+        <option value="2">⭐⭐ (2)</option>
+        <option value="1">⭐ (1)</option>
+        <option value="0">Unrated</option>
+      </$select>
+    </div>
+
+    <!-- Year -->
+    <div style="flex: 1; min-width: 140px;">
+      <span class="mi-label">Year</span>
+      <$select tiddler="$:/state/mblackman/media-importer/library/year" default="All" class="mi-input">
+        <option value="All">All Years</option>
+        <$list filter="[tag[MediaType]media-type<currentType>has[lastFinished]get[lastFinished]search-replace:g:regexp<yearRegex>,[]unique[]!sort[]]">
+          <option value=<<currentTiddler>>><$text text=<<currentTiddler>>/></option>
+        </$list>
+      </$select>
+    </div>
+
+    <!-- Sort -->
+    <div style="flex: 1; min-width: 140px;">
+      <span class="mi-label">Sort by</span>
+      <$select tiddler="$:/state/mblackman/media-importer/library/sort" default="title-asc" class="mi-input">
+        <option value="title-asc">Title (A-Z)</option>
+        <option value="title-desc">Title (Z-A)</option>
+        <option value="rating-desc">Rating (High-Low)</option>
+        <option value="rating-asc">Rating (Low-High)</option>
+        <option value="date-desc">Finished Date (Newest)</option>
+        <option value="date-asc">Finished Date (Oldest)</option>
+      </$select>
+    </div>
+
+  </div>
+</div>
+
+<div class="mi-section-tight">
+  <$edit-text tiddler="$:/temp/mblackman/media-importer/search/library" tag="input" placeholder="Search library..." default="" class="mi-input" />
+</div>
+
+<!-- Result Count Label -->
+<div class="mi-sublabel" style="margin-bottom: 15px;">
+  Found <b><$count filter="[tag[MediaType]media-type<currentType>] +[search{$:/temp/mblackman/media-importer/search/library}] +[filter<ratingLogic>] +[filter<yearLogic>] +[subfilter<sortLogic>]"/></b> items
+</div>
+
+<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 20px;">
+  <!-- Updated filter to use generic MediaType tag and specific media-type field -->
+  <$list filter="[tag[MediaType]media-type<currentType>] +[search{$:/temp/mblackman/media-importer/search/library}] +[filter<ratingLogic>] +[filter<yearLogic>] +[subfilter<sortLogic>]">
+    <$link to={{!!title}} style="text-decoration: none; color: inherit;">
+      <div class="mi-card" style="padding: 0; height: 100%; display: flex; flex-direction: column; overflow: hidden; transition: transform 0.2s;">
+        <div style="aspect-ratio: 16/9; overflow: hidden; background: #000; position: relative;">
+          <$image source={{!!image}} style="width: 100%; height: 100%; object-fit: contain;" />
+        </div>
+        <div style="padding: 12px; flex-grow: 1; display: flex; flex-direction: column;">
+          <div style="font-weight: 600; line-height: 1.3; margin-bottom: 4px;">
+            <$view field="title" />
+          </div>
+          <div class="mi-sublabel" style="margin-top: auto;">
+             <$list filter="[<currentTiddler>get[personalRating]!match[0]]">
+               <$text text={{{ [<currentTiddler>get[personalRating]addsuffix[ ★]] }}} />
+             </$list>
+          </div>
+        </div>
+      </div>
+    </$link>
+  </$list>
+</div>
+
+</$vars>
+</$vars>
+</$vars>
+</$vars>
+</$vars>
+</$vars>
+</$vars>
+</$vars>
+</$vars>
