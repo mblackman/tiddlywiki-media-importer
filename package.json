@@ -1,6 +1,6 @@
 {
   "name": "tiddlywiki-media-importer",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Media Importer Plugin for TiddlyWiki",
   "scripts": {
     "build": "node scripts/build.js"
