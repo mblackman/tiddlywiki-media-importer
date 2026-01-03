@@ -72,15 +72,10 @@ caption: Media Importer
                <$view field="created" format="date" template="YYYY-0MM-0DD"/>
             </div>
           </div>
-          
         </div>
         </$link>
       </$list>
     </div>
   </div>
-
-
-
 </div>
-
 </div>

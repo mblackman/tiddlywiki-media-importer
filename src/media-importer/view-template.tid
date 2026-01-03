@@ -129,10 +129,8 @@ list-before: $:/core/ui/ViewTemplate/body
             <span class="mi-label" style="font-size:0.8em; text-transform:uppercase; color:<<colour muted-foreground>>;">Date</span>
             <$edit-text field="lastFinished" type="date" tag="input" default="" class="mi-input" style="width:100%; height:32px; padding: 4px 8px; font-size:0.9em;"/>
          </div>
-
        </div>
     </div>
-
   </div>
 </div>
 
