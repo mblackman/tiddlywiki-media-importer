@@ -1,6 +1,6 @@
 title: $:/plugins/mblackman/media-importer/styles
 tags: $:/tags/Stylesheet
-type: text/css
+type: text/vnd.tiddlywiki
 
 /* --- Media Importer Button Styles --- */
 .mi-btn {

@@ -121,7 +121,7 @@ Fetches data from various APIs and formats them into fields.
         if (config.apiKeyTiddler) {
           apiKey = $tw.wiki.getTiddlerText(config.apiKeyTiddler);
           if (!apiKey) {
-            alert("Missing API Key in " + config.apiKeyTiddler);
+            alert("Missing API Key for " + type + ". Please set it in Control Panel > Media Importer.");
             return;
           }
         }
