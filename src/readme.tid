@@ -1,0 +1,24 @@
+title: $:/plugins/mblackman/media-importer/readme
+type: text/vnd.tiddlywiki
+
+! Media Importer
+
+This plugin allows you to search and import metadata for various media types into your TiddlyWiki.
+
+!! Supported Sources
+* ''Books'': OpenLibrary
+* ''Comics'': ComicVine (Requires API Key)
+* ''Games'': RAWG (Requires API Key)
+* ''Manga'': AniList
+* ''Movies'': TMDB (Requires API Key)
+* ''TV Shows'': TMDB (Requires API Key)
+
+!! Setup
+
+After installing, please go to the ''Control Panel'' > ''Settings'' > ''Media Importer'' to configure your API keys.
+
+!! Usage
+
+Create a new tiddler for media imports and paste the text: `{{$:/plugins/mblackman/media-importer/ui}}`.
+
+To create the library browser, create a tiddler with this text: `{{$:/plugins/mblackman/media-importer/library}}`.
