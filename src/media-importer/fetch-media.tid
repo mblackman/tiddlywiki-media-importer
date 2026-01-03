@@ -1,3 +1,7 @@
+title: $:/plugins/mblackman/media-importer/fetch-media.js
+type: application/javascript
+module-type: startup
+
 /*\
 title: $:/plugins/mblackman/media-importer/fetch-media.js
 type: application/javascript
@@ -121,7 +125,7 @@ Fetches data from various APIs and formats them into fields.
         if (config.apiKeyTiddler) {
           apiKey = $tw.wiki.getTiddlerText(config.apiKeyTiddler);
           if (!apiKey) {
-            alert("Missing API Key for " + type + ". Please set it in Control Panel > Media Importer.");
+            alert("Missing API Key for " + type + ". Please set it in the Media Importer Plugin Config.");
             return;
           }
         }

@@ -1,0 +1,21 @@
+title: $:/plugins/mblackman/media-importer/config
+tags: $:/tags/ControlPanel/SettingsTab
+caption: Media Importer
+
+Manage your media consumption within TiddlyWiki
+
+---
+
+!! Plugin Configs
+
+Please enter your API keys for the following services:
+
+;ComicVine
+:<$edit-text tiddler="$:/plugins/mblackman/media-importer/configs/comicvine-api-key" tag="input" type="password" default="" placeholder="Enter Key" />
+:[[Link|https://comicvine.gamespot.com/api/]]
+;RAWG
+:<$edit-text tiddler="$:/plugins/mblackman/media-importer/config/rawg-api-key" tag="input" type="password" default="" placeholder="Enter Key" />
+:[[Link|https://rawg.io/apidocs]]
+;TMDB
+:<$edit-text tiddler="$:/plugins/mblackman/media-importer/config/tmdb-api-key" tag="input" type="password" default="" placeholder="Enter Key" />
+:[[Link|https://www.themoviedb.org/documentation/api]]

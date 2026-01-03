@@ -1,7 +1,8 @@
 title: $:/plugins/mblackman/media-importer/readme
-type: text/vnd.tiddlywiki
 
 ! Media Importer
+
+Manage your media consumption within TiddlyWiki
 
 This plugin allows you to search and import metadata for various media types into your TiddlyWiki.
 
@@ -15,7 +16,7 @@ This plugin allows you to search and import metadata for various media types int
 
 !! Setup
 
-After installing, please go to the ''Control Panel'' > ''Settings'' > ''Media Importer'' to configure your API keys.
+After installing, please go to the ''$:/plugins/mblackman/media-importer'' > ''config'' to configure your API keys.
 
 !! Usage
 
