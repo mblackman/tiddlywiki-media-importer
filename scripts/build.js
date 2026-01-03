@@ -17,6 +17,12 @@ if (!fs.existsSync(distDir)) {
 console.log(`Reading plugin info from ${pluginInfoPath}...`);
 const pluginInfo = JSON.parse(fs.readFileSync(pluginInfoPath, 'utf8'));
 
+// Sync version from package.json
+const packageJsonPath = path.join(rootDir, 'package.json');
+const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
+console.log(`Setting plugin version to ${packageJson.version} from package.json`);
+pluginInfo.version = packageJson.version;
+
 // Helper to parse TiddlyWiki headers
 function parseFile(filename, content) {
     if (filename.endsWith('.json')) {
