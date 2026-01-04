@@ -598,7 +598,7 @@ Fetches data from various APIs and formats them into fields.
       // --- CONFIG 6: TV SHOWS (TMDB) ---
       registerMediaImporter({
         type: "TV Show",
-        apiKeyTiddler: "$:/config/tmdb-api-key",
+        apiKeyTiddler: "$:/plugins/mblackman/media-importer/config/tmdb-api-key",
         searchTag: "TVShowSearchResult",
         prefix: "tv-result",
         searchFn: function (query, apiKey, page) {
