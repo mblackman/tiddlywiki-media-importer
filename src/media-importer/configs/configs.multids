@@ -1,1 +1,5 @@
 title: $:/plugins/mblackman/media-importer/configs/
+
+comicvine-api-key:
+rawg-api-key:
+tmdb-api-key:
