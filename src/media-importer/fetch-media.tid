@@ -366,7 +366,7 @@ Fetches data from various APIs and formats them into fields.
       // --- CONFIG 3: GAMES (RAWG) ---
       registerMediaImporter({
         type: "Game",
-        apiKeyTiddler: "$:/plugins/mblackman/media-importer/config/rawg-api-key",
+        apiKeyTiddler: "$:/plugins/mblackman/media-importer/configs/rawg-api-key",
         searchTag: "GameSearchResult",
         prefix: "game-result",
         searchFn: function (query, apiKey, page) {
@@ -533,7 +533,7 @@ Fetches data from various APIs and formats them into fields.
       // --- CONFIG 5: MOVIES (TMDB) ---
       registerMediaImporter({
         type: "Movie",
-        apiKeyTiddler: "$:/plugins/mblackman/media-importer/config/tmdb-api-key",
+        apiKeyTiddler: "$:/plugins/mblackman/media-importer/configs/tmdb-api-key",
         searchTag: "MovieSearchResult",
         prefix: "movie-result",
         searchFn: function (query, apiKey, page) {
@@ -598,7 +598,7 @@ Fetches data from various APIs and formats them into fields.
       // --- CONFIG 6: TV SHOWS (TMDB) ---
       registerMediaImporter({
         type: "TV Show",
-        apiKeyTiddler: "$:/plugins/mblackman/media-importer/config/tmdb-api-key",
+        apiKeyTiddler: "$:/plugins/mblackman/media-importer/configs/tmdb-api-key",
         searchTag: "TVShowSearchResult",
         prefix: "tv-result",
         searchFn: function (query, apiKey, page) {
