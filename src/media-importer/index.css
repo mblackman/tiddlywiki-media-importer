@@ -113,3 +113,80 @@ select.mi-input {
   background: <<colour tiddler-background>>;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
+
+/* --- Media Picker Dropdown --- */
+.mi-media-picker-input-wrapper {
+  position: relative;
+}
+
+.mi-media-picker-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 800;
+  max-height: 250px;
+  overflow-y: auto;
+  width: 100%;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+.mi-media-picker-clear-btn {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  opacity: 0.5;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.mi-media-picker-dropdown .mi-disabled-item {
+  opacity: 0.6;
+  cursor: default;
+  padding: 6px 14px;
+  font-style: italic;
+}
+
+.mi-media-picker-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: transparent;
+  z-index: 799;
+  border: none;
+  padding: 0;
+}
+
+/* --- Summary List Group --- */
+.mi-summary-group {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid <<colour table-border>>;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-top: 4px;
+  background-color: <<colour tiddler-background>>;
+}
+
+.mi-summary-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  border-bottom: 1px solid <<colour table-border>>;
+  font-size: 0.9em;
+}
+
+.mi-summary-item:last-child { border-bottom: none; }
+.mi-summary-item:hover { background-color: <<colour table-header-background>>; }
+
+.mi-summary-link { flex-grow: 1; overflow-wrap: break-word; margin-right: 12px; line-height: 1.3; }
+
+.mi-summary-badge {
+  background-color: <<colour tiddler-editor-background>>; color: <<colour foreground>>;
+  border: 1px solid <<colour table-border>>; border-radius: 12px; padding: 2px 8px;
+  font-size: 0.85em; font-weight: 600; white-space: nowrap; flex-shrink: 0; opacity: 0.9;
+}
