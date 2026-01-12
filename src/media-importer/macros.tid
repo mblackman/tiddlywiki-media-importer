@@ -81,3 +81,78 @@ tags: $:/tags/Macro
   </div>
 </$list>
 \end
+
+\define media-picker(field, tag, label)
+<div class="mi-media-wrapper">
+  <span class="mi-label">$label$</span>
+  
+  <!-- List of added items (Chips) -->
+  <div style="margin-bottom: 4px;">
+    <$list filter="[<currentTiddler>get[$field$]enlist-input[]]" variable="item">
+      <span style="display: inline-block; background: <<colour tiddler-info-background>>; border: 1px solid <<colour tiddler-info-border>>; border-radius: 12px; padding: 2px 10px; margin: 2px 4px 2px 0; font-size: 0.9em;">
+        <$button class="tc-btn-invisible" tooltip="Remove" style="margin-right: 4px; color: <<colour muted-foreground>>;">
+          <$action-listops $field="$field$" $subfilter="-[<item>]"/>
+          ×
+        </$button>
+        <$link to=<<item>> style="text-decoration: none; color: <<colour foreground>>;" />
+      </span>
+    </$list>
+  </div>
+
+  <!-- Search & Select -->
+  <$let 
+    tempState={{{ [[$:/temp/journal/picker/]addsuffix<currentTiddler>addsuffix[/]addsuffix[$field$]] }}}
+    journalTitle=<<currentTiddler>>
+  >
+    <div class="mi-media-picker-input-wrapper">
+      <div style="position:relative;">
+        <$edit-text tiddler=<<tempState>> tag="input" class="mi-input" placeholder="Search $tag$..." default="" />
+        <$reveal state=<<tempState>> type="nomatch" text="">
+          <$button class="tc-btn-invisible mi-media-picker-clear-btn">
+            <$action-setfield $tiddler=<<tempState>> text="" />✕
+          </$button>
+        </$reveal>
+      </div>
+      
+      <$reveal state=<<tempState>> type="nomatch" text="" animate="yes">
+        <$button class="mi-media-picker-overlay">
+          <$action-setfield $tiddler=<<tempState>> text="" />
+        </$button>
+        <div class="tc-drop-down mi-media-picker-dropdown">
+          <$let query={{{ [<tempState>get[text]] }}}>
+            <$list filter="[tag[$tag$]!is[system]search:title<query>sort[title]limit[15]]" emptyMessage="<div class='tc-dropdown-item mi-disabled-item'>No matches found</div>">
+              <$button class="tc-btn-invisible tc-dropdown-item">
+                <$action-listops $tiddler=<<journalTitle>> $field="$field$" $subfilter={{{ [<currentTiddler>format:titlelist[]] }}} />
+                <$action-setfield $tiddler=<<tempState>> text="" />
+                <$view field="title"/> <$list filter="[all[current]has[media-type]]"><span style="opacity:0.6; font-size:0.8em;">({{!!media-type}})</span></$list>
+              </$button>
+            </$list>
+          </$let>
+        </div>
+      </$reveal>
+    </div>
+  </$let>
+</div>
+\end
+
+\define media-consumption-summary(journalFilter, field:"habit-media")
+<div class="mi-section">
+  <$list filter="[tag[MediaType]get[media-type]unique[]sort[]]" variable="mediaType">
+    <$let 
+      mediaItemsFilter="""$journalFilter$ +[get[$field$]enlist-input[]] :filter[media-type<mediaType>] +[unique[]sort[]]"""
+    >
+      <$list filter="[subfilter<mediaItemsFilter>count[]!match[0]]" variable="ignore">
+        <h5 style="margin-bottom: 5px; margin-top: 15px;"><<mediaType>></h5>
+        <div class="mi-summary-group">
+          <$list filter="[subfilter<mediaItemsFilter>]" variable="item">
+            <div class="mi-summary-item">
+              <div class="mi-summary-link"><$link to=<<item>>/></div>
+              <span class="mi-summary-badge"><$count filter="""$journalFilter$ +[contains:$field$<item>]"""/>d</span>
+            </div>
+          </$list>
+        </div>
+      </$list>
+    </$let>
+  </$list>
+</div>
+\end
