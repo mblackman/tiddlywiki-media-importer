@@ -9,6 +9,10 @@ on:
       # Readme.md should not trigger wiki deploy
       - '*.md'
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   deploy:
     permissions:
