@@ -56,7 +56,7 @@ caption: 📚 Media Library
       <$select tiddler="$:/state/mblackman/media-importer/library/type" default="Book" class="mi-input">
         <$list filter="[[$:/plugins/mblackman/media-importer/data/importers]indexes[]]">
           <$vars thisType=<<currentTiddler>>>
-            <option value=<<thisType>>><$text text=<<thisType>>/> (<$count filter="[tag[MediaType]media-type<thisType>]"/>)</option>
+            <option value=<<thisType>>><$text text=<<thisType>>/> (<$count filter="[tag[$:/tags/media-importer/Media]media-type<thisType>]"/>)</option>
           </$vars>
         </$list>
       </$select>
@@ -81,7 +81,7 @@ caption: 📚 Media Library
       <span class="mi-label">Year</span>
       <$select tiddler="$:/state/mblackman/media-importer/library/year" default="All" class="mi-input">
         <option value="All">All Years</option>
-        <$list filter="[tag[MediaType]media-type<currentType>has[lastFinished]get[lastFinished]search-replace:g:regexp<yearRegex>,[]unique[]!sort[]]">
+        <$list filter="[tag[$:/tags/media-importer/Media]media-type<currentType>has[lastFinished]get[lastFinished]search-replace:g:regexp<yearRegex>,[]unique[]!sort[]]">
           <option value=<<currentTiddler>>><$text text=<<currentTiddler>>/></option>
         </$list>
       </$select>
@@ -109,12 +109,12 @@ caption: 📚 Media Library
 
 <!-- Result Count Label -->
 <div class="mi-sublabel" style="margin-bottom: 15px;">
-  Found <b><$count filter="[tag[MediaType]media-type<currentType>] +[search{$:/temp/mblackman/media-importer/search/library}] +[filter<ratingLogic>] +[filter<yearLogic>] +[subfilter<sortLogic>]"/></b> items
+  Found <b><$count filter="[tag[$:/tags/media-importer/Media]media-type<currentType>] +[search{$:/temp/mblackman/media-importer/search/library}] +[filter<ratingLogic>] +[filter<yearLogic>] +[subfilter<sortLogic>]"/></b> items
 </div>
 
 <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 20px;">
-  <!-- Updated filter to use generic MediaType tag and specific media-type field -->
-  <$list filter="[tag[MediaType]media-type<currentType>] +[search{$:/temp/mblackman/media-importer/search/library}] +[filter<ratingLogic>] +[filter<yearLogic>] +[subfilter<sortLogic>]">
+  <!-- Updated filter to use generic $:/tags/media-importer/Media tag and specific media-type field -->
+  <$list filter="[tag[$:/tags/media-importer/Media]media-type<currentType>] +[search{$:/temp/mblackman/media-importer/search/library}] +[filter<ratingLogic>] +[filter<yearLogic>] +[subfilter<sortLogic>]">
     <$link to={{!!title}} style="text-decoration: none; color: inherit;">
       <div class="mi-card" style="padding: 0; height: 100%; display: flex; flex-direction: column; overflow: hidden; transition: transform 0.2s;">
         <div style="aspect-ratio: 16/9; overflow: hidden; background: #000; position: relative;">
