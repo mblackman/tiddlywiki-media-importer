@@ -23,3 +23,15 @@ After installing, please go to the ''$:/plugins/mblackman/media-importer'' > ''c
 Create a new tiddler for media imports and paste the text: `{{$:/plugins/mblackman/media-importer/ui}}`.
 
 To create the library browser, create a tiddler with this text: `{{$:/plugins/mblackman/media-importer/library}}`.
+
+!! Widgets
+
+* ''Media Picker'': Log media consumption for a specific date.
+** `<$MediaPicker date="YYYY-MM-DD" />` (Defaults to today if no date is provided)
+
+* ''Media Consumption Summary'': View a summary of consumed media within a date range.
+** `<$MediaConsumptionSummary startDate="YYYY-MM-DD" endDate="YYYY-MM-DD" />`
+
+* ''Media Importer UI'': The core search and import interface used to build custom importer tabs.
+** `<$MediaImporter type="Book" placeholder="Search books..." resultTag="SearchResult" />`
+** Key attributes: `type` (required), `resultTag` (required), `placeholder`, `loadingText`, `imageField`, `subtitleContent`.

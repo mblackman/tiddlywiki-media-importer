@@ -1,8 +1,6 @@
 title: $:/plugins/mblackman/media-importer/ui
 caption: Media Importer
 
-\import [[$:/plugins/mblackman/media-importer/macros/ui]]
-
 <div style="max-width: 1000px; margin: 0 auto;">
 
 <div class="mi-section">
@@ -27,7 +25,7 @@ caption: Media Importer
     <!-- Dynamic Content -->
     <div class="tc-tab-content">
       <$let type={{{ [[$:/state/media-importer-selected]get[text]!is[blank]else<defaultTab>] }}}>
-          <$macrocall $name="media-importer-ui" 
+          <$MediaImporter
               type=<<type>>
               label={{{ [[$:/plugins/mblackman/media-importer/data/importers]get[text]jsonget<type>,[caption]] }}}
               placeholder={{{ [[$:/plugins/mblackman/media-importer/data/importers]get[text]jsonget<type>,[placeholder]] }}}
@@ -51,7 +49,7 @@ caption: Media Importer
     </h3>
 
     <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 15px;">
-      <$list filter="[tag[MediaType]!sort[created]limit[8]]" emptyMessage="<div style='grid-column: 1/-1; padding:20px; font-style:italic; text-align:center; opacity:0.6;'>No items added yet.</div>">
+      <$list filter="[tag[$:/tags/media-importer/Media]!sort[created]limit[8]]" emptyMessage="<div style='grid-column: 1/-1; padding:20px; font-style:italic; text-align:center; opacity:0.6;'>No items added yet.</div>">
         
         <$link to={{!!title}} style="text-decoration: none; display: block; color: inherit;">
         <div class="mi-card" style="padding: 0; overflow: hidden; position: relative; aspect-ratio: 1/1; margin-bottom: 0; border: none;">
