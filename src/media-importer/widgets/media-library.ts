@@ -35,7 +35,11 @@ class MediaLibraryGridWidget extends Widget {
     const currentStatus = this.wiki.getTiddlerText(statusTiddler, 'All');
     const currentSearch = this.wiki.getTiddlerText(searchTiddler, '');
 
-    let filter = `[tag[$:/tags/media-importer/Media]media-type[${currentType}]]`;
+    let filter = `[tag[$:/tags/media-importer/Media]`;
+    if (currentType !== 'All') {
+      filter += `media-type[${currentType}]`;
+    }
+    filter += `]`;
 
     if (currentSearch) {
       filter += ` +[search{${searchTiddler}}]`;
@@ -150,7 +154,11 @@ class MediaLibraryWidget extends Widget {
 
     // 2. Year Options
     // Regex to strip date to year: -.*$
-    const yearFilter = `[tag[$:/tags/media-importer/Media]media-type[${currentType}]has[lastFinished]get[lastFinished]search-replace:g:regexp[-.*$],[]unique[]!sort[]]`;
+    let yearFilter = `[tag[$:/tags/media-importer/Media]`;
+    if (currentType !== 'All') {
+      yearFilter += `media-type[${currentType}]`;
+    }
+    yearFilter += `has[lastFinished]get[lastFinished]search-replace:g:regexp[-.*$],[]unique[]!sort[]]`;
     const yearOptions = this.wiki.filterTiddlers(yearFilter);
 
     // 3. Status Options
@@ -162,10 +170,14 @@ class MediaLibraryWidget extends Widget {
     const createOption = (value: string, label: string) => h('option', { value }, [text(label)]);
 
     // Type Select
-    const typeSelectChildren = typeOptions.map(t => {
-      const count = this.wiki.filterTiddlers(`[tag[$:/tags/media-importer/Media]media-type[${t}]]`).length;
-      return createOption(t, `${t} (${count})`);
-    });
+    const allCount = this.wiki.filterTiddlers(`[tag[$:/tags/media-importer/Media]]`).length;
+    const typeSelectChildren = [
+      createOption('All', `All Types (${allCount})`),
+      ...typeOptions.map(t => {
+        const count = this.wiki.filterTiddlers(`[tag[$:/tags/media-importer/Media]media-type[${t}]]`).length;
+        return createOption(t, `${t} (${count})`);
+      }),
+    ];
 
     const typeSelect = h('div', { style: 'flex: 1; min-width: 140px;' }, [
       h('span', { class: 'mi-label' }, [text('Type')]),
