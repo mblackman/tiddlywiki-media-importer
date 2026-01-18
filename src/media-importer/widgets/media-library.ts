@@ -9,8 +9,8 @@ Media Library Widget
 import { widget as Widget } from '$:/core/modules/widgets/widget.js';
 import { IChangedTiddlers, IParseTreeNode } from 'tiddlywiki';
 
-const h = (tag: string, attributes: Record<string, any> = {}, children: IParseTreeNode[] = []): IParseTreeNode => {
-  const attributes_: Record<string, any> = {};
+const h = (tag: string, attributes: Record<string, string | undefined> = {}, children: IParseTreeNode[] = []): IParseTreeNode => {
+  const attributes_: Record<string, { type: string; value: string | undefined }> = {};
   for (const key in attributes) {
     attributes_[key] = { type: 'string', value: attributes[key] };
   }
@@ -19,33 +19,20 @@ const h = (tag: string, attributes: Record<string, any> = {}, children: IParseTr
 
 const text = (string_: string): IParseTreeNode => ({ type: 'text', text: string_ });
 
-class MediaLibraryWidget extends Widget {
+class MediaLibraryGridWidget extends Widget {
   execute() {
-    // State Tiddlers
     const typeTiddler = '$:/state/mblackman/media-importer/library/type';
     const ratingTiddler = '$:/state/mblackman/media-importer/library/rating';
     const sortTiddler = '$:/state/mblackman/media-importer/library/sort';
     const yearTiddler = '$:/state/mblackman/media-importer/library/year';
     const searchTiddler = '$:/temp/mblackman/media-importer/search/library';
 
-    // Current Values
     const currentType = this.wiki.getTiddlerText(typeTiddler, 'Book');
     const currentRating = this.wiki.getTiddlerText(ratingTiddler, 'All');
     const currentSort = this.wiki.getTiddlerText(sortTiddler, 'title-asc');
     const currentYear = this.wiki.getTiddlerText(yearTiddler, 'All');
     const currentSearch = this.wiki.getTiddlerText(searchTiddler, '');
 
-    // --- Filters ---
-
-    // 1. Type Options
-    const typeOptions = this.wiki.filterTiddlers('[[$:/plugins/mblackman/media-importer/data/importers]indexes[]]');
-
-    // 2. Year Options
-    // Regex to strip date to year: -.*$
-    const yearFilter = `[tag[$:/tags/media-importer/Media]media-type[${currentType}]has[lastFinished]get[lastFinished]search-replace:g:regexp[-.*$],[]unique[]!sort[]]`;
-    const yearOptions = this.wiki.filterTiddlers(yearFilter);
-
-    // 3. Main Content Filter
     let filter = `[tag[$:/tags/media-importer/Media]media-type[${currentType}]]`;
 
     if (currentSearch) {
@@ -64,7 +51,6 @@ class MediaLibraryWidget extends Widget {
       filter += ` +[search:lastFinished[${currentYear}]]`;
     }
 
-    // Sort
     switch (currentSort) {
       case 'title-asc':
         filter += ` +[sort[title]]`;
@@ -85,8 +71,80 @@ class MediaLibraryWidget extends Widget {
         filter += ` +[has[lastFinished]sort[lastFinished]]`;
         break;
     }
-    console.log('Media Library Filter:', filter);
+
     const results = this.wiki.filterTiddlers(filter);
+
+    const countLabel = h('div', { class: 'mi-sublabel', style: 'margin-bottom: 15px;' }, [
+      text('Found '),
+      h('b', {}, [text(results.length.toString())]),
+      text(' items'),
+    ]);
+
+    const gridItems: IParseTreeNode[] = [];
+    for (const title of results) {
+      const tiddler = this.wiki.getTiddler(title);
+      if (!tiddler) continue;
+
+      const image = tiddler.fields.image as string;
+      const rating = tiddler.fields.personalRating as string;
+
+      const cardContent = h('div', { class: 'mi-card', style: 'padding: 0; height: 100%; display: flex; flex-direction: column; overflow: hidden; transition: transform 0.2s;' }, [
+        h('div', { style: 'aspect-ratio: 16/9; overflow: hidden; background: #000; position: relative;' }, [
+          image
+            ? { type: 'image', attributes: { source: { type: 'string', value: image }, style: { type: 'string', value: 'width: 100%; height: 100%; object-fit: contain;' } } }
+            : text(''),
+        ]),
+        h('div', { style: 'padding: 12px; flex-grow: 1; display: flex; flex-direction: column;' }, [
+          h('div', { style: 'font-weight: 600; line-height: 1.3; margin-bottom: 4px;' }, [text(title)]),
+          h('div', { class: 'mi-sublabel', style: 'margin-top: auto;' }, [
+            rating && rating !== '0' ? text(`${rating} ★`) : text(''),
+          ]),
+        ]),
+      ]);
+
+      gridItems.push({
+        type: 'link',
+        attributes: { to: { type: 'string', value: title }, style: { type: 'string', value: 'text-decoration: none; color: inherit;' } },
+        children: [cardContent],
+      });
+    }
+
+    const grid = h('div', { style: 'display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 20px;' }, gridItems);
+
+    this.makeChildWidgets([countLabel, grid]);
+  }
+
+  refresh(changedTiddlers: IChangedTiddlers) {
+    const searchTiddler = '$:/temp/mblackman/media-importer/search/library';
+    if (changedTiddlers[searchTiddler]) {
+      this.refreshSelf();
+      return true;
+    }
+    return this.refreshChildren(changedTiddlers);
+  }
+}
+
+class MediaLibraryWidget extends Widget {
+  execute() {
+    // State Tiddlers
+    const typeTiddler = '$:/state/mblackman/media-importer/library/type';
+    const ratingTiddler = '$:/state/mblackman/media-importer/library/rating';
+    const sortTiddler = '$:/state/mblackman/media-importer/library/sort';
+    const yearTiddler = '$:/state/mblackman/media-importer/library/year';
+    const searchTiddler = '$:/temp/mblackman/media-importer/search/library';
+
+    // Current Values
+    const currentType = this.wiki.getTiddlerText(typeTiddler, 'Book');
+
+    // --- Filters ---
+
+    // 1. Type Options
+    const typeOptions = this.wiki.filterTiddlers('[[$:/plugins/mblackman/media-importer/data/importers]indexes[]]');
+
+    // 2. Year Options
+    // Regex to strip date to year: -.*$
+    const yearFilter = `[tag[$:/tags/media-importer/Media]media-type[${currentType}]has[lastFinished]get[lastFinished]search-replace:g:regexp[-.*$],[]unique[]!sort[]]`;
+    const yearOptions = this.wiki.filterTiddlers(yearFilter);
 
     // --- UI Construction ---
 
@@ -179,46 +237,7 @@ class MediaLibraryWidget extends Widget {
       },
     ]);
 
-    // Count Label
-    const countLabel = h('div', { class: 'mi-sublabel', style: 'margin-bottom: 15px;' }, [
-      text('Found '),
-      h('b', {}, [text(results.length.toString())]),
-      text(' items'),
-    ]);
-
-    // Grid
-    const gridItems: IParseTreeNode[] = [];
-    for (const title of results) {
-      const tiddler = this.wiki.getTiddler(title);
-      if (!tiddler) continue;
-
-      const image = tiddler.fields.image as string;
-      const rating = tiddler.fields.personalRating as string;
-
-      const cardContent = h('div', { class: 'mi-card', style: 'padding: 0; height: 100%; display: flex; flex-direction: column; overflow: hidden; transition: transform 0.2s;' }, [
-        h('div', { style: 'aspect-ratio: 16/9; overflow: hidden; background: #000; position: relative;' }, [
-          image
-            ? { type: 'image', attributes: { source: { type: 'string', value: image }, style: { type: 'string', value: 'width: 100%; height: 100%; object-fit: contain;' } } }
-            : text(''),
-        ]),
-        h('div', { style: 'padding: 12px; flex-grow: 1; display: flex; flex-direction: column;' }, [
-          h('div', { style: 'font-weight: 600; line-height: 1.3; margin-bottom: 4px;' }, [text(title)]),
-          h('div', { class: 'mi-sublabel', style: 'margin-top: auto;' }, [
-            rating && rating !== '0' ? text(`${rating} ★`) : text(''),
-          ]),
-        ]),
-      ]);
-
-      gridItems.push({
-        type: 'link',
-        attributes: { to: { type: 'string', value: title }, style: { type: 'string', value: 'text-decoration: none; color: inherit;' } },
-        children: [cardContent],
-      });
-    }
-
-    const grid = h('div', { style: 'display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 20px;' }, gridItems);
-
-    this.makeChildWidgets([controls, searchInput, countLabel, grid]);
+    this.makeChildWidgets([controls, searchInput, { type: 'MediaLibraryGrid', attributes: {}, children: [] }]);
   }
 
   refresh(changedTiddlers: IChangedTiddlers) {
@@ -227,7 +246,7 @@ class MediaLibraryWidget extends Widget {
     const importersTiddler = '$:/plugins/mblackman/media-importer/data/importers';
 
     // Check if any state tiddler changed
-    const stateChanged = Object.keys(changedTiddlers).some(t => t.startsWith(statePrefix) || t === searchTiddler || t === importersTiddler);
+    const stateChanged = Object.keys(changedTiddlers).some(t => (t.startsWith(statePrefix) || t === importersTiddler) && t !== searchTiddler);
 
     // Check if any media items changed (for list updates)
     const mediaChanged = Object.keys(changedTiddlers).some(t => {
@@ -245,6 +264,8 @@ class MediaLibraryWidget extends Widget {
 
 declare let exports: {
   MediaLibrary: typeof MediaLibraryWidget;
+  MediaLibraryGrid: typeof MediaLibraryGridWidget;
 };
 
 exports.MediaLibrary = MediaLibraryWidget;
+exports.MediaLibraryGrid = MediaLibraryGridWidget;
