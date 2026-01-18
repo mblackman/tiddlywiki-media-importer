@@ -61,10 +61,10 @@ list-before: $:/core/ui/ViewTemplate/body
        <small class="mi-sublabel">My Score</small>
        
        <$vars avgRating={{{ [tag[$:/tags/media-importer/WatchLog]field:media-title<currentTiddler>get[rating]!match[0]average[]] }}}>
-         <$list filter="[<avgRating>match[0]] [<avgRating>is[blank]] +[limit[1]]">
+         <$list filter="[<avgRating>match[0]] [<avgRating>is[blank]] [<avgRating>match[NaN]] +[limit[1]]">
             <div class="mi-rating-row"><span class="mi-rating-score">N/A</span></div>
          </$list>
-         <$list filter="[<avgRating>!match[0]!is[blank]]" variable="ignore">
+         <$list filter="[<avgRating>!match[0]!is[blank]!match[NaN]]" variable="ignore">
          <$vars rating={{{ [<avgRating>multiply[2]round[]divide[2]] }}}>
            <div class="mi-rating-row">
              <span class="mi-rating-stars">
