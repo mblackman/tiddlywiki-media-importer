@@ -195,7 +195,10 @@ class MediaImporterUiWidget extends Widget {
   handleClearSearch(event: any) {
     const type = this.getAttribute('type', '');
     const resultTag = this.getAttribute('resultTag', '');
-    this.wiki.deleteTiddlers(this.wiki.filterTiddlers(`[tag[${resultTag}]]`));
+    const tiddlersToDelete = this.wiki.filterTiddlers(`[tag[${resultTag}]]`);
+    for (const title of tiddlersToDelete) {
+      this.wiki.deleteTiddler(title);
+    }
     this.wiki.setText(`$:/state/${type}-search`, 'text', undefined, '');
     this.wiki.setText(`$:/state/${type}-search-page`, 'text', undefined, '1');
     this.wiki.setText(`$:/temp/${type}-search-input`, 'text', undefined, '');
