@@ -151,7 +151,7 @@ class MediaLibraryGridWidget extends Widget {
       }
     });
 
-    const countLabel = h('div', { class: 'mi-sublabel', style: 'margin-bottom: 15px;' }, [
+    const countLabel = h('div', { class: 'mi-sublabel mi-library-count' }, [
       text('Found '),
       h('b', {}, [text(items.length.toString())]),
       text(' items'),
@@ -159,15 +159,15 @@ class MediaLibraryGridWidget extends Widget {
 
     const gridItems: IParseTreeNode[] = [];
     for (const item of items) {
-      const cardContent = h('div', { class: 'mi-card', style: 'padding: 0; height: 100%; display: flex; flex-direction: column; overflow: hidden; transition: transform 0.2s;' }, [
-        h('div', { style: 'aspect-ratio: 16/9; overflow: hidden; background: #000; position: relative;' }, [
+      const cardContent = h('div', { class: 'mi-card mi-library-card' }, [
+        h('div', { class: 'mi-library-card-image-container' }, [
           item.image
-            ? { type: 'image', attributes: { source: { type: 'string', value: item.image }, style: { type: 'string', value: 'width: 100%; height: 100%; object-fit: contain;' } } }
+            ? { type: 'image', attributes: { source: { type: 'string', value: item.image }, class: { type: 'string', value: 'mi-library-card-image' } } }
             : text(''),
         ]),
-        h('div', { style: 'padding: 12px; flex-grow: 1; display: flex; flex-direction: column;' }, [
-          h('div', { style: 'font-weight: 600; line-height: 1.3; margin-bottom: 4px;' }, [text(item.title)]),
-          h('div', { class: 'mi-sublabel', style: 'margin-top: auto;' }, [
+        h('div', { class: 'mi-library-card-content' }, [
+          h('div', { class: 'mi-library-card-title' }, [text(item.title)]),
+          h('div', { class: 'mi-sublabel mi-library-card-rating' }, [
             item.averageRating > 0 ? text(`${item.averageRating.toFixed(1).replace(/\.0$/, '')} ★`) : text(''),
           ]),
         ]),
@@ -175,12 +175,12 @@ class MediaLibraryGridWidget extends Widget {
 
       gridItems.push({
         type: 'link',
-        attributes: { to: { type: 'string', value: item.title }, style: { type: 'string', value: 'text-decoration: none; color: inherit;' } },
+        attributes: { to: { type: 'string', value: item.title }, class: { type: 'string', value: 'mi-library-card-link' } },
         children: [cardContent],
       });
     }
 
-    const grid = h('div', { style: 'display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 20px;' }, gridItems);
+    const grid = h('div', { class: 'mi-library-grid' }, gridItems);
 
     this.makeChildWidgets([countLabel, grid]);
   }
@@ -254,7 +254,7 @@ class MediaLibraryWidget extends Widget {
       }),
     ];
 
-    const typeSelect = h('div', { style: 'flex: 1; min-width: 140px;' }, [
+    const typeSelect = h('div', { class: 'mi-filter-group' }, [
       h('span', { class: 'mi-label' }, [text('Type')]),
       {
         type: 'select',
@@ -265,7 +265,7 @@ class MediaLibraryWidget extends Widget {
 
     // Status Select
     const statusSelectChildren = [createOption('All', 'All Statuses'), ...statusOptions.map(s => createOption(s, s))];
-    const statusSelect = h('div', { style: 'flex: 1; min-width: 140px;' }, [
+    const statusSelect = h('div', { class: 'mi-filter-group' }, [
       h('span', { class: 'mi-label' }, [text('Status')]),
       {
         type: 'select',
@@ -275,7 +275,7 @@ class MediaLibraryWidget extends Widget {
     ]);
 
     // Rating Select
-    const ratingSelect = h('div', { style: 'flex: 1; min-width: 140px;' }, [
+    const ratingSelect = h('div', { class: 'mi-filter-group' }, [
       h('span', { class: 'mi-label' }, [text('Rating')]),
       {
         type: 'select',
@@ -294,7 +294,7 @@ class MediaLibraryWidget extends Widget {
 
     // Year Select
     const yearSelectChildren = [createOption('All', 'All Years'), ...yearOptions.map(y => createOption(y, y))];
-    const yearSelect = h('div', { style: 'flex: 1; min-width: 140px;' }, [
+    const yearSelect = h('div', { class: 'mi-filter-group' }, [
       h('span', { class: 'mi-label' }, [text('Year Finished')]),
       {
         type: 'select',
@@ -304,7 +304,7 @@ class MediaLibraryWidget extends Widget {
     ]);
 
     // Sort Select
-    const sortSelect = h('div', { style: 'flex: 1; min-width: 140px;' }, [
+    const sortSelect = h('div', { class: 'mi-filter-group' }, [
       h('span', { class: 'mi-label' }, [text('Sort by')]),
       {
         type: 'select',
@@ -324,8 +324,7 @@ class MediaLibraryWidget extends Widget {
     const refreshButton = {
       type: 'button',
       attributes: {
-        class: { type: 'string', value: 'mi-btn' },
-        style: { type: 'string', value: 'height: 32px; align-self: flex-end;' },
+        class: { type: 'string', value: 'mi-btn mi-refresh-btn' },
         message: { type: 'string', value: 'mi-refresh-library' },
         tooltip: { type: 'string', value: 'Refresh Library' },
       },
@@ -334,7 +333,7 @@ class MediaLibraryWidget extends Widget {
 
     // Controls Container
     const controls = h('div', { class: 'mi-section' }, [
-      h('div', { style: 'display: flex; flex-wrap: wrap; gap: 15px; align-items: flex-end;' }, [
+      h('div', { class: 'mi-library-controls' }, [
         typeSelect,
         statusSelect,
         ratingSelect,

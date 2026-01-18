@@ -449,3 +449,76 @@ select.mi-input {
   opacity: 0.8;
   white-space: pre-wrap;
 }
+
+/* --- Media Library Grid --- */
+.mi-library-count {
+  margin-bottom: 15px;
+}
+
+.mi-library-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 20px;
+}
+
+.mi-library-card-link {
+  text-decoration: none;
+  color: inherit;
+}
+
+.mi-library-card {
+  padding: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition: transform 0.2s;
+}
+
+.mi-library-card-image-container {
+  aspect-ratio: 16/9;
+  overflow: hidden;
+  background: #000;
+  position: relative;
+}
+
+.mi-library-card-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.mi-library-card-content {
+  padding: 12px;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.mi-library-card-title {
+  font-weight: 600;
+  line-height: 1.3;
+  margin-bottom: 4px;
+}
+
+.mi-library-card-rating {
+  margin-top: auto;
+}
+
+/* --- Media Library Controls --- */
+.mi-library-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  align-items: flex-end;
+}
+
+.mi-filter-group {
+  flex: 1;
+  min-width: 140px;
+}
+
+.mi-refresh-btn {
+  height: 32px;
+  align-self: flex-end;
+}
