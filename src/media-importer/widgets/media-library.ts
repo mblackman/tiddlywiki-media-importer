@@ -34,6 +34,7 @@ interface MediaItem {
   logs: LogEntry[];
   averageRating: number;
   lastWatched: string;
+  created: Date;
 }
 
 class MediaLibraryGridWidget extends Widget {
@@ -100,6 +101,7 @@ class MediaLibraryGridWidget extends Widget {
         logs,
         averageRating,
         lastWatched,
+        created: (fields['created'] as Date) || new Date(0),
       };
     });
 
@@ -146,6 +148,10 @@ class MediaLibraryGridWidget extends Widget {
           return b.lastWatched.localeCompare(a.lastWatched);
         case 'date-asc':
           return a.lastWatched.localeCompare(b.lastWatched);
+        case 'added-desc':
+          return b.created.getTime() - a.created.getTime();
+        case 'added-asc':
+          return a.created.getTime() - b.created.getTime();
         default:
           return a.title.localeCompare(b.title);
       }
@@ -316,6 +322,8 @@ class MediaLibraryWidget extends Widget {
           createOption('rating-asc', 'Rating (Low-High)'),
           createOption('date-desc', 'Finished Date (Newest)'),
           createOption('date-asc', 'Finished Date (Oldest)'),
+          createOption('added-desc', 'Added Date (Newest)'),
+          createOption('added-asc', 'Added Date (Oldest)'),
         ],
       },
     ]);
