@@ -178,6 +178,11 @@ Fetches data from various APIs and formats them into fields.
         .then(fields => {
           var finalTitle = fields.title;
 
+          // Preserve created date from temporary tiddler or use current time
+          if (!fields.created) {
+            fields.created = temporaryTiddler.fields.created || new Date();
+          }
+
           // Create Tiddler
           $tw.wiki.addTiddler(new $tw.Tiddler(fields));
 
