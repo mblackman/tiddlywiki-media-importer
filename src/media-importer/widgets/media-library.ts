@@ -45,18 +45,6 @@ class MediaLibraryGridWidget extends Widget {
       filter += ` +[search{${searchTiddler}}]`;
     }
 
-    if (currentRating !== 'All') {
-      if (currentRating === '0') {
-        filter += ` -[has[personalRating]!field:personalRating[0]]`;
-      } else {
-        filter += ` +[field:personalRating[${currentRating}]]`;
-      }
-    }
-
-    if (currentYear !== 'All') {
-      filter += ` +[search:lastFinished[${currentYear}]]`;
-    }
-
     if (currentStatus !== 'All') {
       filter += ` +[field:status[${currentStatus}]]`;
     }
@@ -82,7 +70,25 @@ class MediaLibraryGridWidget extends Widget {
         break;
     }
 
-    const results = this.wiki.filterTiddlers(filter);
+    console.log('Media Library Filter:', filter);
+    let results = this.wiki.filterTiddlers(filter);
+
+    if (currentYear !== 'All') {
+      const itemsWithYear = this.wiki.filterTiddlers(`[tag[$:/tags/media-importer/WatchLog]search:date:anchored[${currentYear}]get[media-title]unique[]]`);
+      results = results.filter(title => itemsWithYear.includes(title));
+    }
+
+    if (currentRating !== 'All') {
+      if (currentRating === '0') {
+        // Unrated: Exclude items that have any log with rating > 0
+        const ratedItems = this.wiki.filterTiddlers(`[tag[$:/tags/media-importer/WatchLog]has[rating]!rating[0]get[media-title]unique[]]`);
+        results = results.filter(title => !ratedItems.includes(title));
+      } else {
+        // Specific Rating: Include items that have a log with this rating
+        const ratedItems = this.wiki.filterTiddlers(`[tag[$:/tags/media-importer/WatchLog]rating[${currentRating}]get[media-title]unique[]]`);
+        results = results.filter(title => ratedItems.includes(title));
+      }
+    }
 
     const countLabel = h('div', { class: 'mi-sublabel', style: 'margin-bottom: 15px;' }, [
       text('Found '),
@@ -153,13 +159,7 @@ class MediaLibraryWidget extends Widget {
     const typeOptions = this.wiki.filterTiddlers('[[$:/plugins/mblackman/media-importer/data/importers]indexes[]]');
 
     // 2. Year Options
-    // Regex to strip date to year: -.*$
-    let yearFilter = `[tag[$:/tags/media-importer/Media]`;
-    if (currentType !== 'All') {
-      yearFilter += `media-type[${currentType}]`;
-    }
-    yearFilter += `has[lastFinished]get[lastFinished]search-replace:g:regexp[-.*$],[]unique[]!sort[]]`;
-    const yearOptions = this.wiki.filterTiddlers(yearFilter);
+    const yearOptions = this.wiki.filterTiddlers(`[tag[$:/tags/media-importer/WatchLog]has[date]get[date]search-replace:g:regexp[-.*$],[]unique[]!sort[]]`);
 
     // 3. Status Options
     const statusOptions = this.wiki.filterTiddlers('[enlist{$:/plugins/mblackman/media-importer/data/statuses}]');
