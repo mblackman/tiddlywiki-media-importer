@@ -2,6 +2,8 @@ title: $:/plugins/mblackman/media-importer/readme
 
 ! Media Importer
 
+[[GitHub Repository|https://github.com/mblackman/tiddlywiki-media-importer]]
+
 Manage your media consumption within TiddlyWiki
 
 This plugin allows you to search and import metadata for various media types into your TiddlyWiki.
