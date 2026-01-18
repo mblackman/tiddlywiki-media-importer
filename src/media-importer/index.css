@@ -190,3 +190,262 @@ select.mi-input {
   border: 1px solid <<colour table-border>>; border-radius: 12px; padding: 2px 8px;
   font-size: 0.85em; font-weight: 600; white-space: nowrap; flex-shrink: 0; opacity: 0.9;
 }
+
+/* --- View Template Layout --- */
+.mi-view-container {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+  margin-bottom: 10px;
+}
+
+.mi-sidebar {
+  flex: 0 0 200px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.mi-cover-image {
+  border-radius: 4px;
+  overflow: hidden;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  background: #000;
+}
+
+.mi-cover-image img {
+  width: 100%;
+  display: block;
+}
+
+.mi-rating-box {
+  text-align: center;
+  background: rgba(0,0,0,0.05);
+  padding: 8px;
+  border-radius: 4px;
+}
+
+.mi-rating-box .mi-sublabel {
+  text-transform: uppercase;
+  margin-bottom: 0;
+}
+
+.mi-rating-stars {
+  color: #f59e0b;
+  font-size: 1.4em;
+  line-height: 1.2;
+}
+
+.mi-rating-score {
+  font-size: 0.8em;
+  opacity: 0.8;
+}
+
+.mi-content {
+  flex: 1;
+}
+
+.mi-header {
+  border-bottom: 1px solid <<colour table-border>>;
+  padding-bottom: 10px;
+}
+
+.mi-title {
+  margin: 0;
+  font-size: 1.8em;
+  line-height: 1.2;
+}
+
+.mi-meta {
+  font-size: 1em;
+  color: <<colour muted-foreground>>;
+  margin-top: 5px;
+}
+
+.mi-badge {
+  background: <<colour primary>>;
+  color: <<colour background>>;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 0.8em;
+  text-transform: uppercase;
+  font-weight: bold;
+  margin-right: 8px;
+}
+
+.mi-grid {
+  display: grid;
+  grid-template-columns: minmax(80px, auto) 1fr;
+  gap: 8px 15px;
+  font-size: 0.95em;
+  align-items: start;
+}
+
+.mi-plot {
+  max-height: 150px;
+  overflow-y: auto;
+  line-height: 1.4;
+}
+
+/* --- Control Card --- */
+.mi-control-card {
+  background: linear-gradient(to bottom right, rgba(0,0,0,0.01), rgba(0,0,0,0.04));
+  border-left: 4px solid <<colour primary>>;
+  padding: 12px;
+}
+
+.mi-control-header {
+  margin-bottom: 8px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid rgba(0,0,0,0.05);
+}
+
+.mi-control-title {
+  margin: 0;
+  font-size: 0.95em;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: <<colour primary>>;
+}
+
+.mi-control-body {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.mi-status-group {
+  width: 200px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.mi-log-row {
+  display: flex;
+  gap: 10px;
+  align-items: flex-end;
+  flex-wrap: wrap;
+}
+
+.mi-log-input-group {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.mi-log-btn-group {
+  flex: 0 0 auto;
+}
+
+.mi-log-btn {
+  height: 32px;
+  padding: 0 16px;
+  display: flex;
+  align-items: center;
+}
+
+/* --- History List --- */
+.mi-history-section {
+  margin-top: 15px;
+  border-top: 1px solid rgba(0,0,0,0.1);
+  padding-top: 10px;
+}
+
+.mi-history-title {
+  margin: 0 0 10px 0;
+  font-size: 0.9em;
+  text-transform: uppercase;
+  color: <<colour muted-foreground>>;
+}
+
+.mi-history-empty {
+  font-style: italic;
+  opacity: 0.6;
+  font-size: 0.9em;
+}
+
+.mi-history-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.9em;
+  padding: 4px 0;
+  border-bottom: 1px dashed rgba(0,0,0,0.1);
+}
+
+.mi-history-date {
+  font-weight: 500;
+}
+
+.mi-history-stars {
+  color: #f59e0b;
+}
+
+.mi-history-timestamp {
+  opacity: 0.5;
+  font-size: 0.8em;
+}
+
+.mi-history-actions {
+  margin-left: auto;
+}
+
+.mi-delete-btn {
+  opacity: 0.5;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+/* --- Log & History Styles --- */
+.mi-input-sm {
+  height: 32px;
+  font-size: 0.9em;
+  padding: 4px 8px;
+}
+
+.mi-input-auto {
+  width: auto;
+}
+
+.mi-textarea-sm {
+  height: 60px;
+  font-size: 0.9em;
+  resize: vertical;
+}
+
+.mi-label-upper {
+  font-size: 0.8em;
+  text-transform: uppercase;
+  color: <<colour muted-foreground>>;
+}
+
+.mi-log-section {
+  margin-top: 10px;
+}
+
+.mi-log-actions {
+  margin-top: 10px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.mi-history-entry {
+  border-bottom: 1px dashed rgba(0,0,0,0.1);
+  padding: 4px 0;
+}
+
+.mi-history-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.9em;
+}
+
+.mi-history-comment-text {
+  margin-top: 4px;
+  font-size: 0.85em;
+  opacity: 0.8;
+  white-space: pre-wrap;
+}
