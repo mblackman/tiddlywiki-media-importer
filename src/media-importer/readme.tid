@@ -35,3 +35,6 @@ To create the library browser, create a tiddler with this text: `{{$:/plugins/mb
 * ''Media Importer UI'': The core search and import interface used to build custom importer tabs.
 ** `<$MediaImporter type="Book" placeholder="Search books..." resultTag="SearchResult" />`
 ** Key attributes: `type` (required), `resultTag` (required), `placeholder`, `loadingText`, `imageField`, `subtitleContent`.
+
+* ''Media Library'': Browse and filter your imported media collection.
+** `<$MediaLibrary />`
