@@ -24,9 +24,7 @@ const text = (string_: string): IParseTreeNode => ({ type: 'text', text: string_
 class MediaPickerWidget extends Widget {
   constructor(parseTreeNode: any, options: any) {
     super(parseTreeNode, options);
-    this.addEventListener('mi-add-item', this.handleAddItem.bind(this));
     this.addEventListener('mi-remove-item', this.handleRemoveItem.bind(this));
-    this.addEventListener('mi-clear-query', this.handleClearQuery.bind(this));
   }
 
   getDate() {
@@ -42,10 +40,8 @@ class MediaPickerWidget extends Widget {
   }
 
   execute() {
-    const placeholder = this.getAttribute('placeholder', 'Search your media...');
     const targetDate = this.getDate();
     const targetTiddler = `$:/media-log/${targetDate}`;
-    const temporaryState = `$:/temp/media-importer/picker/${targetTiddler}/media-log`;
 
     const currentLog = this.wiki.getTiddlerList(targetTiddler, 'media-log');
 
@@ -77,93 +73,87 @@ class MediaPickerWidget extends Widget {
       );
     }
 
-    // --- Dropdown ---
-    const dropdownNodes: IParseTreeNode[] = [
-      {
-        type: 'reveal',
-        attributes: {
-          state: { type: 'string', value: temporaryState },
-          type: { type: 'string', value: 'nomatch' },
-          text: { type: 'string', value: '' },
-        },
-        children: [
-          // Overlay to close
-          {
-            type: 'button',
-            attributes: {
-              class: { type: 'string', value: 'mi-media-picker-overlay' },
-              message: { type: 'string', value: 'mi-clear-query' },
-            },
-            children: [],
-          },
-          // Dropdown list
-          h('div', { class: 'tc-drop-down mi-media-picker-dropdown' }, [
-            {
-              type: 'list',
-              attributes: {
-                filter: { type: 'string', value: `[tag[$:/tags/media-importer/Media]!is[system]search:title{${temporaryState}}sort[title]limit[15]]` },
-                emptyMessage: { type: 'string', value: '<div class="tc-dropdown-item mi-disabled-item">No matches found</div>' },
-              },
-              children: [
-                {
-                  type: 'button',
-                  attributes: {
-                    class: { type: 'string', value: 'tc-btn-invisible tc-dropdown-item' },
-                    actions: { type: 'string', value: '<$action-sendmessage $message="mi-add-item" $param=<<currentTiddler>>/>' },
-                  },
-                  children: [
-                    { type: 'view', attributes: { field: { type: 'string', value: 'title' } } },
-                    h('span', { style: 'opacity:0.6; font-size:0.8em;' }, [
-                      text(' ('),
-                      { type: 'view', attributes: { field: { type: 'string', value: 'media-type' } } },
-                      text(')'),
-                    ]),
-                  ],
-                },
-              ],
-            },
-          ]),
-        ],
-      },
-    ];
+    this.makeChildWidgets(chips);
+  }
 
-    // --- Input Area ---
-    const inputArea = h('div', { class: 'mi-media-picker-input-wrapper' }, [
-      h('div', { style: 'position:relative;' }, [
-        {
-          type: 'edit-text',
-          attributes: {
-            tiddler: { type: 'string', value: temporaryState },
-            tag: { type: 'string', value: 'input' },
-            class: { type: 'string', value: 'mi-input' },
-            placeholder: { type: 'string', value: placeholder },
-            default: { type: 'string', value: '' },
-          },
-          children: [],
-        },
-        {
-          type: 'reveal',
-          attributes: {
-            state: { type: 'string', value: temporaryState },
-            type: { type: 'string', value: 'nomatch' },
-            text: { type: 'string', value: '' },
-          },
-          children: [{
-            type: 'button',
-            attributes: { class: { type: 'string', value: 'tc-btn-invisible mi-media-picker-clear-btn' }, message: { type: 'string', value: 'mi-clear-query' } },
-            children: [text('✕')],
-          }],
-        },
-      ]),
-      ...dropdownNodes,
-    ]);
+  render(parent: Element, nextSibling: Element | null) {
+    this.parentDomNode = parent;
+    this.computeAttributes();
+    this.execute();
 
-    const wrapper = h('div', { class: 'mi-media-wrapper' }, [
-      h('div', { style: 'margin-bottom: 4px;' }, chips),
-      inputArea,
-    ]);
+    const doc = this.document;
+    const wrapper = doc.createElement('div');
+    wrapper.className = 'mi-media-wrapper';
+    parent.insertBefore(wrapper, nextSibling);
+    this.domNodes.push(wrapper);
 
-    this.makeChildWidgets([wrapper]);
+    // Render Chips
+    const chipsContainer = doc.createElement('div');
+    chipsContainer.style.marginBottom = '4px';
+    wrapper.appendChild(chipsContainer);
+    this.renderChildren(chipsContainer, null);
+
+    // Render Input & Dropdown
+    const inputWrapper = doc.createElement('div');
+    inputWrapper.className = 'mi-media-picker-input-wrapper';
+    inputWrapper.style.position = 'relative';
+    wrapper.appendChild(inputWrapper);
+
+    const input = doc.createElement('input');
+    input.type = 'text';
+    input.className = 'mi-input';
+    input.placeholder = this.getAttribute('placeholder', 'Search your media...');
+    input.style.width = '100%';
+    inputWrapper.appendChild(input);
+
+    const dropdown = doc.createElement('div');
+    dropdown.className = 'tc-drop-down mi-media-picker-dropdown';
+    dropdown.style.display = 'none';
+    dropdown.style.position = 'absolute';
+    dropdown.style.zIndex = '1000';
+    dropdown.style.width = '100%';
+    inputWrapper.appendChild(dropdown);
+
+    // Event Handlers
+    const closeDropdown = () => {
+      setTimeout(() => {
+        dropdown.style.display = 'none';
+      }, 200);
+    };
+
+    input.addEventListener('blur', closeDropdown);
+    input.addEventListener('input', () => {
+      const query = input.value;
+      if (!query) {
+        dropdown.style.display = 'none';
+        return;
+      }
+
+      const matches = this.wiki.filterTiddlers(`[tag[$:/tags/media-importer/Media]!is[system]search:title[${query}]sort[title]limit[15]]`);
+      dropdown.innerHTML = '';
+      dropdown.style.display = 'block';
+
+      if (matches.length === 0) {
+        const noMatch = doc.createElement('div');
+        noMatch.className = 'tc-dropdown-item mi-disabled-item';
+        noMatch.innerText = 'No matches found';
+        dropdown.appendChild(noMatch);
+      } else {
+        matches.forEach(title => {
+          const item = doc.createElement('div');
+          item.className = 'tc-dropdown-item';
+          item.style.cursor = 'pointer';
+          const type = this.wiki.getTiddler(title)?.fields['media-type'];
+          item.innerText = title + (type ? ` (${type})` : '');
+          item.addEventListener('click', () => {
+            this.addItem(title);
+            input.value = '';
+            dropdown.style.display = 'none';
+          });
+          dropdown.appendChild(item);
+        });
+      }
+    });
   }
 
   handleRemoveItem(event: any) {
@@ -181,10 +171,8 @@ class MediaPickerWidget extends Widget {
     return false;
   }
 
-  handleAddItem(event: any) {
-    const item = event.param;
+  addItem(item: string) {
     const targetTiddler = `$:/media-log/${this.getDate()}`;
-
     const list = this.wiki.getTiddlerList(targetTiddler, 'media-log');
     if (!list.includes(item)) list.push(item);
 
@@ -194,15 +182,6 @@ class MediaPickerWidget extends Widget {
 
     const listString = list.map((i: any) => `[[${i}]]`).join(' ');
     this.wiki.addTiddler(new $tw.Tiddler(tiddler, { 'media-log': listString, tags: tags, modified: new Date(), 'log-date': this.getDate() }));
-    this.handleClearQuery();
-    return false;
-  }
-
-  handleClearQuery() {
-    const targetTiddler = `$:/media-log/${this.getDate()}`;
-    const temporaryState = `$:/temp/media-importer/picker/${targetTiddler}/media-log`;
-    this.wiki.setText(temporaryState, 'text', undefined, '');
-    return false;
   }
 
   refresh(changedTiddlers: IChangedTiddlers) {

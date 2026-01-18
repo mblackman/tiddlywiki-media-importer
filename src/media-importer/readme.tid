@@ -33,6 +33,7 @@ To create the library browser, create a tiddler with this text: `{{$:/plugins/mb
 
 * ''Media Consumption Summary'': View a summary of consumed media within a date range.
 ** `<$MediaConsumptionSummary startDate="YYYY-MM-DD" endDate="YYYY-MM-DD" />`
+** Key attributes: `startDate`, `endDate`, `readonly`.
 
 * ''Media Importer UI'': The core search and import interface used to build custom importer tabs.
 ** `<$MediaImporter type="Book" placeholder="Search books..." resultTag="SearchResult" />`
