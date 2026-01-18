@@ -104,10 +104,9 @@ list-before: $:/core/ui/ViewTemplate/body
          <div style="flex: 1 0 120px; display:flex; flex-direction:column; gap:2px;">
            <span class="mi-label" style="font-size:0.8em; text-transform:uppercase; color:<<colour muted-foreground>>;">Status</span>
            <$select field="status" default="Backlog" class="mi-input" style="width:100%; height:32px; font-size:0.9em;">
-             <option value="Backlog">Backlog</option>
-             <option value="Active">Active</option>
-             <option value="Completed">Completed</option>
-             <option value="Dropped">Dropped</option>
+             <$list filter="[enlist{$:/plugins/mblackman/media-importer/data/statuses}]">
+               <option value=<<currentTiddler>>><<currentTiddler>></option>
+             </$list>
            </$select>
          </div>
 

@@ -25,12 +25,14 @@ class MediaLibraryGridWidget extends Widget {
     const ratingTiddler = '$:/state/mblackman/media-importer/library/rating';
     const sortTiddler = '$:/state/mblackman/media-importer/library/sort';
     const yearTiddler = '$:/state/mblackman/media-importer/library/year';
+    const statusTiddler = '$:/state/mblackman/media-importer/library/status';
     const searchTiddler = '$:/temp/mblackman/media-importer/search/library';
 
     const currentType = this.wiki.getTiddlerText(typeTiddler, 'Book');
     const currentRating = this.wiki.getTiddlerText(ratingTiddler, 'All');
     const currentSort = this.wiki.getTiddlerText(sortTiddler, 'title-asc');
     const currentYear = this.wiki.getTiddlerText(yearTiddler, 'All');
+    const currentStatus = this.wiki.getTiddlerText(statusTiddler, 'All');
     const currentSearch = this.wiki.getTiddlerText(searchTiddler, '');
 
     let filter = `[tag[$:/tags/media-importer/Media]media-type[${currentType}]]`;
@@ -49,6 +51,10 @@ class MediaLibraryGridWidget extends Widget {
 
     if (currentYear !== 'All') {
       filter += ` +[search:lastFinished[${currentYear}]]`;
+    }
+
+    if (currentStatus !== 'All') {
+      filter += ` +[field:status[${currentStatus}]]`;
     }
 
     switch (currentSort) {
@@ -131,6 +137,7 @@ class MediaLibraryWidget extends Widget {
     const ratingTiddler = '$:/state/mblackman/media-importer/library/rating';
     const sortTiddler = '$:/state/mblackman/media-importer/library/sort';
     const yearTiddler = '$:/state/mblackman/media-importer/library/year';
+    const statusTiddler = '$:/state/mblackman/media-importer/library/status';
     const searchTiddler = '$:/temp/mblackman/media-importer/search/library';
 
     // Current Values
@@ -145,6 +152,9 @@ class MediaLibraryWidget extends Widget {
     // Regex to strip date to year: -.*$
     const yearFilter = `[tag[$:/tags/media-importer/Media]media-type[${currentType}]has[lastFinished]get[lastFinished]search-replace:g:regexp[-.*$],[]unique[]!sort[]]`;
     const yearOptions = this.wiki.filterTiddlers(yearFilter);
+
+    // 3. Status Options
+    const statusOptions = this.wiki.filterTiddlers('[enlist{$:/plugins/mblackman/media-importer/data/statuses}]');
 
     // --- UI Construction ---
 
@@ -163,6 +173,17 @@ class MediaLibraryWidget extends Widget {
         type: 'select',
         attributes: { tiddler: { type: 'string', value: typeTiddler }, default: { type: 'string', value: 'Book' }, class: { type: 'string', value: 'mi-input' } },
         children: typeSelectChildren,
+      },
+    ]);
+
+    // Status Select
+    const statusSelectChildren = [createOption('All', 'All Statuses'), ...statusOptions.map(s => createOption(s, s))];
+    const statusSelect = h('div', { style: 'flex: 1; min-width: 140px;' }, [
+      h('span', { class: 'mi-label' }, [text('Status')]),
+      {
+        type: 'select',
+        attributes: { tiddler: { type: 'string', value: statusTiddler }, default: { type: 'string', value: 'All' }, class: { type: 'string', value: 'mi-input' } },
+        children: statusSelectChildren,
       },
     ]);
 
@@ -216,6 +237,7 @@ class MediaLibraryWidget extends Widget {
     const controls = h('div', { class: 'mi-section' }, [
       h('div', { style: 'display: flex; flex-wrap: wrap; gap: 15px;' }, [
         typeSelect,
+        statusSelect,
         ratingSelect,
         yearSelect,
         sortSelect,
