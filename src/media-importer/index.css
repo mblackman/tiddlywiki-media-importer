@@ -72,10 +72,11 @@ select.mi-input {
 }
 .mi-sublabel {
   display: block;
-  font-size: 0.85em;
-  opacity: 0.7;
+  font-size: 0.75em;
+  text-transform: uppercase;
+  color: #777;
   margin-bottom: 4px;
-  font-style: italic;
+  font-weight: bold;
 }
 .mi-section {
   margin-bottom: 25px;
@@ -194,60 +195,71 @@ select.mi-input {
 /* --- View Template Layout --- */
 .mi-view-container {
   display: flex;
+  flex-wrap: wrap;
   gap: 20px;
-  align-items: flex-start;
-  margin-bottom: 10px;
 }
 
 .mi-sidebar {
-  flex: 0 0 200px;
+  flex: 0 0 240px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
-}
-
-.mi-cover-image {
-  border-radius: 4px;
-  overflow: hidden;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-  background: #000;
+  gap: 15px;
 }
 
 .mi-cover-image img {
   width: 100%;
+  height: auto;
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
   display: block;
 }
 
-.mi-rating-box {
-  text-align: center;
-  background: rgba(0,0,0,0.05);
-  padding: 8px;
-  border-radius: 4px;
+.mi-sidebar-ratings {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-top: 10px;
 }
 
-.mi-rating-box .mi-sublabel {
-  text-transform: uppercase;
-  margin-bottom: 0;
+.mi-rating-box {
+  background: #f5f5f5;
+  padding: 8px;
+  border-radius: 6px;
+  text-align: center;
+}
+
+.mi-rating-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  line-height: 1;
 }
 
 .mi-rating-stars {
-  color: #f59e0b;
-  font-size: 1.4em;
-  line-height: 1.2;
+  font-size: 1.1em;
+  white-space: nowrap;
 }
 
+.mi-star-full { color: #f59e0b; }
+.mi-star-empty { color: #e5e7eb; }
+.mi-star-half { position: relative; display: inline-block; color: #e5e7eb; }
+.mi-star-half::after { content: '★'; position: absolute; left: 0; top: 0; width: 50%; overflow: hidden; color: #f59e0b; }
+
 .mi-rating-score {
-  font-size: 0.8em;
-  opacity: 0.8;
+  font-weight: bold;
+  font-size: 0.9em;
+  color: #333;
 }
 
 .mi-content {
   flex: 1;
+  min-width: 300px;
 }
 
 .mi-header {
-  border-bottom: 1px solid <<colour table-border>>;
-  padding-bottom: 10px;
+  width: 100%;
+  margin-bottom: 15px;
 }
 
 .mi-title {
@@ -282,9 +294,16 @@ select.mi-input {
 }
 
 .mi-plot {
-  max-height: 150px;
-  overflow-y: auto;
   line-height: 1.4;
+}
+
+@media (max-width: 700px) {
+  .mi-sidebar { flex: 0 0 100%; flex-direction: row; flex-wrap: wrap; align-items: flex-start; }
+  .mi-cover-image { flex: 0 0 100px; }
+  .mi-sidebar-ratings { flex: 1; justify-content: center; }
+  .mi-rating-box { text-align: left; }
+  .mi-rating-row { justify-content: flex-start; }
+  .mi-content { min-width: 100%; }
 }
 
 /* --- Control Card --- */

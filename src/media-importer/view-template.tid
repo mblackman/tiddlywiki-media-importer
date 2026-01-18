@@ -5,6 +5,18 @@ list-before: $:/core/ui/ViewTemplate/body
 \whitespace trim
 <$list filter="[all[current]tag[$:/tags/media-importer/Media]]">
 
+<!-- HEADER -->
+<div class="mi-section mi-header">
+  <h1 class="mi-title">{{{ [{!!englishTitle}] ~[{!!title}] }}}</h1>
+  <div class="mi-meta">
+     <span class="mi-badge">
+       {{!!media-type}}
+     </span>
+     {{!!year}}
+     <$list filter="[all[current]has[releaseDate]]"> • <$view field="releaseDate" format="date" template="DD MMM YYYY"/></$list>
+  </div>
+</div>
+
 <div class="mi-view-container mi-card">
 
   <!-- LEFT COLUMN: IMAGE & ONLINE RATING -->
@@ -14,39 +26,70 @@ list-before: $:/core/ui/ViewTemplate/body
       <$image source={{!!image}} />
     </div>
     
+    <div class="mi-sidebar-ratings">
     <!-- ONLINE RATING -->
     <div class="mi-rating-box">
        <small class="mi-sublabel">{{!!dataSource}} Score</small>
        
-       <$vars rating={{{ [{!!onlineRating}round[]] }}}>
-         <div class="mi-rating-stars">
+       <$vars rawRating={{{ [{!!onlineRating}] }}}>
+         <$list filter="[<rawRating>match[0]] [<rawRating>is[blank]] +[limit[1]]">
+            <div class="mi-rating-row"><span class="mi-rating-score">N/A</span></div>
+         </$list>
+         <$list filter="[<rawRating>!match[0]!is[blank]]" variable="ignore">
+         <$vars rating={{{ [<rawRating>multiply[2]round[]divide[2]] }}}>
+         <div class="mi-rating-row">
+           <span class="mi-rating-stars">
            <$list filter="[range[1,5]]" variable="star">
-             <$list filter="[<rating>compare:number:gteq<star>]">★</$list>
-             <$list filter="[<rating>compare:number:lt<star>]">☆</$list>
+             <$list filter="[<rating>compare:number:gteq<star>]"><span class="mi-star-full">★</span></$list>
+             <$list filter="[<rating>compare:number:lt<star>]">
+                <$list filter="[<rating>add[0.5]compare:number:eq<star>]"><span class="mi-star-half">★</span></$list>
+                <$list filter="[<rating>add[0.5]compare:number:neq<star>]"><span class="mi-star-empty">★</span></$list>
+             </$list>
            </$list>
-         </div>
-         <div class="mi-rating-score">
+           </span>
+           <span class="mi-rating-score">
            {{!!onlineRating}} / 5
+           </span>
          </div>
+         </$vars>
+         </$list>
        </$vars>
+    </div>
+
+    <!-- MY RATING -->
+    <div class="mi-rating-box">
+       <small class="mi-sublabel">My Score</small>
+       
+       <$vars avgRating={{{ [tag[$:/tags/media-importer/WatchLog]field:media-title<currentTiddler>get[rating]!match[0]average[]] }}}>
+         <$list filter="[<avgRating>match[0]] [<avgRating>is[blank]] +[limit[1]]">
+            <div class="mi-rating-row"><span class="mi-rating-score">N/A</span></div>
+         </$list>
+         <$list filter="[<avgRating>!match[0]!is[blank]]" variable="ignore">
+         <$vars rating={{{ [<avgRating>multiply[2]round[]divide[2]] }}}>
+           <div class="mi-rating-row">
+             <span class="mi-rating-stars">
+             <$list filter="[range[1,5]]" variable="star">
+               <$list filter="[<rating>compare:number:gteq<star>]"><span class="mi-star-full">★</span></$list>
+               <$list filter="[<rating>compare:number:lt<star>]">
+                  <$list filter="[<rating>add[0.5]compare:number:eq<star>]"><span class="mi-star-half">★</span></$list>
+                  <$list filter="[<rating>add[0.5]compare:number:neq<star>]"><span class="mi-star-empty">★</span></$list>
+               </$list>
+             </$list>
+             </span>
+             <span class="mi-rating-score">
+             <$text text={{{ [<avgRating>fixed[1]else[--]] }}}/> / 5
+             </span>
+           </div>
+         </$vars>
+         </$list>
+       </$vars>
+    </div>
     </div>
   </div>
 
   <!-- RIGHT COLUMN: DATA -->
   <div class="mi-content">
     
-    <!-- HEADER -->
-    <div class="mi-section mi-header">
-      <h1 class="mi-title">{{{ [{!!englishTitle}] ~[{!!title}] }}}</h1>
-      <div class="mi-meta">
-         <span class="mi-badge">
-           {{!!media-type}}
-         </span>
-         {{!!year}}
-         <$list filter="[all[current]has[releaseDate]]"> • <$view field="releaseDate" format="date" template="DD MMM YYYY"/></$list>
-      </div>
-    </div>
-
     <!-- METADATA GRID (READ ONLY) -->
     <div class="mi-section mi-grid">
        <div class="mi-label">Status</div>
