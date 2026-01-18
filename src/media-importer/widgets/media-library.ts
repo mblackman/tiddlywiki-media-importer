@@ -19,6 +19,23 @@ const h = (tag: string, attributes: Record<string, string | undefined> = {}, chi
 
 const text = (string_: string): IParseTreeNode => ({ type: 'text', text: string_ });
 
+interface LogEntry {
+  rating: number;
+  date: string;
+  timestamp: string;
+}
+
+interface MediaItem {
+  title: string;
+  englishTitle: string;
+  type: string;
+  status: string;
+  image: string;
+  logs: LogEntry[];
+  averageRating: number;
+  lastWatched: string;
+}
+
 class MediaLibraryGridWidget extends Widget {
   execute() {
     const typeTiddler = '$:/state/mblackman/media-importer/library/type';
@@ -35,92 +52,130 @@ class MediaLibraryGridWidget extends Widget {
     const currentStatus = this.wiki.getTiddlerText(statusTiddler, 'All');
     const currentSearch = this.wiki.getTiddlerText(searchTiddler, '');
 
-    let filter = `[tag[$:/tags/media-importer/Media]`;
-    if (currentType !== 'All') {
-      filter += `media-type[${currentType}]`;
-    }
-    filter += `]`;
+    // 1. Fetch Data
+    const allMedia = this.wiki.filterTiddlers('[tag[$:/tags/media-importer/Media]]');
+    const allLogs = this.wiki.filterTiddlers('[tag[$:/tags/media-importer/WatchLog]]');
 
-    if (currentSearch) {
-      filter += ` +[search{${searchTiddler}}]`;
+    // 2. Map Logs
+    const logsByMedia = new Map<string, LogEntry[]>();
+    for (const logTitle of allLogs) {
+      const log = this.wiki.getTiddler(logTitle);
+      if (!log) continue;
+      const mediaTitle = log.fields['media-title'] as string;
+      if (!mediaTitle) continue;
+
+      if (!logsByMedia.has(mediaTitle)) logsByMedia.set(mediaTitle, []);
+      logsByMedia.get(mediaTitle)!.push({
+        rating: parseInt((log.fields.rating as string) || '0', 10),
+        date: (log.fields.date as string) || '',
+        timestamp: (log.fields.timestamp as string) || '',
+      });
+    }
+
+    // 3. Build Models
+    let items: MediaItem[] = allMedia.map(title => {
+      const tiddler = this.wiki.getTiddler(title);
+      const fields = tiddler?.fields || {};
+      const logs = logsByMedia.get(title) || [];
+
+      // Calculate Stats
+      const ratedLogs = logs.filter(l => l.rating > 0);
+      const averageRating = ratedLogs.length > 0
+        ? ratedLogs.reduce((sum, l) => sum + l.rating, 0) / ratedLogs.length
+        : 0;
+
+      // Sort logs by date desc to find last watched
+      logs.sort((a, b) => {
+        if (a.date !== b.date) return b.date.localeCompare(a.date);
+        return b.timestamp.localeCompare(a.timestamp);
+      });
+      const lastWatched = logs.length > 0 ? logs[0].date : '';
+
+      return {
+        title,
+        englishTitle: (fields['englishTitle'] as string) || '',
+        type: (fields['media-type'] as string) || 'Unknown',
+        status: (fields['status'] as string) || 'Backlog',
+        image: (fields['image'] as string) || '',
+        logs,
+        averageRating,
+        lastWatched,
+      };
+    });
+
+    // 4. Filter
+    if (currentType !== 'All') {
+      items = items.filter(index => index.type === currentType);
     }
 
     if (currentStatus !== 'All') {
-      filter += ` +[field:status[${currentStatus}]]`;
+      items = items.filter(index => index.status === currentStatus);
     }
 
-    switch (currentSort) {
-      case 'title-asc':
-        filter += ` +[sort[title]]`;
-        break;
-      case 'title-desc':
-        filter += ` +[!sort[title]]`;
-        break;
-      case 'rating-asc':
-        filter += ` +[sort[personalRating]]`;
-        break;
-      case 'rating-desc':
-        filter += ` +[!sort[personalRating]]`;
-        break;
-      case 'date-desc':
-        filter += ` +[has[lastFinished]!sort[lastFinished]]`;
-        break;
-      case 'date-asc':
-        filter += ` +[has[lastFinished]sort[lastFinished]]`;
-        break;
+    if (currentSearch) {
+      const lower = currentSearch.toLowerCase();
+      items = items.filter(index => index.title.toLowerCase().includes(lower) || index.englishTitle.toLowerCase().includes(lower));
     }
-
-    console.log('Media Library Filter:', filter);
-    let results = this.wiki.filterTiddlers(filter);
 
     if (currentYear !== 'All') {
-      const itemsWithYear = this.wiki.filterTiddlers(`[tag[$:/tags/media-importer/WatchLog]search:date:anchored[${currentYear}]get[media-title]unique[]]`);
-      results = results.filter(title => itemsWithYear.includes(title));
+      items = items.filter(index => index.logs.some(l => l.date.startsWith(currentYear)));
     }
 
     if (currentRating !== 'All') {
       if (currentRating === '0') {
         // Unrated: Exclude items that have any log with rating > 0
-        const ratedItems = this.wiki.filterTiddlers(`[tag[$:/tags/media-importer/WatchLog]has[rating]!rating[0]get[media-title]unique[]]`);
-        results = results.filter(title => !ratedItems.includes(title));
+        items = items.filter(index => !index.logs.some(l => l.rating > 0));
       } else {
-        // Specific Rating: Include items that have a log with this rating
-        const ratedItems = this.wiki.filterTiddlers(`[tag[$:/tags/media-importer/WatchLog]rating[${currentRating}]get[media-title]unique[]]`);
-        results = results.filter(title => ratedItems.includes(title));
+        const r = parseInt(currentRating, 10);
+        items = items.filter(index => index.logs.some(l => l.rating === r));
       }
     }
 
+    // 5. Sort
+    items.sort((a, b) => {
+      switch (currentSort) {
+        case 'title-asc':
+          return a.title.localeCompare(b.title);
+        case 'title-desc':
+          return b.title.localeCompare(a.title);
+        case 'rating-desc':
+          return b.averageRating - a.averageRating;
+        case 'rating-asc':
+          return a.averageRating - b.averageRating;
+        case 'date-desc':
+          return b.lastWatched.localeCompare(a.lastWatched);
+        case 'date-asc':
+          return a.lastWatched.localeCompare(b.lastWatched);
+        default:
+          return a.title.localeCompare(b.title);
+      }
+    });
+
     const countLabel = h('div', { class: 'mi-sublabel', style: 'margin-bottom: 15px;' }, [
       text('Found '),
-      h('b', {}, [text(results.length.toString())]),
+      h('b', {}, [text(items.length.toString())]),
       text(' items'),
     ]);
 
     const gridItems: IParseTreeNode[] = [];
-    for (const title of results) {
-      const tiddler = this.wiki.getTiddler(title);
-      if (!tiddler) continue;
-
-      const image = tiddler.fields.image as string;
-      const rating = tiddler.fields.personalRating as string;
-
+    for (const item of items) {
       const cardContent = h('div', { class: 'mi-card', style: 'padding: 0; height: 100%; display: flex; flex-direction: column; overflow: hidden; transition: transform 0.2s;' }, [
         h('div', { style: 'aspect-ratio: 16/9; overflow: hidden; background: #000; position: relative;' }, [
-          image
-            ? { type: 'image', attributes: { source: { type: 'string', value: image }, style: { type: 'string', value: 'width: 100%; height: 100%; object-fit: contain;' } } }
+          item.image
+            ? { type: 'image', attributes: { source: { type: 'string', value: item.image }, style: { type: 'string', value: 'width: 100%; height: 100%; object-fit: contain;' } } }
             : text(''),
         ]),
         h('div', { style: 'padding: 12px; flex-grow: 1; display: flex; flex-direction: column;' }, [
-          h('div', { style: 'font-weight: 600; line-height: 1.3; margin-bottom: 4px;' }, [text(title)]),
+          h('div', { style: 'font-weight: 600; line-height: 1.3; margin-bottom: 4px;' }, [text(item.title)]),
           h('div', { class: 'mi-sublabel', style: 'margin-top: auto;' }, [
-            rating && rating !== '0' ? text(`${rating} ★`) : text(''),
+            item.averageRating > 0 ? text(`${item.averageRating.toFixed(1).replace(/\.0$/, '')} ★`) : text(''),
           ]),
         ]),
       ]);
 
       gridItems.push({
         type: 'link',
-        attributes: { to: { type: 'string', value: title }, style: { type: 'string', value: 'text-decoration: none; color: inherit;' } },
+        attributes: { to: { type: 'string', value: item.title }, style: { type: 'string', value: 'text-decoration: none; color: inherit;' } },
         children: [cardContent],
       });
     }
@@ -131,8 +186,21 @@ class MediaLibraryGridWidget extends Widget {
   }
 
   refresh(changedTiddlers: IChangedTiddlers) {
+    const typeTiddler = '$:/state/mblackman/media-importer/library/type';
+    const ratingTiddler = '$:/state/mblackman/media-importer/library/rating';
+    const sortTiddler = '$:/state/mblackman/media-importer/library/sort';
+    const yearTiddler = '$:/state/mblackman/media-importer/library/year';
+    const statusTiddler = '$:/state/mblackman/media-importer/library/status';
     const searchTiddler = '$:/temp/mblackman/media-importer/search/library';
-    if (changedTiddlers[searchTiddler]) {
+
+    const stateChanged = [typeTiddler, ratingTiddler, sortTiddler, yearTiddler, statusTiddler, searchTiddler].some(t => changedTiddlers[t]);
+    const mediaChanged = Object.keys(changedTiddlers).some(t => {
+      const tid = this.wiki.getTiddler(t);
+      return tid?.hasTag('$:/tags/media-importer/Media');
+    });
+    const logsChanged = Object.keys(changedTiddlers).some(t => t.startsWith('$:/data/media-log/'));
+
+    if (stateChanged || mediaChanged || logsChanged) {
       this.refreshSelf();
       return true;
     }
@@ -141,6 +209,16 @@ class MediaLibraryGridWidget extends Widget {
 }
 
 class MediaLibraryWidget extends Widget {
+  constructor(parseTreeNode: any, options: any) {
+    super(parseTreeNode, options);
+    this.addEventListener('mi-refresh-library', this.handleRefresh.bind(this));
+  }
+
+  handleRefresh() {
+    this.refreshSelf();
+    return false;
+  }
+
   execute() {
     // State Tiddlers
     const typeTiddler = '$:/state/mblackman/media-importer/library/type';
@@ -149,9 +227,6 @@ class MediaLibraryWidget extends Widget {
     const yearTiddler = '$:/state/mblackman/media-importer/library/year';
     const statusTiddler = '$:/state/mblackman/media-importer/library/status';
     const searchTiddler = '$:/temp/mblackman/media-importer/search/library';
-
-    // Current Values
-    const currentType = this.wiki.getTiddlerText(typeTiddler, 'Book');
 
     // --- Filters ---
 
@@ -245,14 +320,27 @@ class MediaLibraryWidget extends Widget {
       },
     ]);
 
+    // Refresh Button
+    const refreshButton = {
+      type: 'button',
+      attributes: {
+        class: { type: 'string', value: 'mi-btn' },
+        style: { type: 'string', value: 'height: 32px; align-self: flex-end;' },
+        message: { type: 'string', value: 'mi-refresh-library' },
+        tooltip: { type: 'string', value: 'Refresh Library' },
+      },
+      children: [text('↻')],
+    };
+
     // Controls Container
     const controls = h('div', { class: 'mi-section' }, [
-      h('div', { style: 'display: flex; flex-wrap: wrap; gap: 15px;' }, [
+      h('div', { style: 'display: flex; flex-wrap: wrap; gap: 15px; align-items: flex-end;' }, [
         typeSelect,
         statusSelect,
         ratingSelect,
         yearSelect,
         sortSelect,
+        refreshButton,
       ]),
     ]);
 
@@ -288,7 +376,10 @@ class MediaLibraryWidget extends Widget {
       return tid?.hasTag('$:/tags/media-importer/Media');
     });
 
-    if (stateChanged || mediaChanged) {
+    // Check if any log items changed (for list updates)
+    const logsChanged = Object.keys(changedTiddlers).some(t => t.startsWith('$:/data/media-log/'));
+
+    if (stateChanged || mediaChanged || logsChanged) {
       this.refreshSelf();
       return true;
     }
