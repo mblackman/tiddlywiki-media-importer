@@ -35,6 +35,7 @@ interface MediaItem {
   averageRating: number;
   lastWatched: string;
   created: Date;
+  favorite: boolean;
 }
 
 class MediaLibraryGridWidget extends Widget {
@@ -45,6 +46,7 @@ class MediaLibraryGridWidget extends Widget {
     const yearTiddler = '$:/state/mblackman/media-importer/library/year';
     const statusTiddler = '$:/state/mblackman/media-importer/library/status';
     const searchTiddler = '$:/temp/mblackman/media-importer/search/library';
+    const favoriteTiddler = '$:/state/mblackman/media-importer/library/favorite';
 
     const currentType = this.wiki.getTiddlerText(typeTiddler, 'Book');
     const currentRating = this.wiki.getTiddlerText(ratingTiddler, 'All');
@@ -52,6 +54,7 @@ class MediaLibraryGridWidget extends Widget {
     const currentYear = this.wiki.getTiddlerText(yearTiddler, 'All');
     const currentStatus = this.wiki.getTiddlerText(statusTiddler, 'All');
     const currentSearch = this.wiki.getTiddlerText(searchTiddler, '');
+    const currentFavorite = this.wiki.getTiddlerText(favoriteTiddler, 'false').trim();
 
     // 1. Fetch Data
     const allMedia = this.wiki.filterTiddlers('[tag[$:/tags/media-importer/Media]]');
@@ -102,6 +105,7 @@ class MediaLibraryGridWidget extends Widget {
         averageRating,
         lastWatched,
         created: (fields['created'] as Date) || new Date(0),
+        favorite: fields['favorite'] === 'yes',
       };
     });
 
@@ -121,6 +125,10 @@ class MediaLibraryGridWidget extends Widget {
 
     if (currentYear !== 'All') {
       items = items.filter(index => index.logs.some(l => l.date.startsWith(currentYear)));
+    }
+
+    if (currentFavorite === 'true') {
+      items = items.filter(index => index.favorite);
     }
 
     if (currentRating !== 'All') {
@@ -166,7 +174,10 @@ class MediaLibraryGridWidget extends Widget {
     const gridItems: IParseTreeNode[] = [];
     for (const item of items) {
       const cardContent = h('div', { class: 'mi-card mi-library-card' }, [
-        h('div', { class: 'mi-library-card-image-container' }, [
+        h('div', { class: 'mi-library-card-image-container', style: 'position: relative;' }, [
+          item.favorite
+            ? h('div', { style: 'position: absolute; top: 5px; left: 5px; color: #f59e0b; font-size: 1.2em; text-shadow: 0 1px 2px rgba(0,0,0,0.6); z-index: 10;' }, [text('★')])
+            : text(''),
           item.image
             ? { type: 'image', attributes: { source: { type: 'string', value: item.image }, class: { type: 'string', value: 'mi-library-card-image' } } }
             : text(''),
@@ -198,8 +209,9 @@ class MediaLibraryGridWidget extends Widget {
     const yearTiddler = '$:/state/mblackman/media-importer/library/year';
     const statusTiddler = '$:/state/mblackman/media-importer/library/status';
     const searchTiddler = '$:/temp/mblackman/media-importer/search/library';
+    const favoriteTiddler = '$:/state/mblackman/media-importer/library/favorite';
 
-    const stateChanged = [typeTiddler, ratingTiddler, sortTiddler, yearTiddler, statusTiddler, searchTiddler].some(t => changedTiddlers[t]);
+    const stateChanged = [typeTiddler, ratingTiddler, sortTiddler, yearTiddler, statusTiddler, searchTiddler, favoriteTiddler].some(t => changedTiddlers[t]);
     const mediaChanged = Object.keys(changedTiddlers).some(t => {
       const tid = this.wiki.getTiddler(t);
       return tid?.hasTag('$:/tags/media-importer/Media');
@@ -233,6 +245,7 @@ class MediaLibraryWidget extends Widget {
     const yearTiddler = '$:/state/mblackman/media-importer/library/year';
     const statusTiddler = '$:/state/mblackman/media-importer/library/status';
     const searchTiddler = '$:/temp/mblackman/media-importer/search/library';
+    const favoriteTiddler = '$:/state/mblackman/media-importer/library/favorite';
 
     // --- Filters ---
 
@@ -309,6 +322,45 @@ class MediaLibraryWidget extends Widget {
       },
     ]);
 
+    // Favorite Toggle
+    const favoriteToggle = h('div', { class: 'mi-filter-group' }, [
+      h('span', { class: 'mi-label' }, [text('Favorites')]),
+      // Active State (True) -> Button to unset
+      {
+        type: 'list',
+        attributes: { filter: { type: 'string', value: `[title[${favoriteTiddler}]get[text]else[false]match[true]]` }, variable: { type: 'string', value: 'ignore' } },
+        children: [{
+          type: 'button',
+          attributes: {
+            class: { type: 'string', value: 'mi-input' },
+            style: { type: 'string', value: 'text-align: left; display: flex; justify-content: space-between; align-items: center; cursor: pointer; width: 100%; height: 2.5em;' },
+          },
+          children: [
+            text('Show Favorites'),
+            h('span', { style: 'color: #f59e0b;' }, [text('★')]),
+            { type: 'action-setfield', attributes: { $tiddler: { type: 'string', value: favoriteTiddler }, text: { type: 'string', value: 'false' } } },
+          ],
+        }],
+      },
+      // Inactive State (False) -> Button to set
+      {
+        type: 'list',
+        attributes: { filter: { type: 'string', value: `[title[${favoriteTiddler}]get[text]else[false]!match[true]]` }, variable: { type: 'string', value: 'ignore' } },
+        children: [{
+          type: 'button',
+          attributes: {
+            class: { type: 'string', value: 'mi-input' },
+            style: { type: 'string', value: 'text-align: left; display: flex; justify-content: space-between; align-items: center; cursor: pointer; width: 100%; height: 2.5em;' },
+          },
+          children: [
+            text('Show Favorites'),
+            h('span', { style: 'color: #ccc;' }, [text('☆')]),
+            { type: 'action-setfield', attributes: { $tiddler: { type: 'string', value: favoriteTiddler }, text: { type: 'string', value: 'true' } } },
+          ],
+        }],
+      },
+    ]);
+
     // Sort Select
     const sortSelect = h('div', { class: 'mi-filter-group' }, [
       h('span', { class: 'mi-label' }, [text('Sort by')]),
@@ -346,6 +398,7 @@ class MediaLibraryWidget extends Widget {
         statusSelect,
         ratingSelect,
         yearSelect,
+        favoriteToggle,
         sortSelect,
         refreshButton,
       ]),
@@ -370,12 +423,9 @@ class MediaLibraryWidget extends Widget {
   }
 
   refresh(changedTiddlers: IChangedTiddlers) {
-    const statePrefix = '$:/state/mblackman/media-importer/library/';
-    const searchTiddler = '$:/temp/mblackman/media-importer/search/library';
     const importersTiddler = '$:/plugins/mblackman/media-importer/data/importers';
 
-    // Check if any state tiddler changed
-    const stateChanged = Object.keys(changedTiddlers).some(t => (t.startsWith(statePrefix) || t === importersTiddler) && t !== searchTiddler);
+    const importersChanged = changedTiddlers[importersTiddler];
 
     // Check if any media items changed (for list updates)
     const mediaChanged = Object.keys(changedTiddlers).some(t => {
@@ -386,7 +436,7 @@ class MediaLibraryWidget extends Widget {
     // Check if any log items changed (for list updates)
     const logsChanged = Object.keys(changedTiddlers).some(t => t.startsWith('$:/data/media-log/'));
 
-    if (stateChanged || mediaChanged || logsChanged) {
+    if (importersChanged || mediaChanged || logsChanged) {
       this.refreshSelf();
       return true;
     }
