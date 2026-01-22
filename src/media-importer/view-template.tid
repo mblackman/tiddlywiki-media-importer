@@ -7,7 +7,19 @@ list-before: $:/core/ui/ViewTemplate/body
 
 <!-- HEADER -->
 <div class="mi-section mi-header">
-  <h1 class="mi-title">{{{ [{!!englishTitle}] ~[{!!title}] }}}</h1>
+  <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+    <h1 class="mi-title" style="margin-top: 0;">{{{ [{!!englishTitle}] ~[{!!title}] }}}</h1>
+    <$button class="tc-btn-invisible" style="font-size: 1.5em; line-height: 1; padding-left: 10px; cursor: pointer;">
+      <$list filter="[all[current]field:favorite[yes]]">
+        <span style="color: #f59e0b;">★</span>
+        <$action-deletefield favorite />
+      </$list>
+      <$list filter="[all[current]!field:favorite[yes]]">
+        <span style="color: <<colour muted-foreground>>;">☆</span>
+        <$action-setfield favorite="yes" />
+      </$list>
+    </$button>
+  </div>
   <div class="mi-meta">
      <span class="mi-badge">
        {{!!media-type}}
