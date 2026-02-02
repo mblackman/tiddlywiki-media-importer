@@ -1,0 +1,15 @@
+title: $:/plugins/mblackman/media-importer/ui/toolbar-media-library
+tags: $:/tags/PageControls
+caption: Media Library
+description: Opens the media importer library
+
+\whitespace trim
+<$button class=<<tv-config-toolbar-class>> tooltip="Open the media importer library" aria-label="Media Library">
+    <$action-navigate $to="$:/plugins/mblackman/media-importer/ui/media-library"/>
+    {{$:/plugins/mblackman/media-importer/images/media-library-icon}}
+    <$list filter="[<tv-config-toolbar-text>match[yes]]">
+    <span class="tc-btn-text">
+      <$text text="Media Library"/>
+    </span>
+  </$list>
+</$button>

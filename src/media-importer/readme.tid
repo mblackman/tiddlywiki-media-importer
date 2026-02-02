@@ -40,4 +40,5 @@ To create the library browser, create a tiddler with this text: `{{$:/plugins/mb
 ** Key attributes: `type` (required), `resultTag` (required), `placeholder`, `loadingText`, `imageField`, `subtitleContent`.
 
 * ''Media Library'': Browse and filter your imported media collection.
-** `<$MediaLibrary />`
+** Tiddler: [[$:/plugins/mblackman/media-importer/ui/media-library]]
+** You can add a toolbar button from the tools menu to quickly access the library.
