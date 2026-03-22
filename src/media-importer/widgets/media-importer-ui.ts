@@ -59,7 +59,6 @@ class MediaImporterUiWidget extends Widget {
           attributes: {
             tiddler: { type: 'string', value: searchInputTitle },
             tag: { type: 'string', value: 'input' },
-            focus: { type: 'string', value: 'yes' },
             default: { type: 'string', value: '' },
             placeholder: { type: 'string', value: placeholder },
             class: { type: 'string', value: 'mi-input' },

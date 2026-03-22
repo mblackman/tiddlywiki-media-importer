@@ -115,13 +115,20 @@ class MediaPickerWidget extends Widget {
     inputWrapper.appendChild(dropdown);
 
     // Event Handlers
+    let closeDropdownTimer: ReturnType<typeof setTimeout> | null = null;
     const closeDropdown = () => {
-      setTimeout(() => {
+      closeDropdownTimer = setTimeout(() => {
         dropdown.style.display = 'none';
       }, 200);
     };
 
     input.addEventListener('blur', closeDropdown);
+    input.addEventListener('focus', () => {
+      if (closeDropdownTimer !== null) {
+        clearTimeout(closeDropdownTimer);
+        closeDropdownTimer = null;
+      }
+    });
     input.addEventListener('input', () => {
       const query = input.value;
       if (!query) {
