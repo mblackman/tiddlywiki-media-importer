@@ -45,42 +45,6 @@ class MediaImporterUiWidget extends Widget {
     const searchState = this.wiki.getTiddlerText(searchStateTitle, '');
     const searchPage = parseInt(this.wiki.getTiddlerText(searchPageTitle, '1'), 10);
 
-    // --- Search Bar ---
-    const searchBar = h('div', { class: 'mi-flex-row', style: 'margin-bottom:20px;' }, [
-      {
-        type: 'keyboard',
-        attributes: {
-          key: { type: 'string', value: 'enter' },
-          message: { type: 'string', value: 'ui-trigger-search' },
-          class: { type: 'string', value: 'mi-flex-grow' },
-        },
-        children: [{
-          type: 'edit-text',
-          attributes: {
-            tiddler: { type: 'string', value: searchInputTitle },
-            tag: { type: 'string', value: 'input' },
-            default: { type: 'string', value: '' },
-            placeholder: { type: 'string', value: placeholder },
-            class: { type: 'string', value: 'mi-input' },
-            style: { type: 'string', value: 'width: 100%;' },
-          },
-          children: [],
-        }],
-      },
-      // Search Button
-      {
-        type: 'button',
-        attributes: { class: { type: 'string', value: 'mi-btn mi-btn-primary' }, message: { type: 'string', value: 'ui-trigger-search' } },
-        children: [text('Search')],
-      },
-      // Clear Button
-      {
-        type: 'button',
-        attributes: { message: { type: 'string', value: 'ui-clear-search' } },
-        children: [text('Clear')],
-      },
-    ]);
-
     // --- Results Area ---
     const resultsNodes: IParseTreeNode[] = [];
 
@@ -180,7 +144,8 @@ class MediaImporterUiWidget extends Widget {
 
     const container = h('div', { style: searchState ? 'min-height: 400px;' : '' }, resultsNodes);
 
-    this.makeChildWidgets([searchBar, container, ...paginationNodes]);
+    const parseTreeChildren = (this.parseTreeNode as any).children || [];
+    this.makeChildWidgets([...parseTreeChildren, container, ...paginationNodes]);
   }
 
   handleTriggerSearch(event: any) {
@@ -217,23 +182,30 @@ class MediaImporterUiWidget extends Widget {
   }
 
   refresh(changedTiddlers: IChangedTiddlers) {
-    const type = this.getAttribute('type', '');
+    const oldType = this.getAttribute('type', '');
+    const changedAttributes = this.computeAttributes();
+    const newType = this.getAttribute('type', '');
+    
     const resultTag = this.getAttribute('resultTag', '');
 
-    const changedAttributes = this.computeAttributes();
-    if (Object.keys(changedAttributes).length > 0) {
+    // Check if the search state changed (e.g. from typing enter or search finishing)
+    const searchStateTiddler = `$:/state/${newType}-search`;
+    const searchPageTiddler = `$:/state/${newType}-search-page`;
+    
+    if (changedTiddlers[searchStateTiddler] || changedTiddlers[searchPageTiddler]) {
       this.refreshSelf();
       return true;
     }
 
-    if (
-      changedTiddlers[`$:/state/${type}-search`] ||
-      changedTiddlers[`$:/state/${type}-search-page`] ||
-      Object.keys(changedTiddlers).some(t => this.wiki.getTiddler(t)?.hasTag(resultTag))
-    ) {
+    // Check if any newly arrived result tiddlers match our tag
+    if (resultTag && Object.keys(changedTiddlers).some(t => {
+      const tiddler = this.wiki.getTiddler(t);
+      return tiddler && tiddler.fields.tags && tiddler.fields.tags.includes(resultTag);
+    })) {
       this.refreshSelf();
       return true;
     }
+    
     return this.refreshChildren(changedTiddlers);
   }
 }

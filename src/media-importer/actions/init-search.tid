@@ -1,0 +1,8 @@
+title: $:/plugins/mblackman/media-importer/actions/init-search
+tags: $:/tags/StartupAction/Browser
+
+<$list filter="[[$:/plugins/mblackman/media-importer/data/importers]indexes[]]" variable="importerType">
+  <$list filter="[[$:/temp/]addsuffix<importerType>addsuffix[-search-input]!has[title]]">
+    <$action-setfield $tiddler={{{ [[$:/temp/]addsuffix<importerType>addsuffix[-search-input]] }}} text="" />
+  </$list>
+</$list>

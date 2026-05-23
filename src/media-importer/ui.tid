@@ -16,6 +16,10 @@ caption: Media Importer
       <$list filter="[[$:/plugins/mblackman/media-importer/data/importers]indexes[]]" variable="importerType">
         <$button class={{{ [[$:/state/media-importer-selected]get[text]else<defaultTab>match<importerType>then[tc-tab-selected]else[]] }}}>
           <$action-setfield $tiddler="$:/state/media-importer-selected" text=<<importerType>> />
+          <!-- Pre-initialize the search tiddler if it doesn't exist to prevent TiddlyWiki edit-text focus bug on first keystroke -->
+          <$list filter="[[$:/temp/]addsuffix<importerType>addsuffix[-search-input]!has[title]]">
+            <$action-setfield $tiddler={{{ [[$:/temp/]addsuffix<importerType>addsuffix[-search-input]] }}} text="" />
+          </$list>
           <!-- FIX: Explicitly get text before parsing JSON -->
           <$text text={{{ [[$:/plugins/mblackman/media-importer/data/importers]get[text]jsonget<importerType>,[caption]] }}} />
         </$button>
@@ -24,7 +28,7 @@ caption: Media Importer
 
     <!-- Dynamic Content -->
     <div class="tc-tab-content">
-      <$let type={{{ [[$:/state/media-importer-selected]get[text]!is[blank]else<defaultTab>] }}}>
+      <$set name="type" filter="[[$:/state/media-importer-selected]get[text]!is[blank]else<defaultTab>]">
           <$MediaImporter
               type=<<type>>
               label={{{ [[$:/plugins/mblackman/media-importer/data/importers]get[text]jsonget<type>,[caption]] }}}
@@ -33,8 +37,16 @@ caption: Media Importer
               resultTag={{{ [[$:/plugins/mblackman/media-importer/data/importers]get[text]jsonget<type>,[resultTag]] }}}
               imageField={{{ [[$:/plugins/mblackman/media-importer/data/importers]get[text]jsonget<type>,[imageField]] }}}
               subtitleContent={{{ [[$:/plugins/mblackman/media-importer/data/importers]get[text]jsonget<type>,[subtitle]] }}}
-          />
-      </$let>
+          >
+              <div class="mi-flex-row" style="margin-bottom:20px;">
+                  <$keyboard key="enter" message="ui-trigger-search" class="mi-flex-grow">
+                      <$edit-text tiddler={{{ [[$:/temp/]addsuffix<type>addsuffix[-search-input]] }}} tag="input" default="" placeholder={{{ [[$:/plugins/mblackman/media-importer/data/importers]get[text]jsonget<type>,[placeholder]] }}} class="mi-input" style="width: 100%;" />
+                  </$keyboard>
+                  <$button class="mi-btn mi-btn-primary" message="ui-trigger-search">Search</$button>
+                  <$button message="ui-clear-search">Clear</$button>
+              </div>
+          </$MediaImporter>
+      </$set>
     </div>
     </$let>
 
