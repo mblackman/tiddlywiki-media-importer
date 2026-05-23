@@ -182,8 +182,12 @@ class MediaImporterUiWidget extends Widget {
   }
 
   refresh(changedTiddlers: IChangedTiddlers) {
-    const oldType = this.getAttribute('type', '');
     const changedAttributes = this.computeAttributes();
+    if (Object.keys(changedAttributes).length > 0) {
+      this.refreshSelf();
+      return true;
+    }
+
     const newType = this.getAttribute('type', '');
     
     const resultTag = this.getAttribute('resultTag', '');
