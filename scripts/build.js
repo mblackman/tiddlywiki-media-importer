@@ -83,4 +83,13 @@ fs.mkdirSync(path.dirname(wikiPluginDir), { recursive: true });
 fs.cpSync(distPluginDir, wikiPluginDir, { recursive: true });
 console.log('✅ Plugin successfully mirrored to wiki/plugins.');
 
+console.log('📦 Packaging plugin for release...');
+try {
+  execSync('npx tiddlywiki wiki --output dist --rendertiddler "$:/plugins/mblackman/media-importer" "media-importer.json" "text/plain" "$:/core/templates/json-tiddler"', { stdio: 'inherit', cwd: rootDir });
+  console.log('✅ Plugin packaged successfully into dist/media-importer.json.');
+} catch (error) {
+  console.error('❌ Plugin packaging failed:', error.message);
+  process.exit(1);
+}
+
 console.log('\n🌟 Build Completed successfully! 🌟\n');
