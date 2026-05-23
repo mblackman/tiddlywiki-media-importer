@@ -1,12 +1,19 @@
 {
-  "extends": "@modern-js/tsconfig/base.json",
   "compilerOptions": {
+    "target": "ES2020",
+    "module": "CommonJS",
+    "moduleResolution": "node",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
     "declaration": false,
     "jsx": "react-jsx",
     "baseUrl": "./",
     "noEmit": true,
-    "typeRoots": ["node_modules/@types", "node_modules/tw5-typed"],
+    "typeRoots": ["node_modules/@types"],
+    "types": ["node", "jasmine"],
     "lib": ["DOM", "ESNext"]
   },
-  "include": ["src", "*.json", "wiki/*.info", "*.mjs", "*.js", "src/**/*.d.ts"]
+  "include": ["src", "*.json", "wiki/*.info", "*.mjs", "*.js", "src/**/*.d.ts", "node_modules/tw5-typed/src/index.d.ts"]
 }

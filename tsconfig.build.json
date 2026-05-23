@@ -1,0 +1,9 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "outDir": "./dist/plugins/mblackman/media-importer",
+    "rootDir": "./src/media-importer"
+  },
+  "include": ["src/media-importer/**/*.ts", "node_modules/tw5-typed/src/index.d.ts"]
+}

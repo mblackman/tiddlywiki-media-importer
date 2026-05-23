@@ -3,22 +3,17 @@
   "license": "MIT",
   "version": "0.0.2",
   "scripts": {
-    "dev": "tiddlywiki-plugin-dev dev",
-    "dev:lan": "tiddlywiki-plugin-dev dev --lan",
-    "dev:wiki": "tiddlywiki-plugin-dev dev --write-wiki",
-    "test": "tiddlywiki-plugin-dev test",
-    "build": "npm run clean && tiddlywiki-plugin-dev build",
+    "dev": "node scripts/dev.js",
+    "test": "npm run build && npx tiddlywiki wiki --test",
+    "build": "node scripts/build.js",
+    "build:demo": "npm run build && npx tiddlywiki wiki --output dist --build index",
     "lint": "eslint ./src",
     "lint:fix": "eslint ./src --fix",
     "check": "tsc --noEmit --skipLibCheck",
-    "publish": "npm run clean && tiddlywiki-plugin-dev publish",
     "reset": "rimraf ./**/node_modules",
-    "clean": "rimraf dist",
+    "clean": "rimraf dist wiki/plugins",
     "prepare": "husky install",
-    "update": "npm-check-updates -u && dprint config update",
-    "new": "tiddlywiki-plugin-dev new",
-    "build:library": "npm run clean && tiddlywiki-plugin-dev build --library --output dist/library",
-    "publish:offline": "npm run clean && tiddlywiki-plugin-dev publish --offline"
+    "update": "npm-check-updates -u && dprint config update"
   },
   "engines": {
     "node": ">=20"
@@ -37,7 +32,6 @@
     ]
   },
   "devDependencies": {
-    "@modern-js/tsconfig": "^2.69.6",
     "@types/jasmine": "^5.1.13",
     "@types/node": "^25.0.3",
     "dprint": "^0.51.1",
@@ -52,7 +46,6 @@
   },
   "dependencies": {
     "npm-check-updates": "^19.2.1",
-    "tiddlywiki": "^5.3.8",
-    "tiddlywiki-plugin-dev": "^0.3.2"
+    "tiddlywiki": "^5.3.8"
   }
 }

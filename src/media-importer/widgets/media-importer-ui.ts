@@ -152,13 +152,13 @@ class MediaImporterUiWidget extends Widget {
     const paginationNodes: IParseTreeNode[] = [];
 
     if (hasResults || searchPage > 1) {
-      const previousButton = searchPage > 1
+      const previousButton = (searchPage > 1
         ? {
           type: 'button',
           attributes: { class: { type: 'string', value: 'mi-btn' }, message: { type: 'string', value: 'ui-paginate' }, param: { type: 'string', value: '-1' } },
           children: [text('← Prev')],
         }
-        : text('');
+        : text('')) as IParseTreeNode;
 
       const nextButton = {
         type: 'button',
@@ -169,7 +169,7 @@ class MediaImporterUiWidget extends Widget {
           param: { type: 'string', value: '1' },
         },
         children: [text('Next →')],
-      };
+      } as IParseTreeNode;
 
       paginationNodes.push(h('div', { class: 'mi-flex-row', style: 'gap: 10px; margin-top: 15px; justify-content: center; align-items: center;' }, [
         previousButton,

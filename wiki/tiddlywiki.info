@@ -1,9 +1,17 @@
 {
   "description": "Basic client-server edition",
-  "plugins": [],
+  "plugins": [
+    "tiddlywiki/jasmine",
+    "tiddlywiki/filesystem",
+    "tiddlywiki/tiddlyweb"
+  ],
   "themes": [
     "tiddlywiki/vanilla"
   ],
   "languages": [],
-  "build": {}
+  "build": {
+    "index": [
+      "--rendertiddler", "$:/core/save/all", "index.html", "text/plain"
+    ]
+  }
 }

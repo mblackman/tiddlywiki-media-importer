@@ -99,14 +99,14 @@ class MediaPickerWidget extends Widget {
     inputWrapper.style.position = 'relative';
     wrapper.appendChild(inputWrapper);
 
-    const input = doc.createElement('input');
+    const input = doc.createElement('input') as unknown as HTMLInputElement;
     input.type = 'text';
     input.className = 'mi-input';
     input.placeholder = this.getAttribute('placeholder', 'Search your media...');
     input.style.width = '100%';
     inputWrapper.appendChild(input);
 
-    const dropdown = doc.createElement('div');
+    const dropdown = doc.createElement('div') as unknown as HTMLDivElement;
     dropdown.className = 'tc-drop-down mi-media-picker-dropdown';
     dropdown.style.display = 'none';
     dropdown.style.position = 'absolute';

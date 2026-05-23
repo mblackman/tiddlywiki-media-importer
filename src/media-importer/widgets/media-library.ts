@@ -10,7 +10,7 @@ import { widget as Widget } from '$:/core/modules/widgets/widget.js';
 import { IChangedTiddlers, IParseTreeNode } from 'tiddlywiki';
 
 const h = (tag: string, attributes: Record<string, string | undefined> = {}, children: IParseTreeNode[] = []): IParseTreeNode => {
-  const attributes_: Record<string, { type: string; value: string | undefined }> = {};
+  const attributes_: Record<string, any> = {};
   for (const key in attributes) {
     attributes_[key] = { type: 'string', value: attributes[key] };
   }
@@ -79,7 +79,7 @@ class MediaLibraryGridWidget extends Widget {
     // 3. Build Models
     let items: MediaItem[] = allMedia.map(title => {
       const tiddler = this.wiki.getTiddler(title);
-      const fields = tiddler?.fields || {};
+      const fields: Record<string, any> = tiddler?.fields || {};
       const logs = logsByMedia.get(title) || [];
 
       // Calculate Stats
@@ -389,7 +389,7 @@ class MediaLibraryWidget extends Widget {
         tooltip: { type: 'string', value: 'Refresh Library' },
       },
       children: [text('↻')],
-    };
+    } as IParseTreeNode;
 
     // Controls Container
     const controls = h('div', { class: 'mi-section' }, [

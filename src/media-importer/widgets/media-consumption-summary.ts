@@ -100,7 +100,7 @@ class MediaConsumptionSummaryWidget extends Widget {
     const isReadOnly = this.getAttribute('readonly', 'false') === 'true';
 
     const createDateInput = (value: string, onChange: (val: string) => void) => {
-      const input = doc.createElement('input');
+      const input = doc.createElement('input') as unknown as HTMLInputElement;
       input.type = 'date';
       input.className = 'mi-input';
       input.style.padding = '4px';
