@@ -28,25 +28,27 @@ caption: Media Importer
 
     <!-- Dynamic Content -->
     <div class="tc-tab-content">
-      <$set name="type" filter="[[$:/state/media-importer-selected]get[text]!is[blank]else<defaultTab>]">
-          <$MediaImporter
-              type=<<type>>
-              label={{{ [[$:/plugins/mblackman/media-importer/data/importers]get[text]jsonget<type>,[caption]] }}}
-              placeholder={{{ [[$:/plugins/mblackman/media-importer/data/importers]get[text]jsonget<type>,[placeholder]] }}}
-              loadingText={{{ [[$:/plugins/mblackman/media-importer/data/importers]get[text]jsonget<type>,[loadingText]] }}}
-              resultTag={{{ [[$:/plugins/mblackman/media-importer/data/importers]get[text]jsonget<type>,[resultTag]] }}}
-              imageField={{{ [[$:/plugins/mblackman/media-importer/data/importers]get[text]jsonget<type>,[imageField]] }}}
-              subtitleContent={{{ [[$:/plugins/mblackman/media-importer/data/importers]get[text]jsonget<type>,[subtitle]] }}}
-          >
-              <div class="mi-flex-row" style="margin-bottom:20px;">
-                  <$keyboard key="enter" message="ui-trigger-search" class="mi-flex-grow">
-                      <$edit-text tiddler={{{ [[$:/temp/]addsuffix<type>addsuffix[-search-input]] }}} tag="input" default="" placeholder={{{ [[$:/plugins/mblackman/media-importer/data/importers]get[text]jsonget<type>,[placeholder]] }}} class="mi-input" style="width: 100%;" />
-                  </$keyboard>
-                  <$button class="mi-btn mi-btn-primary" message="ui-trigger-search">Search</$button>
-                  <$button message="ui-clear-search">Clear</$button>
-              </div>
-          </$MediaImporter>
-      </$set>
+      <$list filter="[[$:/plugins/mblackman/media-importer/data/importers]indexes[]]" variable="type">
+          <div style={{{ [[$:/state/media-importer-selected]get[text]else<defaultTab>match<type>then[display: block;]else[display: none;]] }}}>
+            <$MediaImporter
+                type=<<type>>
+                label={{{ [[$:/plugins/mblackman/media-importer/data/importers]get[text]jsonget<type>,[caption]] }}}
+                placeholder={{{ [[$:/plugins/mblackman/media-importer/data/importers]get[text]jsonget<type>,[placeholder]] }}}
+                loadingText={{{ [[$:/plugins/mblackman/media-importer/data/importers]get[text]jsonget<type>,[loadingText]] }}}
+                resultTag={{{ [[$:/plugins/mblackman/media-importer/data/importers]get[text]jsonget<type>,[resultTag]] }}}
+                imageField={{{ [[$:/plugins/mblackman/media-importer/data/importers]get[text]jsonget<type>,[imageField]] }}}
+                subtitleContent={{{ [[$:/plugins/mblackman/media-importer/data/importers]get[text]jsonget<type>,[subtitle]] }}}
+            >
+                <div class="mi-flex-row" style="margin-bottom:20px;">
+                    <$keyboard key="enter" message="ui-trigger-search" class="mi-flex-grow">
+                        <$edit-text tiddler={{{ [[$:/temp/]addsuffix<type>addsuffix[-search-input]] }}} tag="input" default="" placeholder={{{ [[$:/plugins/mblackman/media-importer/data/importers]get[text]jsonget<type>,[placeholder]] }}} class="mi-input" style="width: 100%;" />
+                    </$keyboard>
+                    <$button class="mi-btn mi-btn-primary" message="ui-trigger-search">Search</$button>
+                    <$button message="ui-clear-search">Clear</$button>
+                </div>
+            </$MediaImporter>
+          </div>
+      </$list>
     </div>
     </$let>
 
