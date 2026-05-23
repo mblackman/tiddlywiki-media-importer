@@ -59,6 +59,37 @@ function copyFolderRecursive(src, dest) {
 copyFolderRecursive(srcDir, distPluginDir);
 console.log('✅ Static assets, stylesheets, templates, and metadata copied.');
 
+console.log('🗜️ Minifying JavaScript and CSS assets...');
+const esbuild = require('esbuild');
+
+function minifyFolderRecursive(dir) {
+  if (!fs.existsSync(dir)) return;
+  const files = fs.readdirSync(dir);
+  for (const file of files) {
+    const fullPath = path.join(dir, file);
+    if (fs.statSync(fullPath).isDirectory()) {
+      minifyFolderRecursive(fullPath);
+    } else {
+      const ext = path.extname(fullPath);
+      if (ext === '.js' || ext === '.css') {
+        try {
+          const content = fs.readFileSync(fullPath, 'utf8');
+          const result = esbuild.transformSync(content, {
+            minify: true,
+            loader: ext === '.js' ? 'js' : 'css',
+          });
+          fs.writeFileSync(fullPath, result.code, 'utf8');
+        } catch (e) {
+          console.error(`❌ Minification failed for ${file}:`, e.message);
+        }
+      }
+    }
+  }
+}
+
+minifyFolderRecursive(distPluginDir);
+console.log('✅ JavaScript and CSS minified.');
+
 console.log('⚙️ Generating tiddlywiki.files descriptor...');
 const tiddlywikiFilesContent = {
   directories: [
