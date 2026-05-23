@@ -11,7 +11,7 @@
   "languages": [],
   "build": {
     "index": [
-      "--rendertiddler", "$:/core/save/offline", "index.html", "text/plain"
+      "--rendertiddler", "$:/core/save/all", "index.html", "text/plain", "$:/core/save/all", "publishFilter", "-[[$:/plugins/tiddlywiki/filesystem]] -[[$:/plugins/tiddlywiki/tiddlyweb]]"
     ]
   }
 }
