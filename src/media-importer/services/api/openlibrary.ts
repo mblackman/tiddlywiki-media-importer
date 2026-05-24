@@ -82,6 +82,7 @@ export const OpenLibraryConfig: MediaImporterConfig = {
           isbn13: data.isbn_13 && data.isbn_13[0] ? data.isbn_13[0] : 'unknown',
           released: 'true',
           status: 'Backlog',
+          genres: data.subjects && Array.isArray(data.subjects) ? makeList(data.subjects.slice(0, 5)) : '',
           tags: '$:/tags/media-importer/Media',
           'media-type': 'Book',
           modified: formatCustomDate(),
