@@ -81,32 +81,32 @@ class MediaPickerWidget extends Widget {
     this.computeAttributes();
     this.execute();
 
-    const doc = this.document;
-    const wrapper = doc.createElement('div');
+    const document = this.document;
+    const wrapper = document.createElement('div');
     wrapper.className = 'mi-media-wrapper';
     parent.insertBefore(wrapper, nextSibling);
     this.domNodes.push(wrapper);
 
     // Render Chips
-    const chipsContainer = doc.createElement('div');
+    const chipsContainer = document.createElement('div');
     chipsContainer.style.marginBottom = '4px';
     wrapper.appendChild(chipsContainer);
     this.renderChildren(chipsContainer, null);
 
     // Render Input & Dropdown
-    const inputWrapper = doc.createElement('div');
+    const inputWrapper = document.createElement('div');
     inputWrapper.className = 'mi-media-picker-input-wrapper';
     inputWrapper.style.position = 'relative';
     wrapper.appendChild(inputWrapper);
 
-    const input = doc.createElement('input') as unknown as HTMLInputElement;
+    const input = document.createElement('input') as unknown as HTMLInputElement;
     input.type = 'text';
     input.className = 'mi-input';
     input.placeholder = this.getAttribute('placeholder', 'Search your media...');
     input.style.width = '100%';
     inputWrapper.appendChild(input);
 
-    const dropdown = doc.createElement('div') as unknown as HTMLDivElement;
+    const dropdown = document.createElement('div') as unknown as HTMLDivElement;
     dropdown.className = 'tc-drop-down mi-media-picker-dropdown';
     dropdown.style.display = 'none';
     dropdown.style.position = 'absolute';
@@ -141,13 +141,13 @@ class MediaPickerWidget extends Widget {
       dropdown.style.display = 'block';
 
       if (matches.length === 0) {
-        const noMatch = doc.createElement('div');
+        const noMatch = document.createElement('div');
         noMatch.className = 'tc-dropdown-item mi-disabled-item';
         noMatch.innerText = 'No matches found';
         dropdown.appendChild(noMatch);
       } else {
         matches.forEach(title => {
-          const item = doc.createElement('div');
+          const item = document.createElement('div');
           item.className = 'tc-dropdown-item';
           item.style.cursor = 'pointer';
           const type = this.wiki.getTiddler(title)?.fields['media-type'];
@@ -172,7 +172,7 @@ class MediaPickerWidget extends Widget {
     if (index !== -1) {
       list.splice(index, 1);
       const tiddler = this.wiki.getTiddler(targetTiddler) || new $tw.Tiddler({ title: targetTiddler });
-      const listString = list.map((i: any) => `[[${i}]]`).join(' ');
+      const listString = list.map((index_: any) => `[[${index_}]]`).join(' ');
       this.wiki.addTiddler(new $tw.Tiddler(tiddler, { 'media-log': listString, modified: new Date(), 'log-date': this.getDate() }));
     }
     return false;
@@ -187,7 +187,7 @@ class MediaPickerWidget extends Widget {
     const tags = (tiddler.fields.tags || []).slice();
     if (!tags.includes('$:/tags/media-importer/Log')) tags.push('$:/tags/media-importer/Log');
 
-    const listString = list.map((i: any) => `[[${i}]]`).join(' ');
+    const listString = list.map((index: any) => `[[${index}]]`).join(' ');
     this.wiki.addTiddler(new $tw.Tiddler(tiddler, { 'media-log': listString, tags: tags, modified: new Date(), 'log-date': this.getDate() }));
   }
 

@@ -22,6 +22,8 @@ const h = (tag: string, attributes: Record<string, any> = {}, children: IParseTr
 const text = (string_: string): IParseTreeNode => ({ type: 'text', text: string_ });
 
 class MediaImporterUiWidget extends Widget {
+  private searchTimeout: any = null;
+
   constructor(parseTreeNode: any, options: any) {
     super(parseTreeNode, options);
     this.addEventListener('ui-trigger-search', this.handleTriggerSearch.bind(this));
@@ -116,13 +118,13 @@ class MediaImporterUiWidget extends Widget {
     const paginationNodes: IParseTreeNode[] = [];
 
     if (hasResults || searchPage > 1) {
-      const previousButton = (searchPage > 1
+      const previousButton: IParseTreeNode = searchPage > 1
         ? {
           type: 'button',
           attributes: { class: { type: 'string', value: 'mi-btn' }, message: { type: 'string', value: 'ui-paginate' }, param: { type: 'string', value: '-1' } },
           children: [text('← Prev')],
         }
-        : text('')) as IParseTreeNode;
+        : text('');
 
       const nextButton = {
         type: 'button',
@@ -189,27 +191,44 @@ class MediaImporterUiWidget extends Widget {
     }
 
     const newType = this.getAttribute('type', '');
-    
+
     const resultTag = this.getAttribute('resultTag', '');
+    const searchInputTiddler = `$:/temp/${newType}-search-input`;
+
+    // Debounced automatic search on input change
+    if (changedTiddlers[searchInputTiddler]) {
+      const input = this.wiki.getTiddlerText(searchInputTiddler, '');
+      if (this.searchTimeout) {
+        clearTimeout(this.searchTimeout);
+      }
+      this.searchTimeout = setTimeout(() => {
+        if (input.trim().length >= 3) {
+          this.wiki.setText(`$:/state/${newType}-search-page`, 'text', undefined, '1');
+          this.dispatchEvent({ type: `tm-search-${newType}`, param: input, page: '1' });
+        }
+      }, 500);
+    }
 
     // Check if the search state changed (e.g. from typing enter or search finishing)
     const searchStateTiddler = `$:/state/${newType}-search`;
     const searchPageTiddler = `$:/state/${newType}-search-page`;
-    
+
     if (changedTiddlers[searchStateTiddler] || changedTiddlers[searchPageTiddler]) {
       this.refreshSelf();
       return true;
     }
 
     // Check if any newly arrived result tiddlers match our tag
-    if (resultTag && Object.keys(changedTiddlers).some(t => {
-      const tiddler = this.wiki.getTiddler(t);
-      return tiddler && tiddler.fields.tags && tiddler.fields.tags.includes(resultTag);
-    })) {
+    if (
+      resultTag && Object.keys(changedTiddlers).some(t => {
+        const tiddler = this.wiki.getTiddler(t);
+        return tiddler && tiddler.fields.tags && tiddler.fields.tags.includes(resultTag);
+      })
+    ) {
       this.refreshSelf();
       return true;
     }
-    
+
     return this.refreshChildren(changedTiddlers);
   }
 }

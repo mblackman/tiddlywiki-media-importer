@@ -81,14 +81,14 @@ class MediaConsumptionSummaryWidget extends Widget {
     this.computeAttributes();
     this.execute();
 
-    const doc = this.document;
-    const container = doc.createElement('div');
+    const document = this.document;
+    const container = document.createElement('div');
     container.className = 'mi-media-consumption-summary';
     parent.insertBefore(container, nextSibling);
     this.domNodes.push(container);
 
     // --- Controls ---
-    const controls = doc.createElement('div');
+    const controls = document.createElement('div');
     controls.style.display = 'flex';
     controls.style.alignItems = 'center';
     controls.style.gap = '10px';
@@ -99,8 +99,8 @@ class MediaConsumptionSummaryWidget extends Widget {
 
     const isReadOnly = this.getAttribute('readonly', 'false') === 'true';
 
-    const createDateInput = (value: string, onChange: (val: string) => void) => {
-      const input = doc.createElement('input') as unknown as HTMLInputElement;
+    const createDateInput = (value: string, onChange: (value_: string) => void) => {
+      const input = document.createElement('input') as unknown as HTMLInputElement;
       input.type = 'date';
       input.className = 'mi-input';
       input.style.padding = '4px';
@@ -109,27 +109,29 @@ class MediaConsumptionSummaryWidget extends Widget {
       if (isReadOnly) {
         input.disabled = true;
       } else {
-        input.onchange = (e: any) => onChange(e.target.value);
+        input.onchange = (e: any) => {
+          onChange(e.target.value);
+        };
       }
       return input;
     };
 
-    controls.appendChild(doc.createTextNode('From: '));
-    controls.appendChild(createDateInput(this.startDate, (val) => {
-      this.startDate = val;
+    controls.appendChild(document.createTextNode('From: '));
+    controls.appendChild(createDateInput(this.startDate, (value) => {
+      this.startDate = value;
       this.refreshSelf();
     }));
 
-    controls.appendChild(doc.createTextNode(' To: '));
-    controls.appendChild(createDateInput(this.endDate, (val) => {
-      this.endDate = val;
+    controls.appendChild(document.createTextNode(' To: '));
+    controls.appendChild(createDateInput(this.endDate, (value) => {
+      this.endDate = value;
       this.refreshSelf();
     }));
 
     container.appendChild(controls);
 
     // --- Content ---
-    const content = doc.createElement('div');
+    const content = document.createElement('div');
     container.appendChild(content);
     this.renderChildren(content, null);
   }
