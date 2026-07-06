@@ -195,19 +195,6 @@ class MediaImporterUiWidget extends Widget {
     const resultTag = this.getAttribute('resultTag', '');
     const searchInputTiddler = `$:/temp/${newType}-search-input`;
 
-    // Debounced automatic search on input change
-    if (changedTiddlers[searchInputTiddler]) {
-      const input = this.wiki.getTiddlerText(searchInputTiddler, '');
-      if (this.searchTimeout) {
-        clearTimeout(this.searchTimeout);
-      }
-      this.searchTimeout = setTimeout(() => {
-        if (input.trim().length >= 3) {
-          this.wiki.setText(`$:/state/${newType}-search-page`, 'text', undefined, '1');
-          this.dispatchEvent({ type: `tm-search-${newType}`, param: input, page: '1' });
-        }
-      }, 500);
-    }
 
     // Check if the search state changed (e.g. from typing enter or search finishing)
     const searchStateTiddler = `$:/state/${newType}-search`;
