@@ -1,5 +1,5 @@
 import { MediaDraftFields, MediaFinalFields, MediaImporterConfig } from './types';
-import { makeList, formatCustomDate, fetchGraphQL } from './utils';
+import { makeList, formatCustomDate, fetchGraphQL, stripHtml } from './utils';
 
 export const AniListConfig: MediaImporterConfig = {
   type: 'Manga',
@@ -94,7 +94,7 @@ export const AniListConfig: MediaImporterConfig = {
           tags: '$:/tags/media-importer/Media',
           'media-type': 'Manga',
           modified: formatCustomDate(),
-          plot: manga.description || '',
+          plot: stripHtml(manga.description || ''),
         };
       },
     );

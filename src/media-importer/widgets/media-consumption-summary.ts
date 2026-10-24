@@ -38,38 +38,70 @@ class MediaConsumptionSummaryWidget extends Widget {
 
     const mediaLogFilter =
       `[tag[$:/tags/media-importer/Log]!has[draft.of]] :filter[get[log-date]compare:string:gteq[${filterStart}]] :filter[get[log-date]compare:string:lteq[${filterEnd}]]`;
+    const watchLogFilter =
+      `[tag[$:/tags/media-importer/WatchLog]!has[draft.of]] :filter[get[date]compare:string:gteq[${filterStart}]] :filter[get[date]compare:string:lteq[${filterEnd}]]`;
 
     const logTiddlers = this.wiki.filterTiddlers(mediaLogFilter);
-    const itemCounts = new Map<string, number>();
+    const watchLogTiddlers = this.wiki.filterTiddlers(watchLogFilter);
+
+    // Track unique dates logged per media item so Daily Logs and WatchLogs on the same day don't double-count
+    const itemDates = new Map<string, Set<string>>();
+    const activeDates = new Set<string>();
 
     for (const log of logTiddlers) {
+      const logTiddler = this.wiki.getTiddler(log);
+      const logDate = (logTiddler?.fields['log-date'] as string) || log.replace('$:/media-log/', '');
       const items = this.wiki.getTiddlerList(log, 'media-log');
       for (const item of items) {
-        itemCounts.set(item, (itemCounts.get(item) || 0) + 1);
+        if (!itemDates.has(item)) itemDates.set(item, new Set());
+        itemDates.get(item)!.add(logDate);
+        activeDates.add(logDate);
       }
+    }
+
+    for (const watchLog of watchLogTiddlers) {
+      const tid = this.wiki.getTiddler(watchLog);
+      if (!tid) continue;
+      const item = tid.fields['media-title'] as string;
+      const date = (tid.fields['date'] as string) || '';
+      if (!item || !date) continue;
+      if (!itemDates.has(item)) itemDates.set(item, new Set());
+      itemDates.get(item)!.add(date);
+      activeDates.add(date);
     }
 
     const mediaTypes = this.wiki.filterTiddlers('[tag[$:/tags/media-importer/Media]get[media-type]unique[]sort[]]');
     const nodes: IParseTreeNode[] = [];
 
-    const allMediaItems = Array.from(itemCounts.keys()).sort();
+    const allMediaItems = Array.from(itemDates.keys()).sort();
 
-    for (const type of mediaTypes) {
-      const itemsOfType = allMediaItems.filter(item => this.wiki.getTiddler(item)?.fields['media-type'] === type);
+    if (allMediaItems.length === 0) {
+      nodes.push(h('div', { class: 'mi-empty-state' }, [
+        text('No media activity logged for this period.'),
+      ]));
+    } else {
+      nodes.push(h('div', { class: 'mi-sublabel', style: 'display: flex; justify-content: space-between; margin-bottom: 8px;' }, [
+        h('span', {}, [text('Unique Media: '), h('b', {}, [text(allMediaItems.length.toString())])]),
+        h('span', {}, [text('Active Days: '), h('b', {}, [text(activeDates.size.toString())])]),
+      ]));
 
-      if (itemsOfType.length > 0) {
-        nodes.push(h('h5', { style: 'margin-bottom: 5px; margin-top: 15px;' }, [text(type)]));
+      for (const type of mediaTypes) {
+        const itemsOfType = allMediaItems.filter(item => this.wiki.getTiddler(item)?.fields['media-type'] === type);
 
-        const summaryItems: IParseTreeNode[] = [];
-        for (const item of itemsOfType) {
-          const count = itemCounts.get(item) || 0;
+        if (itemsOfType.length > 0) {
+          nodes.push(h('h5', { style: 'margin-bottom: 5px; margin-top: 15px;' }, [text(type)]));
 
-          summaryItems.push(h('div', { class: 'mi-summary-item' }, [
-            h('div', { class: 'mi-summary-link' }, [{ type: 'link', attributes: { to: { type: 'string', value: item } }, children: [text(item)] }]),
-            h('span', { class: 'mi-summary-badge' }, [text(`${count}d`)]),
-          ]));
+          const summaryItems: IParseTreeNode[] = [];
+          for (const item of itemsOfType) {
+            const count = itemDates.get(item)?.size || 0;
+
+            summaryItems.push(h('div', { class: 'mi-summary-item' }, [
+              h('div', { class: 'mi-summary-link' }, [{ type: 'link', attributes: { to: { type: 'string', value: item } }, children: [text(item)] }]),
+              h('span', { class: 'mi-summary-badge' }, [text(`${count}d`)]),
+            ]));
+          }
+          nodes.push(h('div', { class: 'mi-summary-group' }, summaryItems));
         }
-        nodes.push(h('div', { class: 'mi-summary-group' }, summaryItems));
       }
     }
 
@@ -143,9 +175,18 @@ class MediaConsumptionSummaryWidget extends Widget {
       return true;
     }
 
-    // Refresh if any media log changes or if media types change
-    // This is a broad check, could be optimized
-    if (Object.keys(changedTiddlers).some(t => this.wiki.getTiddler(t)?.hasTag('$:/tags/media-importer/Media') || this.wiki.getTiddler(t)?.hasTag('$:/tags/media-importer/Log'))) {
+    // Refresh if any media log, watch log, or media item changes
+    if (
+      Object.keys(changedTiddlers).some(t => {
+        if (changedTiddlers[t]?.deleted) return true;
+        const tid = this.wiki.getTiddler(t);
+        return (
+          tid?.hasTag('$:/tags/media-importer/Media') ||
+          tid?.hasTag('$:/tags/media-importer/Log') ||
+          tid?.hasTag('$:/tags/media-importer/WatchLog')
+        );
+      })
+    ) {
       this.refreshSelf();
       return true;
     }

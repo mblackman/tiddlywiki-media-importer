@@ -4,7 +4,9 @@ type: application/json
 {
     "Book": {
         "caption": "Add Book",
-        "placeholder": "Enter Book Title",
+        "label": "Books",
+        "icon": "📚",
+        "placeholder": "Search books by title or author...",
         "loadingText": "Searching OpenLibrary...",
         "resultTag": "SearchResult",
         "imageField": "draft_cover",
@@ -12,7 +14,9 @@ type: application/json
     },
     "Comic": {
         "caption": "Add Comic",
-        "placeholder": "Enter Comic Name",
+        "label": "Comics",
+        "icon": "💬",
+        "placeholder": "Search comic volumes...",
         "loadingText": "Searching ComicVine...",
         "resultTag": "ComicSearchResult",
         "imageField": "draft_image",
@@ -20,7 +24,9 @@ type: application/json
     },
     "Game": {
         "caption": "Add Game",
-        "placeholder": "Enter Game Title",
+        "label": "Games",
+        "icon": "🎮",
+        "placeholder": "Search video games...",
         "loadingText": "Searching RAWG...",
         "resultTag": "GameSearchResult",
         "imageField": "draft_image",
@@ -28,7 +34,9 @@ type: application/json
     },
     "Manga": {
         "caption": "Add Manga",
-        "placeholder": "Enter Manga Title",
+        "label": "Manga",
+        "icon": "📖",
+        "placeholder": "Search manga series...",
         "loadingText": "Searching AniList...",
         "resultTag": "MangaSearchResult",
         "imageField": "draft_image",
@@ -36,7 +44,9 @@ type: application/json
     },
     "Movie": {
         "caption": "Add Movie",
-        "placeholder": "Enter Movie Title",
+        "label": "Movies",
+        "icon": "🎬",
+        "placeholder": "Search movies...",
         "loadingText": "Searching TMDB...",
         "resultTag": "MovieSearchResult",
         "imageField": "draft_poster",
@@ -44,7 +54,9 @@ type: application/json
     },
     "TV Show": {
         "caption": "Add TV Show",
-        "placeholder": "Enter TV Show Title",
+        "label": "TV Shows",
+        "icon": "📺",
+        "placeholder": "Search TV series...",
         "loadingText": "Searching TMDB...",
         "resultTag": "TVShowSearchResult",
         "imageField": "draft_poster",

@@ -24,7 +24,7 @@ After installing, please go to the ''$:/plugins/mblackman/media-importer'' > ''c
 
 Create a new tiddler for media imports and paste the text: `{{$:/plugins/mblackman/media-importer/ui}}`.
 
-To create the library browser, create a tiddler with this text: `{{$:/plugins/mblackman/media-importer/library}}`.
+To create the library browser, create a tiddler with this text: `{{$:/plugins/mblackman/media-importer/ui/media-library}}` (or use `<$MediaLibrary />`).
 
 !! Widgets
 

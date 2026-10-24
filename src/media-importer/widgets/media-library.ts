@@ -50,7 +50,7 @@ class MediaLibraryGridWidget extends Widget {
     const favoriteTiddler = '$:/state/mblackman/media-importer/library/favorite';
     const genreTiddler = '$:/state/mblackman/media-importer/library/genre';
 
-    const currentType = this.wiki.getTiddlerText(typeTiddler, 'Book');
+    const currentType = this.wiki.getTiddlerText(typeTiddler, 'All');
     const currentRating = this.wiki.getTiddlerText(ratingTiddler, 'All');
     const currentSort = this.wiki.getTiddlerText(sortTiddler, 'title-asc');
     const currentYear = this.wiki.getTiddlerText(yearTiddler, 'All');
@@ -62,8 +62,9 @@ class MediaLibraryGridWidget extends Widget {
     // 1. Fetch Data
     const allMedia = this.wiki.filterTiddlers('[tag[$:/tags/media-importer/Media]]');
     const allLogs = this.wiki.filterTiddlers('[tag[$:/tags/media-importer/WatchLog]]');
+    const allDailyLogs = this.wiki.filterTiddlers('[tag[$:/tags/media-importer/Log]!has[draft.of]]');
 
-    // 2. Map Logs
+    // 2. Map Logs (both WatchLog reviews and Daily Activity Logs)
     const logsByMedia = new Map<string, LogEntry[]>();
     for (const logTitle of allLogs) {
       const log = this.wiki.getTiddler(logTitle);
@@ -77,6 +78,21 @@ class MediaLibraryGridWidget extends Widget {
         date: (log.fields.date as string) || '',
         timestamp: (log.fields.timestamp as string) || '',
       });
+    }
+
+    for (const dailyLogTitle of allDailyLogs) {
+      const dailyLog = this.wiki.getTiddler(dailyLogTitle);
+      if (!dailyLog) continue;
+      const logDate = (dailyLog.fields['log-date'] as string) || dailyLogTitle.replace('$:/media-log/', '');
+      const itemsInDay = this.wiki.getTiddlerList(dailyLogTitle, 'media-log');
+      for (const mediaTitle of itemsInDay) {
+        if (!logsByMedia.has(mediaTitle)) logsByMedia.set(mediaTitle, []);
+        logsByMedia.get(mediaTitle)!.push({
+          rating: 0,
+          date: logDate,
+          timestamp: logDate,
+        });
+      }
     }
 
     // 3. Build Models
@@ -173,8 +189,9 @@ class MediaLibraryGridWidget extends Widget {
       }
     });
 
-    const inProgressItems = items.filter(item => item.status === 'Active');
-    const gridItemsData = items.filter(item => item.status !== 'Active');
+    const showActiveSplit = currentStatus === 'All';
+    const inProgressItems = showActiveSplit ? items.filter(item => item.status === 'Active') : [];
+    const gridItemsData = showActiveSplit ? items.filter(item => item.status !== 'Active') : items;
 
     const totalRated = items.filter(i => i.averageRating > 0);
     const overallRating = totalRated.length > 0 
@@ -187,21 +204,32 @@ class MediaLibraryGridWidget extends Widget {
     ]);
 
     const makeGrid = (itemsList: MediaItem[]) => {
+      if (itemsList.length === 0) {
+        return h('div', { class: 'mi-empty-state' }, [
+          text('No media items match the current filters.'),
+        ]);
+      }
       const gridItemsNodes: IParseTreeNode[] = [];
       for (const item of itemsList) {
         const cardContent = h('div', { class: 'mi-card mi-library-card' }, [
           h('div', { class: 'mi-library-card-image-container', style: 'position: relative;' }, [
             item.favorite
-              ? h('div', { style: 'position: absolute; top: 5px; left: 5px; color: #f59e0b; font-size: 1.2em; text-shadow: 0 1px 2px rgba(0,0,0,0.6); z-index: 10;' }, [text('★')])
+              ? h('div', { class: 'mi-library-card-fav' }, [text('★')])
+              : text(''),
+            currentType === 'All'
+              ? h('span', { class: 'mi-library-card-type-badge' }, [text(item.type)])
               : text(''),
             item.image
               ? { type: 'image', attributes: { source: { type: 'string', value: item.image }, class: { type: 'string', value: 'mi-library-card-image' } } }
-              : text(''),
+              : h('div', { class: 'mi-library-card-placeholder' }, [text(item.type)]),
           ]),
           h('div', { class: 'mi-library-card-content' }, [
             h('div', { class: 'mi-library-card-title' }, [text(item.title)]),
-            h('div', { class: 'mi-sublabel mi-library-card-rating' }, [
-              item.averageRating > 0 ? text(`${item.averageRating.toFixed(1).replace(/\.0$/, '')} ★`) : text(''),
+            h('div', { class: 'mi-sublabel mi-library-card-rating', style: 'display: flex; justify-content: space-between; align-items: center;' }, [
+              h('span', {}, [text(item.status)]),
+              h('span', { style: 'color: #f59e0b;' }, [
+                item.averageRating > 0 ? text(`${item.averageRating.toFixed(1).replace(/\.0$/, '')} ★`) : text(''),
+              ]),
             ]),
           ]),
         ]);
@@ -244,10 +272,11 @@ class MediaLibraryGridWidget extends Widget {
 
     const stateChanged = [typeTiddler, ratingTiddler, sortTiddler, yearTiddler, statusTiddler, searchTiddler, favoriteTiddler, genreTiddler].some(t => changedTiddlers[t]);
     const mediaChanged = Object.keys(changedTiddlers).some(t => {
+      if (changedTiddlers[t]?.deleted) return true;
       const tid = this.wiki.getTiddler(t);
       return tid?.hasTag('$:/tags/media-importer/Media');
     });
-    const logsChanged = Object.keys(changedTiddlers).some(t => t.startsWith('$:/data/media-log/'));
+    const logsChanged = Object.keys(changedTiddlers).some(t => t.startsWith('$:/data/media-log/') || t.startsWith('$:/media-log/'));
 
     if (stateChanged || mediaChanged || logsChanged) {
       this.refreshSelf();
@@ -261,11 +290,24 @@ class MediaLibraryWidget extends Widget {
   constructor(parseTreeNode: any, options: any) {
     super(parseTreeNode, options);
     this.addEventListener('mi-refresh-library', this.handleRefresh.bind(this));
+    this.addEventListener('mi-reset-filters', this.handleResetFilters.bind(this));
     this.addEventListener('mi-surprise-me', this.handleSurpriseMe.bind(this));
   }
 
   handleRefresh() {
     this.refreshSelf();
+    return false;
+  }
+
+  handleResetFilters() {
+    this.wiki.setText('$:/state/mblackman/media-importer/library/type', 'text', undefined, 'All');
+    this.wiki.setText('$:/state/mblackman/media-importer/library/status', 'text', undefined, 'All');
+    this.wiki.setText('$:/state/mblackman/media-importer/library/genre', 'text', undefined, 'All');
+    this.wiki.setText('$:/state/mblackman/media-importer/library/rating', 'text', undefined, 'All');
+    this.wiki.setText('$:/state/mblackman/media-importer/library/year', 'text', undefined, 'All');
+    this.wiki.setText('$:/state/mblackman/media-importer/library/favorite', 'text', undefined, 'false');
+    this.wiki.setText('$:/state/mblackman/media-importer/library/sort', 'text', undefined, 'title-asc');
+    this.wiki.setText('$:/temp/mblackman/media-importer/search/library', 'text', undefined, '');
     return false;
   }
 
@@ -312,15 +354,18 @@ class MediaLibraryWidget extends Widget {
     const favoriteTiddler = '$:/state/mblackman/media-importer/library/favorite';
     const genreTiddler = '$:/state/mblackman/media-importer/library/genre';
 
-    const currentType = this.wiki.getTiddlerText(typeTiddler, 'Book');
+    const currentType = this.wiki.getTiddlerText(typeTiddler, 'All');
+    const currentSort = this.wiki.getTiddlerText(sortTiddler, 'title-asc');
 
     // --- Filters ---
 
     // 1. Type Options
     const typeOptions = this.wiki.filterTiddlers('[[$:/plugins/mblackman/media-importer/data/importers]indexes[]]');
 
-    // 2. Year Options
-    const yearOptions = this.wiki.filterTiddlers(`[tag[$:/tags/media-importer/WatchLog]has[date]get[date]search-replace:g:regexp[-.*$],[]unique[]!sort[]]`);
+    // 2. Year Options (from both WatchLog and Daily Log)
+    const yearOptions = this.wiki.filterTiddlers(
+      `[tag[$:/tags/media-importer/WatchLog]has[date]get[date]] [tag[$:/tags/media-importer/Log]!has[draft.of]get[log-date]] +[search-replace:g:regexp[-.*$],[]unique[]!sort[]]`,
+    );
 
     // 3. Status Options
     const statusOptions = this.wiki.filterTiddlers('[enlist{$:/plugins/mblackman/media-importer/data/statuses}]');
@@ -361,7 +406,7 @@ class MediaLibraryWidget extends Widget {
       h('span', { class: 'mi-label' }, [text('Type')]),
       {
         type: 'select',
-        attributes: { tiddler: { type: 'string', value: typeTiddler }, default: { type: 'string', value: 'Book' }, class: { type: 'string', value: 'mi-input' } },
+        attributes: { tiddler: { type: 'string', value: typeTiddler }, default: { type: 'string', value: 'All' }, class: { type: 'string', value: 'mi-input' } },
         children: typeSelectChildren,
       },
     ]);
@@ -475,15 +520,15 @@ class MediaLibraryWidget extends Widget {
       },
     ]);
 
-    // Refresh Button
-    const refreshButton = {
+    // Reset Filters Button
+    const resetButton = {
       type: 'button',
       attributes: {
         class: { type: 'string', value: 'mi-btn mi-refresh-btn' },
-        message: { type: 'string', value: 'mi-refresh-library' },
-        tooltip: { type: 'string', value: 'Refresh Library' },
+        message: { type: 'string', value: 'mi-reset-filters' },
+        tooltip: { type: 'string', value: 'Reset all filters and search' },
       },
-      children: [text('↻')],
+      children: [text('Reset')],
     } as IParseTreeNode;
 
     // Surprise Me Button
@@ -502,7 +547,7 @@ class MediaLibraryWidget extends Widget {
     const quickSortAddedButton = {
       type: 'button',
       attributes: {
-        class: { type: 'string', value: 'mi-btn' },
+        class: { type: 'string', value: currentSort === 'added-desc' ? 'mi-btn mi-btn-primary' : 'mi-btn' },
         style: { type: 'string', value: 'margin-left: 8px;' },
       },
       children: [
@@ -515,11 +560,11 @@ class MediaLibraryWidget extends Widget {
     const quickSortFinishedButton = {
       type: 'button',
       attributes: {
-        class: { type: 'string', value: 'mi-btn' },
+        class: { type: 'string', value: currentSort === 'date-desc' ? 'mi-btn mi-btn-primary' : 'mi-btn' },
         style: { type: 'string', value: 'margin-left: 8px;' },
       },
       children: [
-        text('Recently Finished'),
+        text('Recently Active'),
         { type: 'action-setfield', attributes: { $tiddler: { type: 'string', value: sortTiddler }, text: { type: 'string', value: 'date-desc' } } }
       ],
     } as IParseTreeNode;
@@ -534,11 +579,11 @@ class MediaLibraryWidget extends Widget {
         yearSelect,
         favoriteToggle,
         sortSelect,
-        refreshButton,
+        resetButton,
         surpriseMeButton,
       ]),
-      h('div', { style: 'margin-top: 10px; display: flex; align-items: center;' }, [
-        text('Quick Sort: '),
+      h('div', { style: 'margin-top: 10px; display: flex; align-items: center; flex-wrap: wrap; gap: 4px;' }, [
+        h('span', { class: 'mi-sublabel', style: 'margin-bottom: 0; margin-right: 4px;' }, [text('Quick Sort:')]),
         quickSortAddedButton,
         quickSortFinishedButton,
       ]),
@@ -565,20 +610,23 @@ class MediaLibraryWidget extends Widget {
   refresh(changedTiddlers: IChangedTiddlers) {
     const importersTiddler = '$:/plugins/mblackman/media-importer/data/importers';
     const typeTiddler = '$:/state/mblackman/media-importer/library/type';
+    const sortTiddler = '$:/state/mblackman/media-importer/library/sort';
 
     const importersChanged = changedTiddlers[importersTiddler];
     const typeChanged = changedTiddlers[typeTiddler];
+    const sortChanged = changedTiddlers[sortTiddler];
 
-    // Check if any media items changed (for list updates)
+    // Check if any media items changed or were deleted (for list updates)
     const mediaChanged = Object.keys(changedTiddlers).some(t => {
+      if (changedTiddlers[t]?.deleted) return true;
       const tid = this.wiki.getTiddler(t);
       return tid?.hasTag('$:/tags/media-importer/Media');
     });
 
     // Check if any log items changed (for list updates)
-    const logsChanged = Object.keys(changedTiddlers).some(t => t.startsWith('$:/data/media-log/'));
+    const logsChanged = Object.keys(changedTiddlers).some(t => t.startsWith('$:/data/media-log/') || t.startsWith('$:/media-log/'));
 
-    if (importersChanged || mediaChanged || logsChanged || typeChanged) {
+    if (importersChanged || mediaChanged || logsChanged || typeChanged || sortChanged) {
       this.refreshSelf();
       return true;
     }

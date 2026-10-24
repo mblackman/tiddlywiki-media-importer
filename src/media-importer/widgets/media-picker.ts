@@ -49,15 +49,11 @@ class MediaPickerWidget extends Widget {
     const chips: IParseTreeNode[] = [];
     for (const item of currentLog) {
       chips.push(
-        h('span', {
-          style:
-            'display: inline-block; background: <<colour tiddler-info-background>>; border: 1px solid <<colour tiddler-info-border>>; border-radius: 12px; padding: 2px 10px; margin: 2px 4px 2px 0; font-size: 0.9em;',
-        }, [
+        h('span', { class: 'mi-picker-chip' }, [
           {
             type: 'button',
             attributes: {
-              class: { type: 'string', value: 'tc-btn-invisible' },
-              style: { type: 'string', value: 'margin-right: 4px; color: <<colour muted-foreground>>;' },
+              class: { type: 'string', value: 'tc-btn-invisible mi-picker-chip-remove' },
               tooltip: { type: 'string', value: 'Remove' },
               message: { type: 'string', value: 'mi-remove-item' },
               param: { type: 'string', value: item },
@@ -66,7 +62,7 @@ class MediaPickerWidget extends Widget {
           },
           {
             type: 'link',
-            attributes: { to: { type: 'string', value: item }, style: { type: 'string', value: 'text-decoration: none; color: <<colour foreground>>;' } },
+            attributes: { to: { type: 'string', value: item }, class: { type: 'string', value: 'mi-picker-chip-link' } },
             children: [text(item)],
           },
         ]),
@@ -89,7 +85,7 @@ class MediaPickerWidget extends Widget {
 
     // Render Chips
     const chipsContainer = document.createElement('div');
-    chipsContainer.style.marginBottom = '4px';
+    chipsContainer.className = 'mi-picker-chips-container';
     wrapper.appendChild(chipsContainer);
     this.renderChildren(chipsContainer, null);
 
@@ -102,7 +98,7 @@ class MediaPickerWidget extends Widget {
     const input = document.createElement('input') as unknown as HTMLInputElement;
     input.type = 'text';
     input.className = 'mi-input';
-    input.placeholder = this.getAttribute('placeholder', 'Search your media...');
+    input.placeholder = this.getAttribute('placeholder', 'Search your media (or click to pick active)...');
     input.style.width = '100%';
     inputWrapper.appendChild(input);
 
@@ -114,12 +110,96 @@ class MediaPickerWidget extends Widget {
     dropdown.style.width = '100%';
     inputWrapper.appendChild(dropdown);
 
+    let activeIndex = -1;
+    let currentMatches: string[] = [];
+
+    const updateSelectionHighlight = () => {
+      const optionEls = dropdown.querySelectorAll('.mi-picker-option');
+      optionEls.forEach((el, idx) => {
+        if (idx === activeIndex) {
+          el.classList.add('mi-dropdown-item-active');
+          (el as HTMLElement).scrollIntoView({ block: 'nearest' });
+        } else {
+          el.classList.remove('mi-dropdown-item-active');
+        }
+      });
+    };
+
+    const populateDropdown = () => {
+      const query = input.value.trim().toLowerCase();
+      const targetTiddler = `$:/media-log/${this.getDate()}`;
+      const alreadyPicked = new Set(this.wiki.getTiddlerList(targetTiddler, 'media-log'));
+
+      const allMedia = this.wiki.filterTiddlers('[tag[$:/tags/media-importer/Media]!is[system]sort[title]]');
+      let matches: string[] = [];
+      let showingActiveSuggestions = false;
+
+      if (!query) {
+        matches = allMedia.filter(title => {
+          if (alreadyPicked.has(title)) return false;
+          const tid = this.wiki.getTiddler(title);
+          return tid?.fields['status'] === 'Active';
+        });
+        showingActiveSuggestions = matches.length > 0;
+        if (matches.length === 0) {
+          dropdown.style.display = 'none';
+          currentMatches = [];
+          activeIndex = -1;
+          return;
+        }
+      } else {
+        matches = allMedia
+          .filter(title => {
+            if (alreadyPicked.has(title)) return false;
+            const tid = this.wiki.getTiddler(title);
+            const englishTitle = ((tid?.fields['englishTitle'] as string) || '').toLowerCase();
+            return title.toLowerCase().includes(query) || englishTitle.includes(query);
+          })
+          .slice(0, 15);
+      }
+
+      currentMatches = matches;
+      activeIndex = matches.length > 0 ? 0 : -1;
+      dropdown.innerHTML = '';
+      dropdown.style.display = 'block';
+
+      if (showingActiveSuggestions) {
+        const header = document.createElement('div');
+        header.className = 'mi-picker-dropdown-header';
+        header.innerText = 'Currently Active';
+        dropdown.appendChild(header);
+      }
+
+      if (matches.length === 0) {
+        const noMatch = document.createElement('div');
+        noMatch.className = 'tc-dropdown-item mi-disabled-item';
+        noMatch.innerText = 'No matches found';
+        dropdown.appendChild(noMatch);
+      } else {
+        matches.forEach((title, idx) => {
+          const item = document.createElement('div');
+          item.className = 'tc-dropdown-item mi-picker-option' + (idx === activeIndex ? ' mi-dropdown-item-active' : '');
+          item.style.cursor = 'pointer';
+          const tid = this.wiki.getTiddler(title);
+          const type = tid?.fields['media-type'];
+          item.innerText = title + (type ? ` (${type})` : '');
+          item.addEventListener('mousedown', (e: MouseEvent) => {
+            e.preventDefault();
+            this.addItem(title);
+            input.value = '';
+            dropdown.style.display = 'none';
+          });
+          dropdown.appendChild(item);
+        });
+      }
+    };
+
     // Event Handlers
     let closeDropdownTimer: ReturnType<typeof setTimeout> | null = null;
     const closeDropdown = () => {
       closeDropdownTimer = setTimeout(() => {
         dropdown.style.display = 'none';
-      }, 200);
+      }, 150);
     };
 
     input.addEventListener('blur', closeDropdown);
@@ -128,37 +208,38 @@ class MediaPickerWidget extends Widget {
         clearTimeout(closeDropdownTimer);
         closeDropdownTimer = null;
       }
+      populateDropdown();
     });
-    input.addEventListener('input', () => {
-      const query = input.value;
-      if (!query) {
-        dropdown.style.display = 'none';
+    input.addEventListener('input', populateDropdown);
+    input.addEventListener('keydown', (e: KeyboardEvent) => {
+      if (dropdown.style.display === 'none') {
+        if (e.key === 'ArrowDown') {
+          populateDropdown();
+          e.preventDefault();
+        }
         return;
       }
-
-      const matches = this.wiki.filterTiddlers(`[tag[$:/tags/media-importer/Media]!is[system]search:title[${query}]sort[title]limit[15]]`);
-      dropdown.innerHTML = '';
-      dropdown.style.display = 'block';
-
-      if (matches.length === 0) {
-        const noMatch = document.createElement('div');
-        noMatch.className = 'tc-dropdown-item mi-disabled-item';
-        noMatch.innerText = 'No matches found';
-        dropdown.appendChild(noMatch);
-      } else {
-        matches.forEach(title => {
-          const item = document.createElement('div');
-          item.className = 'tc-dropdown-item';
-          item.style.cursor = 'pointer';
-          const type = this.wiki.getTiddler(title)?.fields['media-type'];
-          item.innerText = title + (type ? ` (${type})` : '');
-          item.addEventListener('click', () => {
-            this.addItem(title);
-            input.value = '';
-            dropdown.style.display = 'none';
-          });
-          dropdown.appendChild(item);
-        });
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        if (currentMatches.length > 0) {
+          activeIndex = (activeIndex + 1) % currentMatches.length;
+          updateSelectionHighlight();
+        }
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        if (currentMatches.length > 0) {
+          activeIndex = (activeIndex - 1 + currentMatches.length) % currentMatches.length;
+          updateSelectionHighlight();
+        }
+      } else if (e.key === 'Enter') {
+        if (activeIndex >= 0 && activeIndex < currentMatches.length) {
+          e.preventDefault();
+          this.addItem(currentMatches[activeIndex]);
+          input.value = '';
+          dropdown.style.display = 'none';
+        }
+      } else if (e.key === 'Escape') {
+        dropdown.style.display = 'none';
       }
     });
   }
@@ -189,6 +270,12 @@ class MediaPickerWidget extends Widget {
 
     const listString = list.map((index: any) => `[[${index}]]`).join(' ');
     this.wiki.addTiddler(new $tw.Tiddler(tiddler, { 'media-log': listString, tags: tags, modified: new Date(), 'log-date': this.getDate() }));
+
+    // Automatically transition item status from Backlog to Active when logged in Daily Picker
+    const mediaTiddler = this.wiki.getTiddler(item);
+    if (mediaTiddler && (!mediaTiddler.fields.status || mediaTiddler.fields.status === 'Backlog')) {
+      this.wiki.addTiddler(new $tw.Tiddler(mediaTiddler, { status: 'Active', modified: new Date() }));
+    }
   }
 
   refresh(changedTiddlers: IChangedTiddlers) {

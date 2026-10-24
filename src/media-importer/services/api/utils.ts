@@ -14,21 +14,25 @@ export function makeList(array: any[] | undefined): string {
     .join(' ');
 }
 
-// Helper: Format Date like "2025-08-02 - 11:28 pm"
-export function formatCustomDate(): string {
-  const d = new Date();
-  const datePart = d.getFullYear() +
-    '-' +
-    String(d.getMonth() + 1).padStart(2, '0') +
-    '-' +
-    String(d.getDate()).padStart(2, '0');
+// Helper: Format Date for TiddlyWiki modified field (returns Date object for standard TW serialization)
+export function formatCustomDate(): Date {
+  return new Date();
+}
 
-  let hours = d.getHours();
-  const ampm = hours >= 12 ? 'pm' : 'am';
-  hours = hours % 12;
-  hours = hours ? hours : 12;
-  const timePart = hours + ':' + String(d.getMinutes()).padStart(2, '0') + ' ' + ampm;
-  return datePart + ' - ' + timePart;
+// Helper: Clean HTML tags and markdown footnotes from API descriptions
+export function stripHtml(raw: string | undefined): string {
+  if (!raw) return '';
+  return raw
+    .replace(/<br\s*\/?>/gi, '\n')
+    .replace(/<\/p>\s*<p[^>]*>/gi, '\n\n')
+    .replace(/<[^>]+>/g, '')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;|&apos;/g, "'")
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&nbsp;/g, ' ')
+    .trim();
 }
 
 // --- HELPER: JSONP (For ComicVine) ---

@@ -19,9 +19,9 @@ export interface MediaFinalFields {
   url: string;
   id: string;
   status: string;
-  tags: string;
+  tags: string | string[];
   'media-type': string;
-  modified: string;
+  modified: Date | string;
   image?: string;
   plot?: string;
   onlineRating?: string;

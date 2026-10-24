@@ -1,5 +1,5 @@
 import { MediaDraftFields, MediaFinalFields, MediaImporterConfig } from './types';
-import { formatCustomDate, fetchJSONP } from './utils';
+import { formatCustomDate, fetchJSONP, makeList, stripHtml } from './utils';
 
 export const ComicVineConfig: MediaImporterConfig = {
   type: 'Comic',
@@ -27,25 +27,33 @@ export const ComicVineConfig: MediaImporterConfig = {
     });
   },
   fetchFn: function(draftFields: MediaDraftFields, apiKey: string): Promise<MediaFinalFields> {
-    const url = draftFields.draft_id + '?api_key=' + apiKey + '&format=jsonp';
+    const rawId = draftFields.draft_id || '';
+    const detailUrl = rawId.startsWith('http')
+      ? rawId
+      : 'https://comicvine.gamespot.com/api/volume/' + (rawId.startsWith('4050-') ? rawId : '4050-' + rawId) + '/';
+    const url = detailUrl + '?api_key=' + apiKey + '&format=jsonp';
     return fetchJSONP(url).then(data => {
       if (data.error && data.error !== 'OK') throw new Error(data.error);
       const comic = data.results;
-      const finalTitle = comic.name + ' (' + draftFields.draft_year + ')';
+      const year = comic.start_year || draftFields.draft_year || '0000';
+      const finalTitle = comic.name + ' (' + year + ')';
+      const publisherName = comic.publisher && comic.publisher.name
+        ? makeList([comic.publisher.name])
+        : (draftFields.draft_publisher ? makeList([draftFields.draft_publisher]) : '');
 
       return {
         title: finalTitle,
         englishTitle: comic.name,
-        year: draftFields.draft_year || '0000',
+        year: year,
         dataSource: 'ComicVine',
         url: comic.site_detail_url,
         id: String(comic.id),
-        publisher: draftFields.draft_publisher,
+        publisher: publisherName,
         count_of_issues: comic.count_of_issues
           ? String(comic.count_of_issues)
           : 'unknown',
         image: comic.image ? comic.image.super_url : '',
-        plot: comic.deck || comic.description || '',
+        plot: stripHtml(comic.deck || comic.description || ''),
         status: 'Backlog',
         tags: '$:/tags/media-importer/Media',
         'media-type': 'Comic',

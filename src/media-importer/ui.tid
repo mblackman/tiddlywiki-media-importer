@@ -10,57 +10,78 @@ caption: Media Importer
   
   <div style="margin-top: 10px;">
     
-    <$let defaultTab={{{ [[$:/plugins/mblackman/media-importer/data/importers]indexes[]first[]] }}}>
-    <!-- Dynamic Tabs from Configuration -->
-    <div class="tc-tab-buttons">
-      <$list filter="[[$:/plugins/mblackman/media-importer/data/importers]indexes[]]" variable="importerType">
-        <$button class={{{ [[$:/state/media-importer-selected]get[text]else<defaultTab>match<importerType>then[tc-tab-selected]else[]] }}}>
-          <$action-setfield $tiddler="$:/state/media-importer-selected" text=<<importerType>> />
-          <!-- Pre-initialize the search tiddler if it doesn't exist to prevent TiddlyWiki edit-text focus bug on first keystroke -->
-          <$list filter="[[$:/temp/]addsuffix<importerType>addsuffix[-search-input]!has[title]]">
-            <$action-setfield $tiddler={{{ [[$:/temp/]addsuffix<importerType>addsuffix[-search-input]] }}} text="" />
-          </$list>
-          <!-- FIX: Explicitly get text before parsing JSON -->
-          <$text text={{{ [[$:/plugins/mblackman/media-importer/data/importers]get[text]jsonget<importerType>,[caption]] }}} />
-        </$button>
-      </$list>
-    </div>
+    <$let
+      defaultTab={{{ [[$:/plugins/mblackman/media-importer/data/importers]indexes[]first[]] }}}
+      activeType={{{ [[$:/state/media-importer-selected]get[text]else<defaultTab>] }}}
+      importersJson={{{ [[$:/plugins/mblackman/media-importer/data/importers]get[text]] }}}
+    >
+      <!-- Segmented Media Type Pill Selector -->
+      <div class="mi-segmented-bar" role="tablist" aria-label="Media type selector">
+        <$list filter="[[$:/plugins/mblackman/media-importer/data/importers]indexes[]]" variable="importerType">
+          <$button
+            class={{{ [<activeType>match<importerType>then[tc-btn-invisible mi-segmented-pill mi-segmented-pill-active]else[tc-btn-invisible mi-segmented-pill]] }}}
+          >
+            <$action-setfield $tiddler="$:/state/media-importer-selected" text=<<importerType>> />
+            <$list filter="[[$:/temp/media-importer/search-input]!has[title]]">
+              <$action-setfield $tiddler="$:/temp/media-importer/search-input" text="" />
+            </$list>
+            <!-- If a search query is already typed, automatically search the newly selected media type -->
+            <$let currentQuery={{{ [[$:/temp/media-importer/search-input]get[text]trim[]] }}}>
+              <$list filter="[<currentQuery>!is[blank]]" variable="ignore">
+                <$action-setfield $tiddler={{{ [[$:/state/]addsuffix<importerType>addsuffix[-search-page]] }}} text="1" />
+                <$action-sendmessage $message={{{ [[tm-search-]addsuffix<importerType>] }}} $param=<<currentQuery>> page="1" />
+              </$list>
+            </$let>
+            <span class="mi-segmented-pill-icon">
+              <$text text={{{ [<importersJson>jsonget<importerType>,[icon]] }}} />
+            </span>
+            <span class="mi-segmented-pill-label">
+              <$text text={{{ [<importersJson>jsonget<importerType>,[label]else<importerType>] }}} />
+            </span>
+          </$button>
+        </$list>
+      </div>
 
-    <!-- Dynamic Content -->
-    <div class="tc-tab-content">
-      <$list filter="[[$:/plugins/mblackman/media-importer/data/importers]indexes[]]" variable="type">
-          <div style={{{ [[$:/state/media-importer-selected]get[text]else<defaultTab>match<type>then[display: block;]else[display: none;]] }}}>
-            <$MediaImporter
-                type=<<type>>
-                label={{{ [[$:/plugins/mblackman/media-importer/data/importers]get[text]jsonget<type>,[caption]] }}}
-                placeholder={{{ [[$:/plugins/mblackman/media-importer/data/importers]get[text]jsonget<type>,[placeholder]] }}}
-                loadingText={{{ [[$:/plugins/mblackman/media-importer/data/importers]get[text]jsonget<type>,[loadingText]] }}}
-                resultTag={{{ [[$:/plugins/mblackman/media-importer/data/importers]get[text]jsonget<type>,[resultTag]] }}}
-                imageField={{{ [[$:/plugins/mblackman/media-importer/data/importers]get[text]jsonget<type>,[imageField]] }}}
-                subtitleContent={{{ [[$:/plugins/mblackman/media-importer/data/importers]get[text]jsonget<type>,[subtitle]] }}}
-            >
-                <div class="mi-flex-row" style="margin-bottom:20px;">
-                    <$keyboard key="enter" message="ui-trigger-search" class="mi-flex-grow">
-                        <$edit-text tiddler={{{ [[$:/temp/]addsuffix<type>addsuffix[-search-input]] }}} tag="input" default="" placeholder={{{ [[$:/plugins/mblackman/media-importer/data/importers]get[text]jsonget<type>,[placeholder]] }}} class="mi-input" style="width: 100%;" />
-                    </$keyboard>
-                    <$button class="mi-btn mi-btn-primary" message="ui-trigger-search">Search</$button>
-                    <$button message="ui-clear-search">Clear</$button>
-                </div>
-            </$MediaImporter>
+      <!-- Unified Shared Search & Results -->
+      <$MediaImporter
+          type=<<activeType>>
+          inputTiddler="$:/temp/media-importer/search-input"
+          label={{{ [<importersJson>jsonget<activeType>,[caption]] }}}
+          placeholder={{{ [<importersJson>jsonget<activeType>,[placeholder]] }}}
+          loadingText={{{ [<importersJson>jsonget<activeType>,[loadingText]] }}}
+          resultTag={{{ [<importersJson>jsonget<activeType>,[resultTag]] }}}
+          imageField={{{ [<importersJson>jsonget<activeType>,[imageField]] }}}
+          subtitleContent={{{ [<importersJson>jsonget<activeType>,[subtitle]] }}}
+      >
+          <div class="mi-flex-row mi-unified-search-row">
+              <$keyboard key="enter" message="ui-trigger-search" class="mi-flex-grow">
+                  <$edit-text
+                      tiddler="$:/temp/media-importer/search-input"
+                      tag="input"
+                      default=""
+                      placeholder={{{ [<importersJson>jsonget<activeType>,[placeholder]] }}}
+                      class="mi-input mi-unified-search-input"
+                  />
+              </$keyboard>
+              <$button class="mi-btn mi-btn-primary" message="ui-trigger-search">Search</$button>
+              <$button class="mi-btn" message="ui-clear-search">Clear</$button>
           </div>
-      </$list>
-    </div>
+      </$MediaImporter>
     </$let>
 
   </div>
 </div>
 
-<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 25px;">
-
-  <div style="grid-column: span 2;">
-    <h3 style="margin: 0 0 15px 0; font-size: 1.1em; text-transform: uppercase; letter-spacing: 1px; color: <<colour muted-foreground>>;">
-      ⏱️ Recently Added
-    </h3>
+<div>
+  <div>
+    <div class="mi-flex-row mi-flex-between" style="margin-bottom: 15px;">
+      <h3 style="margin: 0; font-size: 1.1em; text-transform: uppercase; letter-spacing: 1px; color: <<colour muted-foreground>>;">
+        ⏱️ Recently Added
+      </h3>
+      <$link to="$:/plugins/mblackman/media-importer/ui/media-library" class="mi-btn" style="padding: 4px 12px; font-size: 0.75em;">
+        Open Full Library →
+      </$link>
+    </div>
 
     <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 15px;">
       <$list filter="[tag[$:/tags/media-importer/Media]!sort[created]limit[8]]" emptyMessage="<div style='grid-column: 1/-1; padding:20px; font-style:italic; text-align:center; opacity:0.6;'>No items added yet.</div>">

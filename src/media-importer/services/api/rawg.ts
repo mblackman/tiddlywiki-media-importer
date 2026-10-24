@@ -38,11 +38,14 @@ export const RawgConfig: MediaImporterConfig = {
         return res.json();
       })
       .then(data => {
-        const finalTitle = data.name + ' (' + draftFields.draft_year + ')';
+        const year = data.released
+          ? data.released.substring(0, 4)
+          : (draftFields.draft_year || '0000');
+        const finalTitle = data.name + ' (' + year + ')';
         return {
           title: finalTitle,
           englishTitle: data.name,
-          year: draftFields.draft_year || '0000',
+          year: year,
           dataSource: 'RAWG',
           url: 'https://rawg.io/games/' + data.slug,
           id: String(data.id),
