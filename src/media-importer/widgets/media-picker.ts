@@ -115,12 +115,12 @@ class MediaPickerWidget extends Widget {
 
     const updateSelectionHighlight = () => {
       const optionEls = dropdown.querySelectorAll('.mi-picker-option');
-      optionEls.forEach((el, idx) => {
-        if (idx === activeIndex) {
-          el.classList.add('mi-dropdown-item-active');
-          (el as HTMLElement).scrollIntoView({ block: 'nearest' });
+      optionEls.forEach((element, index) => {
+        if (index === activeIndex) {
+          element.classList.add('mi-dropdown-item-active');
+          (element as HTMLElement).scrollIntoView({ block: 'nearest' });
         } else {
-          el.classList.remove('mi-dropdown-item-active');
+          element.classList.remove('mi-dropdown-item-active');
         }
       });
     };
@@ -176,9 +176,9 @@ class MediaPickerWidget extends Widget {
         noMatch.innerText = 'No matches found';
         dropdown.appendChild(noMatch);
       } else {
-        matches.forEach((title, idx) => {
+        matches.forEach((title, index) => {
           const item = document.createElement('div');
-          item.className = 'tc-dropdown-item mi-picker-option' + (idx === activeIndex ? ' mi-dropdown-item-active' : '');
+          item.className = 'tc-dropdown-item mi-picker-option' + (index === activeIndex ? ' mi-dropdown-item-active' : '');
           item.style.cursor = 'pointer';
           const tid = this.wiki.getTiddler(title);
           const type = tid?.fields['media-type'];

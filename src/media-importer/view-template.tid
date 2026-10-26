@@ -2,223 +2,247 @@ title: $:/plugins/mblackman/media-importer/view-template
 tags: $:/tags/ViewTemplate
 list-before: $:/core/ui/ViewTemplate/body
 
-\whitespace trim
 <$list filter="[all[current]tag[$:/tags/media-importer/Media]]">
 
-<!-- HEADER -->
-<div class="mi-section mi-header">
-  <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 10px;">
-    <h1 class="mi-title" style="margin-top: 0;">{{{ [{!!englishTitle}!is[blank]] ~[{!!title}] }}}</h1>
-    <div style="display: flex; align-items: center; gap: 8px; flex-shrink: 0;">
-      <$list filter="[all[current]has[id]!field:id[]]" variable="ignoreId">
-        <$let
-          refreshStateTitle={{{ [[$:/temp/refreshing/]addsuffix<currentTiddler>] }}}
-          refreshState={{{ [<refreshStateTitle>get[text]] }}}
-        >
-          <$list filter="[<refreshState>match[loading]]" variable="ignore">
-            <$button class="mi-btn" disabled="yes" style="padding: 4px 10px; font-size: 0.75em;">
-              ↻ Updating...
-            </$button>
-          </$list>
-          <$list filter="[<refreshState>match[done]]" variable="ignore">
-            <$button class="mi-btn mi-btn-primary" style="padding: 4px 10px; font-size: 0.75em;">
-              ✓ Updated!
-            </$button>
-          </$list>
-          <$list filter="[<refreshState>match[missing-key]]" variable="ignore">
-            <$button class="mi-btn" style="padding: 4px 10px; font-size: 0.75em; border-color: #f59e0b; color: #f59e0b;" message="tm-navigate" param="$:/plugins/mblackman/media-importer/config" tooltip="Configure API key in settings">
-              🔑 Missing Key
-            </$button>
-          </$list>
-          <$list filter="[<refreshState>match[error]]" variable="ignore">
-            <$button class="mi-btn" style="padding: 4px 10px; font-size: 0.75em; border-color: #ef4444; color: #ef4444;" message="tm-refresh-media" param=<<currentTiddler>>>
-              ⚠️ Retry Update
-            </$button>
-          </$list>
-          <$list filter="[<refreshState>is[blank]]" variable="ignore">
-            <$button
-              class="mi-btn"
-              style="padding: 4px 10px; font-size: 0.75em;"
-              tooltip={{{ [[Pull latest metadata from ]addsuffix{!!dataSource}] }}}
-              message="tm-refresh-media"
-              param=<<currentTiddler>>
-            >
-              ↻ Update Info
-            </$button>
-          </$list>
-        </$let>
-      </$list>
-      <$let todayDate=<<now "YYYY-0MM-0DD">> todayLog={{{ [[$:/media-log/]addsuffix<todayDate>] }}}>
-        <$list filter="[<todayLog>contains:media-log<currentTiddler>]" variable="ignore">
-          <$button class="mi-btn mi-btn-primary" style="padding: 4px 10px; font-size: 0.75em;" tooltip="Remove from today's daily activity log">
-            ✓ Logged Today
-            <$action-listops $tiddler=<<todayLog>> $field="media-log" $subfilter="-[<currentTiddler>]"/>
+<!-- SUBHEADER: METADATA PILLS & QUICK ACTIONS -->
+<div class="mi-item-subheader">
+  <div class="mi-meta">
+    <span class="mi-badge">{{!!media-type}}</span>
+    <$list filter="[all[current]has[year]!field:year[0000]!field:year[]]" variable="ignoreYr">
+      <span class="mi-meta-item">{{!!year}}</span>
+    </$list>
+    <$list filter="[all[current]has[releaseDate]!field:releaseDate[]]" variable="ignoreRel">
+      <span class="mi-meta-sep">•</span>
+      <span class="mi-meta-item"><$view field="releaseDate" format="date" template="DD MMM YYYY"/></span>
+    </$list>
+    <$list filter="[all[current]has[url]!field:url[]]" variable="ignoreUrl">
+      <span class="mi-meta-sep">•</span>
+      <a href={{!!url}} target="_blank" rel="noopener noreferrer" class="mi-external-link">
+        View on <$text text={{{ [{!!dataSource}!is[blank]else[Source]] }}}/> ↗
+      </a>
+    </$list>
+    <$list filter="[all[current]has[image]!field:image[]]" variable="ignoreStorage">
+      <span class="mi-meta-sep">•</span>
+      <span class="mi-storage-badge mi-storage-badge-uri" title="Cover art storage mode">
+        <$text text={{{ [{!!image}prefix[data:]then[Embedded Cover]else[External Cover URI]] }}}/>
+      </span>
+    </$list>
+  </div>
+
+  <div class="mi-item-actions">
+    <$link to="$:/plugins/mblackman/media-importer/ui/media-library" class="mi-btn mi-btn-sm" tooltip="Back to Media Library">
+      ← Library
+    </$link>
+
+    <$list filter="[all[current]has[id]!field:id[]]" variable="ignoreId">
+      <$let
+        refreshStateTitle={{{ [[$:/temp/refreshing/]addsuffix<currentTiddler>] }}}
+        refreshState={{{ [<refreshStateTitle>get[text]] }}}
+      >
+        <$list filter="[<refreshState>match[loading]]" variable="ignore">
+          <$button class="mi-btn mi-btn-sm" disabled="yes">
+            ↻ Updating...
           </$button>
         </$list>
-        <$list filter="[<todayLog>!contains:media-log<currentTiddler>]" variable="ignore">
-          <$button class="mi-btn" style="padding: 4px 10px; font-size: 0.75em;" tooltip="Add to today's daily activity log">
-            + Log Today
-            <$action-listops $tiddler=<<todayLog>> $tags="+[[$:/tags/media-importer/Log]]" $field="media-log" $subfilter="[<currentTiddler>]"/>
-            <$action-setfield $tiddler=<<todayLog>> log-date=<<todayDate>>/>
-            <$list filter="[all[current]field:status[Backlog]] [all[current]!has[status]] +[limit[1]]" variable="ignoreStatus">
-              <$action-setfield $tiddler=<<currentTiddler>> status="Active"/>
-            </$list>
+        <$list filter="[<refreshState>match[done]]" variable="ignore">
+          <$button class="mi-btn mi-btn-primary mi-btn-sm">
+            ✓ Updated!
+          </$button>
+        </$list>
+        <$list filter="[<refreshState>match[missing-key]]" variable="ignore">
+          <$button class="mi-btn mi-btn-sm mi-btn-warning" message="tm-navigate" param="$:/plugins/mblackman/media-importer/config" tooltip="Configure API key in settings">
+            Missing Key
+          </$button>
+        </$list>
+        <$list filter="[<refreshState>match[error]]" variable="ignore">
+          <$button class="mi-btn mi-btn-sm mi-btn-danger" message="tm-refresh-media" param=<<currentTiddler>>>
+            Retry Update
+          </$button>
+        </$list>
+        <$list filter="[<refreshState>is[blank]]" variable="ignore">
+          <$button
+            class="mi-btn mi-btn-sm"
+            tooltip={{{ [[Pull latest metadata from ]addsuffix{!!dataSource}] }}}
+            message="tm-refresh-media"
+            param=<<currentTiddler>>
+          >
+            ↻ Update Info
           </$button>
         </$list>
       </$let>
-      <$button class="tc-btn-invisible" style="font-size: 1.6em; line-height: 1; padding: 0 4px; cursor: pointer;" tooltip="Toggle Favorite">
-        <$list filter="[all[current]field:favorite[yes]]">
-          <span style="color: #f59e0b;">★</span>
-          <$action-deletefield favorite />
-        </$list>
-        <$list filter="[all[current]!field:favorite[yes]]">
-          <span style="color: <<colour muted-foreground>>;">☆</span>
-          <$action-setfield favorite="yes" />
-        </$list>
-      </$button>
-    </div>
-  </div>
-  <div class="mi-meta">
-     <span class="mi-badge">
-       {{!!media-type}}
-     </span>
-     <span>{{!!year}}</span>
-     <$list filter="[all[current]has[releaseDate]]"> • <$view field="releaseDate" format="date" template="DD MMM YYYY"/></$list>
-     <$list filter="[all[current]has[url]!field:url[]]">
-       • <a href={{!!url}} target="_blank" rel="noopener noreferrer" class="mi-external-link">View on {{!!dataSource}} ↗</a>
-     </$list>
+    </$list>
+
+    <$let todayDate=<<now "YYYY-0MM-0DD">> todayLog={{{ [[$:/media-log/]addsuffix<todayDate>] }}}>
+      <$list filter="[<todayLog>contains:media-log<currentTiddler>]" variable="ignore">
+        <$button class="mi-btn mi-btn-active-subtle mi-btn-sm" tooltip="Remove from today's daily activity log">
+          ✓ Logged Today
+          <$action-listops $tiddler=<<todayLog>> $field="media-log" $subfilter="-[<currentTiddler>]"/>
+        </$button>
+      </$list>
+      <$list filter="[<todayLog>!contains:media-log<currentTiddler>]" variable="ignore">
+        <$button class="mi-btn mi-btn-sm" tooltip="Add to today's daily activity log">
+          + Log Today
+          <$action-listops $tiddler=<<todayLog>> $tags="+[[$:/tags/media-importer/Log]]" $field="media-log" $subfilter="[<currentTiddler>]"/>
+          <$action-setfield $tiddler=<<todayLog>> log-date=<<todayDate>>/>
+          <$list filter="[all[current]field:status[Backlog]] [all[current]!has[status]] +[limit[1]]" variable="ignoreStatus">
+            <$action-setfield $tiddler=<<currentTiddler>> status="Active"/>
+          </$list>
+        </$button>
+      </$list>
+    </$let>
+
+    <$button class="mi-btn mi-btn-sm" tooltip="Copy [[Wikilink]] to clipboard">
+      <$text text="Copy [[Link]]"/>
+      <$action-sendmessage $message="tm-copy-to-clipboard" $param={{{ [[[[]]addsuffix<currentTiddler>addsuffix[]]]] }}}/>
+    </$button>
+
+    <$button class="tc-btn-invisible mi-fav-star-btn" tooltip="Toggle Favorite" aria-label="Toggle Favorite">
+      <$list filter="[all[current]field:favorite[yes]]">
+        <span class="mi-star-full">★</span>
+        <$action-deletefield favorite />
+      </$list>
+      <$list filter="[all[current]!field:favorite[yes]]">
+        <span class="mi-star-inactive">☆</span>
+        <$action-setfield favorite="yes" />
+      </$list>
+    </$button>
   </div>
 </div>
 
 <div class="mi-view-container mi-card">
 
-  <!-- LEFT COLUMN: IMAGE & ONLINE RATING -->
+  <!-- LEFT COLUMN: IMAGE & RATINGS -->
   <div class="mi-sidebar">
-    
+
     <div class="mi-cover-image">
-      <$image source={{!!image}} />
-    </div>
-    
-    <div class="mi-sidebar-ratings">
-    <!-- ONLINE RATING -->
-    <div class="mi-rating-box">
-       <small class="mi-sublabel">{{!!dataSource}} Score</small>
-       
-       <$vars rawRating={{{ [{!!onlineRating}] }}}>
-         <$list filter="[<rawRating>match[0]] [<rawRating>is[blank]] +[limit[1]]">
-            <div class="mi-rating-row"><span class="mi-rating-score">N/A</span></div>
-         </$list>
-         <$list filter="[<rawRating>!match[0]!is[blank]]" variable="ignore">
-         <$vars rating={{{ [<rawRating>multiply[2]round[]divide[2]] }}}>
-         <div class="mi-rating-row">
-           <span class="mi-rating-stars">
-           <$list filter="[range[1,5]]" variable="star">
-             <$list filter="[<rating>compare:number:gteq<star>]"><span class="mi-star-full">★</span></$list>
-             <$list filter="[<rating>compare:number:lt<star>]">
-                <$list filter="[<rating>add[0.5]compare:number:eq<star>]"><span class="mi-star-half">★</span></$list>
-                <$list filter="[<rating>add[0.5]compare:number:neq<star>]"><span class="mi-star-empty">★</span></$list>
-             </$list>
-           </$list>
-           </span>
-           <span class="mi-rating-score">
-           {{!!onlineRating}} / 5
-           </span>
-         </div>
-         </$vars>
-         </$list>
-       </$vars>
+      <$list filter="[all[current]has[image]!field:image[]]" variable="ignoreHasCover">
+        <$image source={{!!image}} />
+      </$list>
+      <$list filter="[all[current]!has[image]] [all[current]field:image[]] +[limit[1]]" variable="ignoreNoCover">
+        <div class="mi-library-card-placeholder" style="aspect-ratio: 2/3; border-radius: 6px;">{{!!media-type}}</div>
+      </$list>
     </div>
 
-    <!-- MY RATING -->
-    <div class="mi-rating-box">
-       <small class="mi-sublabel">My Score</small>
-       
-       <$vars avgRating={{{ [tag[$:/tags/media-importer/WatchLog]field:media-title<currentTiddler>get[rating]!match[0]average[]] }}}>
-         <$list filter="[<avgRating>match[0]] [<avgRating>is[blank]] [<avgRating>match[NaN]] +[limit[1]]">
+    <div class="mi-sidebar-ratings">
+      <!-- ONLINE RATING -->
+      <div class="mi-rating-box">
+        <small class="mi-sublabel"><$text text={{{ [{!!dataSource}!is[blank]else[Online]] }}}/> Score</small>
+
+        <$vars rawRating={{{ [{!!onlineRating}] }}}>
+          <$list filter="[<rawRating>match[0]] [<rawRating>is[blank]] +[limit[1]]">
             <div class="mi-rating-row"><span class="mi-rating-score">N/A</span></div>
-         </$list>
-         <$list filter="[<avgRating>!match[0]!is[blank]!match[NaN]]" variable="ignore">
-         <$vars rating={{{ [<avgRating>multiply[2]round[]divide[2]] }}}>
-           <div class="mi-rating-row">
-             <span class="mi-rating-stars">
-             <$list filter="[range[1,5]]" variable="star">
-               <$list filter="[<rating>compare:number:gteq<star>]"><span class="mi-star-full">★</span></$list>
-               <$list filter="[<rating>compare:number:lt<star>]">
-                  <$list filter="[<rating>add[0.5]compare:number:eq<star>]"><span class="mi-star-half">★</span></$list>
-                  <$list filter="[<rating>add[0.5]compare:number:neq<star>]"><span class="mi-star-empty">★</span></$list>
-               </$list>
-             </$list>
-             </span>
-             <span class="mi-rating-score">
-             <$text text={{{ [<avgRating>fixed[1]else[--]] }}}/> / 5
-             </span>
-           </div>
-         </$vars>
-         </$list>
-       </$vars>
-    </div>
+          </$list>
+          <$list filter="[<rawRating>!match[0]!is[blank]]" variable="ignore">
+            <$vars rating={{{ [<rawRating>multiply[2]round[]divide[2]] }}}>
+              <div class="mi-rating-row">
+                <span class="mi-rating-stars">
+                  <$list filter="[range[1,5]]" variable="star">
+                    <$list filter="[<rating>compare:number:gteq<star>]"><span class="mi-star-full">★</span></$list>
+                    <$list filter="[<rating>compare:number:lt<star>]">
+                      <$list filter="[<rating>add[0.5]compare:number:eq<star>]"><span class="mi-star-half">★</span></$list>
+                      <$list filter="[<rating>add[0.5]compare:number:neq<star>]"><span class="mi-star-empty">★</span></$list>
+                    </$list>
+                  </$list>
+                </span>
+                <span class="mi-rating-score">
+                  <$text text=<<rawRating>>/> / 5
+                </span>
+              </div>
+            </$vars>
+          </$list>
+        </$vars>
+      </div>
+
+      <!-- MY RATING -->
+      <div class="mi-rating-box">
+        <small class="mi-sublabel">My Score</small>
+
+        <$vars avgRating={{{ [tag[$:/tags/media-importer/WatchLog]field:media-title<currentTiddler>get[rating]!match[0]average[]] }}}>
+          <$list filter="[<avgRating>match[0]] [<avgRating>is[blank]] [<avgRating>match[NaN]] +[limit[1]]">
+            <div class="mi-rating-row"><span class="mi-rating-score">N/A</span></div>
+          </$list>
+          <$list filter="[<avgRating>!match[0]!is[blank]!match[NaN]]" variable="ignore">
+            <$vars rating={{{ [<avgRating>multiply[2]round[]divide[2]] }}}>
+              <div class="mi-rating-row">
+                <span class="mi-rating-stars">
+                  <$list filter="[range[1,5]]" variable="star">
+                    <$list filter="[<rating>compare:number:gteq<star>]"><span class="mi-star-full">★</span></$list>
+                    <$list filter="[<rating>compare:number:lt<star>]">
+                      <$list filter="[<rating>add[0.5]compare:number:eq<star>]"><span class="mi-star-half">★</span></$list>
+                      <$list filter="[<rating>add[0.5]compare:number:neq<star>]"><span class="mi-star-empty">★</span></$list>
+                    </$list>
+                  </$list>
+                </span>
+                <span class="mi-rating-score">
+                  <$text text={{{ [<avgRating>fixed[1]else[--]] }}}/> / 5
+                </span>
+              </div>
+            </$vars>
+          </$list>
+        </$vars>
+      </div>
     </div>
   </div>
 
   <!-- RIGHT COLUMN: DATA -->
   <div class="mi-content">
-    
-    <!-- METADATA GRID (READ ONLY) -->
+
+    <!-- METADATA GRID -->
     <div class="mi-section mi-grid">
-       <div class="mi-label">Status</div>
-       <div>
-         <$select field="status" default="Backlog" class="mi-input mi-input-sm mi-input-auto">
-           <$list filter="[enlist{$:/plugins/mblackman/media-importer/data/statuses}]">
-             <option value=<<currentTiddler>>><<currentTiddler>></option>
-           </$list>
-         </$select>
-       </div>
-       <!-- Dynamic Fields based on Type -->
-       <$list filter="[all[current]media-type[Book]]">
-          <div class="mi-label">Author</div> <div><$text text={{{ [enlist{!!author}search-replace:g[_],[ ]join[, ]] }}}/></div>
-          <div class="mi-label">Pages</div> <div>{{!!pages}}</div>
-          <div class="mi-label">ISBN</div> <div>{{!!isbn}}</div>
-       </$list>
-       <$list filter="[all[current]media-type[Game]]">
-          <div class="mi-label">Developer</div> <div><$text text={{{ [enlist{!!developers}search-replace:g[_],[ ]join[, ]] }}}/></div>
-          <div class="mi-label">Publisher</div> <div><$text text={{{ [enlist{!!publishers}search-replace:g[_],[ ]join[, ]] }}}/></div>
-       </$list>
-       <$list filter="[all[current]media-type[Movie]]">
-          <div class="mi-label">Director</div> <div><$text text={{{ [enlist{!!director}search-replace:g[_],[ ]join[, ]] }}}/></div>
-          <div class="mi-label">Cast</div> <div><$text text={{{ [enlist{!!cast}search-replace:g[_],[ ]join[, ]] }}}/></div>
-          <div class="mi-label">Runtime</div> <div>{{!!runtime}} min</div>
-       </$list>
-       <$list filter="[all[current]media-type[TV Show]]">
-          <div class="mi-label">Creator</div> <div><$text text={{{ [enlist{!!creator}search-replace:g[_],[ ]join[, ]] }}}/></div>
-          <div class="mi-label">Cast</div> <div><$text text={{{ [enlist{!!cast}search-replace:g[_],[ ]join[, ]] }}}/></div>
-          <div class="mi-label">Seasons</div> <div>{{!!seasons}}</div>
-          <div class="mi-label">Episodes</div> <div>{{!!episodes}}</div>
-       </$list>
-       <$list filter="[all[current]media-type[Manga]]">
-          <div class="mi-label">Author</div> <div><$text text={{{ [enlist{!!author}search-replace:g[_],[ ]join[, ]] }}}/></div>
-          <div class="mi-label">Volumes</div> <div>{{!!volumes}}</div>
-       </$list>
-       <$list filter="[all[current]media-type[Comic]]">
-          <div class="mi-label">Publisher</div> <div><$text text={{{ [enlist{!!publisher}search-replace:g[_],[ ]join[, ]] }}}/></div>
-          <div class="mi-label">Issues</div> <div>{{!!count_of_issues}}</div>
-       </$list>
-       <$list filter="[all[current]has[genres]!field:genres[]]">
-          <div class="mi-label">Genres</div>
-          <div class="mi-genre-pills">
-            <$list filter="[enlist{!!genres}]" variable="genreItem">
-              <$button class="tc-btn-invisible mi-genre-pill" tooltip="Filter library by this genre">
-                <$text text={{{ [<genreItem>search-replace:g[_],[ ]] }}}/>
-                <$action-setfield $tiddler="$:/state/mblackman/media-importer/library/genre" text=<<genreItem>>/>
-                <$action-setfield $tiddler="$:/state/mblackman/media-importer/library/type" text="All"/>
-                <$action-navigate $to="$:/plugins/mblackman/media-importer/ui/media-library"/>
-              </$button>
-            </$list>
-          </div>
-       </$list>
-       <div class="mi-label">Plot</div> 
-       <div class="mi-plot">
-         <$transclude field="plot" mode="block"/>
-       </div>
+      <div class="mi-label">Status</div>
+      <div>
+        <$select field="status" default="Backlog" class="mi-input mi-input-sm mi-input-auto">
+          <$list filter="[enlist{$:/plugins/mblackman/media-importer/data/statuses}]">
+            <option value=<<currentTiddler>>><<currentTiddler>></option>
+          </$list>
+        </$select>
+      </div>
+      <!-- Dynamic Fields based on Type -->
+      <$list filter="[all[current]media-type[Book]]">
+        <div class="mi-label">Author</div> <div><$text text={{{ [enlist{!!author}search-replace:g[_],[ ]join[, ]] }}}/></div>
+        <div class="mi-label">Pages</div> <div>{{!!pages}}</div>
+        <div class="mi-label">ISBN</div> <div>{{!!isbn}}</div>
+      </$list>
+      <$list filter="[all[current]media-type[Game]]">
+        <div class="mi-label">Developer</div> <div><$text text={{{ [enlist{!!developers}search-replace:g[_],[ ]join[, ]] }}}/></div>
+        <div class="mi-label">Publisher</div> <div><$text text={{{ [enlist{!!publishers}search-replace:g[_],[ ]join[, ]] }}}/></div>
+      </$list>
+      <$list filter="[all[current]media-type[Movie]]">
+        <div class="mi-label">Director</div> <div><$text text={{{ [enlist{!!director}search-replace:g[_],[ ]join[, ]] }}}/></div>
+        <div class="mi-label">Cast</div> <div><$text text={{{ [enlist{!!cast}search-replace:g[_],[ ]join[, ]] }}}/></div>
+        <div class="mi-label">Runtime</div> <div><$text text={{!!runtime}}/> min</div>
+      </$list>
+      <$list filter="[all[current]media-type[TV Show]]">
+        <div class="mi-label">Creator</div> <div><$text text={{{ [enlist{!!creator}search-replace:g[_],[ ]join[, ]] }}}/></div>
+        <div class="mi-label">Cast</div> <div><$text text={{{ [enlist{!!cast}search-replace:g[_],[ ]join[, ]] }}}/></div>
+        <div class="mi-label">Seasons</div> <div>{{!!seasons}}</div>
+        <div class="mi-label">Episodes</div> <div>{{!!episodes}}</div>
+      </$list>
+      <$list filter="[all[current]media-type[Manga]]">
+        <div class="mi-label">Author</div> <div><$text text={{{ [enlist{!!author}search-replace:g[_],[ ]join[, ]] }}}/></div>
+        <div class="mi-label">Volumes</div> <div>{{!!volumes}}</div>
+      </$list>
+      <$list filter="[all[current]media-type[Comic]]">
+        <div class="mi-label">Publisher</div> <div><$text text={{{ [enlist{!!publisher}search-replace:g[_],[ ]join[, ]] }}}/></div>
+        <div class="mi-label">Issues</div> <div>{{!!count_of_issues}}</div>
+      </$list>
+      <$list filter="[all[current]has[genres]!field:genres[]]">
+        <div class="mi-label">Genres</div>
+        <div class="mi-genre-pills">
+          <$list filter="[enlist{!!genres}]" variable="genreItem">
+            <$button class="tc-btn-invisible mi-genre-pill" tooltip="Filter library by this genre">
+              <$text text={{{ [<genreItem>search-replace:g[_],[ ]] }}}/>
+              <$action-setfield $tiddler="$:/state/mblackman/media-importer/library/genre" text=<<genreItem>>/>
+              <$action-setfield $tiddler="$:/state/mblackman/media-importer/library/type" text="All"/>
+              <$action-navigate $to="$:/plugins/mblackman/media-importer/ui/media-library"/>
+            </$button>
+          </$list>
+        </div>
+      </$list>
+      <div class="mi-label">Plot</div>
+      <div class="mi-plot">
+        <$transclude field="plot" mode="block"/>
+      </div>
     </div>
   </div>
 </div>
@@ -226,127 +250,140 @@ list-before: $:/core/ui/ViewTemplate/body
 <!-- USER CONTROLS (EDITABLE) -->
 <$let
   mediaType={{!!media-type}}
-  historyTitle={{{ [<mediaType>match[Book]then[📖 Reading & Review History]] [<mediaType>match[Manga]then[📖 Reading & Review History]] [<mediaType>match[Comic]then[📖 Reading & Review History]] [<mediaType>match[Game]then[🎮 Play & Review History]] ~[[🎬 Watch & Review History]] }}}
+  historyTitle={{{ [<mediaType>match[Book]then[Reading & Review History]] [<mediaType>match[Manga]then[Reading & Review History]] [<mediaType>match[Comic]then[Reading & Review History]] [<mediaType>match[Game]then[Play & Review History]] ~[[Watch & Review History]] }}}
   dateLabel={{{ [<mediaType>match[Book]then[Date Read]] [<mediaType>match[Manga]then[Date Read]] [<mediaType>match[Comic]then[Date Read]] [<mediaType>match[Game]then[Date Played]] ~[[Date Watched]] }}}
 >
 <div class="mi-card mi-control-card">
-       
-       <div class="mi-control-header">
-         <h3 class="mi-control-title">
-           <$text text=<<historyTitle>>/>
-         </h3>
-       </div>
-       
-       <div class="mi-control-body">
 
-         <$vars logState={{{ [[$:/state/media-log/]addsuffix<currentTiddler>] }}}>
-           <div class="mi-log-row">
-             <!-- SESSION RATING -->
-             <div class="mi-log-input-group">
-                <span class="mi-label mi-label-upper">Session Rating</span>
-                <$select tiddler=<<logState>> field="rating" default="0" class="mi-input mi-input-sm">
-                   <option value="0">Unrated</option>
-                   <option value="1">★☆☆☆☆ (1/5)</option>
-                   <option value="2">★★☆☆☆ (2/5)</option>
-                   <option value="3">★★★☆☆ (3/5)</option>
-                   <option value="4">★★★★☆ (4/5)</option>
-                   <option value="5">★★★★★ (5/5)</option>
-                </$select>
-             </div>
+  <div class="mi-control-header">
+    <h3 class="mi-control-title">
+      <$text text=<<historyTitle>>/>
+    </h3>
+  </div>
 
-             <!-- DATE PICKER -->
-             <div class="mi-log-input-group">
-                <span class="mi-label mi-label-upper"><$text text=<<dateLabel>>/></span>
-                <$edit-text tiddler=<<logState>> field="date" type="date" tag="input" default=<<now "YYYY-0MM-0DD">> class="mi-input mi-input-sm"/>
-             </div>
+  <div class="mi-control-body">
 
-             <!-- UPDATE STATUS OPTION -->
-             <div class="mi-log-input-group">
-                <span class="mi-label mi-label-upper">Set Status</span>
-                <$select tiddler=<<logState>> field="new_status" default="Completed" class="mi-input mi-input-sm">
-                   <option value="">Keep ({{!!status}})</option>
-                   <$list filter="[enlist{$:/plugins/mblackman/media-importer/data/statuses}]" variable="statusOpt">
-                     <option value=<<statusOpt>>><<statusOpt>></option>
-                   </$list>
-                </$select>
-             </div>
-
-           </div>
-           
-           <!-- COMMENTS -->
-           <div class="mi-log-section">
-              <span class="mi-label mi-label-upper">Comments</span>
-              <$edit-text tiddler=<<logState>> field="comment" tag="textarea" class="mi-input mi-textarea-sm" placeholder="Thoughts..."/>
-           </div>
-
-           <!-- LOG BUTTON -->
-           <div class="mi-log-actions">
-              <$button class="tc-btn-invisible mi-btn mi-btn-primary mi-log-btn">
-                 Log Session
-                 <$action-createtiddler 
-                    $basetitle={{{ [[$:/data/media-log/]addsuffix<currentTiddler>addsuffix[/]addsuffix<now "[UTC]YYYY0MM0DD0hh0mm0ss0XXX">] }}}
-                    tags="$:/tags/media-importer/WatchLog"
-                    media-title=<<currentTiddler>>
-                    rating={{{ [<logState>get[rating]else[0]] }}}
-                    date={{{ [<logState>get[date]else<now "YYYY-0MM-0DD">] }}}
-                    comment={{{ [<logState>get[comment]] }}}
-                    timestamp=<<now "YYYY-0MM-0DD 0hh:0mm:0ss">>
-                 />
-                 <$let chosenStatus={{{ [<logState>get[new_status]else[Completed]] }}}>
-                   <$list filter="[<chosenStatus>!is[blank]]" variable="ignore">
-                     <$action-setfield $tiddler=<<currentTiddler>> status=<<chosenStatus>>/>
-                   </$list>
-                 </$let>
-                 <$action-setfield $tiddler=<<logState>> rating="0" comment="" new_status="Completed"/>
-                 <$action-deletefield $tiddler=<<logState>> date/>
-              </$button>
-           </div>
-         </$vars>
-       </div>
-       
-       <!-- DAILY ACTIVITY LOGS (from MediaPicker) -->
-       <$list filter="[tag[$:/tags/media-importer/Log]!has[draft.of]contains:media-log<currentTiddler>limit[1]]" variable="hasDaily">
-         <div class="mi-history-section">
-           <h4 class="mi-history-title">
-             Daily Activity (<$count filter="[tag[$:/tags/media-importer/Log]!has[draft.of]contains:media-log<currentTiddler>]"/> days)
-           </h4>
-           <div class="mi-daily-log-chips">
-             <$list filter="[tag[$:/tags/media-importer/Log]!has[draft.of]contains:media-log<currentTiddler>get[log-date]!sort[]]">
-               <span class="mi-summary-badge"><$text text=<<currentTiddler>>/></span>
-             </$list>
-           </div>
-         </div>
-       </$list>
-
-       <!-- HISTORY LIST -->
-       <div class="mi-history-section">
-         <h4 class="mi-history-title">Session Reviews</h4>
-         <$list filter="[tag[$:/tags/media-importer/WatchLog]field:media-title<currentTiddler>!sort[date]]" emptyMessage="<div class='mi-history-empty'>No session reviews yet.</div>">
-           <div class="mi-history-entry">
-             <div class="mi-history-row">
-                <span class="mi-history-date"><$view field="date"/></span>
-                <span class="mi-history-stars">
-                  <$list filter="[range[1,5]]" variable="star">
-                      <$list filter="[{!!rating}compare:number:gteq<star>]">★</$list>
-                      <$list filter="[{!!rating}compare:number:lt<star>]">☆</$list>
+    <$vars logState={{{ [[$:/state/media-log/]addsuffix<currentTiddler>] }}}>
+      <div class="mi-log-row">
+        <!-- INTERACTIVE SESSION RATING -->
+        <div class="mi-log-input-group">
+          <span class="mi-label mi-label-upper">Session Rating</span>
+          <$let currentRating={{{ [<logState>get[rating]else[0]] }}}>
+            <div class="mi-star-picker-row" role="radiogroup" aria-label="Session Rating">
+              <$list filter="[range[1,5]]" variable="starVal">
+                <$button
+                  class="tc-btn-invisible mi-star-picker-btn"
+                  tooltip={{{ [[Rate ]addsuffix<starVal>addsuffix[ of 5 stars]] }}}
+                  aria-label={{{ [[Rate ]addsuffix<starVal>addsuffix[ of 5 stars]] }}}
+                >
+                  <$list filter="[<currentRating>compare:number:gteq<starVal>]">
+                    <span class="mi-star-full">★</span>
                   </$list>
-                </span>
-                <span class="mi-history-timestamp">(Logged: <$view field="timestamp"/>)</span>
-                <span class="mi-history-actions">
-                  <$button class="tc-btn-invisible mi-delete-btn" tooltip="Delete log entry">
-                    ×
-                    <$action-confirm $message={{{ [[Delete log entry? ]addsuffix[Media: ]addsuffix{!!media-title}addsuffix[, Rating: ]addsuffix{!!rating}addsuffix[, Timestamp: ]addsuffix{!!timestamp}] }}}>
-                      <$action-deletetiddler $tiddler=<<currentTiddler>>/>
-                    </$action-confirm>
-                  </$button>
-                </span>
-             </div>
-             <$list filter="[all[current]has[comment]!field:comment[]]">
-               <div class="mi-history-comment-text"><$view field="comment"/></div>
-             </$list>
-           </div>
-         </$list>
-       </div>
+                  <$list filter="[<currentRating>compare:number:lt<starVal>]">
+                    <span class="mi-star-inactive">☆</span>
+                  </$list>
+                  <$action-setfield $tiddler=<<logState>> rating={{{ [<currentRating>match<starVal>then[0]else<starVal>] }}}/>
+                </$button>
+              </$list>
+              <span class="mi-star-picker-label">
+                <$text text={{{ [<currentRating>!match[0]addsuffix[/5]else[Unrated]] }}}/>
+              </span>
+            </div>
+          </$let>
+        </div>
+
+        <!-- DATE PICKER -->
+        <div class="mi-log-input-group">
+          <span class="mi-label mi-label-upper"><$text text=<<dateLabel>>/></span>
+          <$edit-text tiddler=<<logState>> field="date" type="date" tag="input" default=<<now "YYYY-0MM-0DD">> class="mi-input mi-input-sm"/>
+        </div>
+
+        <!-- UPDATE STATUS OPTION -->
+        <div class="mi-log-input-group">
+          <span class="mi-label mi-label-upper">Set Status</span>
+          <$select tiddler=<<logState>> field="new_status" default="Completed" class="mi-input mi-input-sm">
+            <option value="">Keep ({{!!status}})</option>
+            <$list filter="[enlist{$:/plugins/mblackman/media-importer/data/statuses}]" variable="statusOpt">
+              <option value=<<statusOpt>>><<statusOpt>></option>
+            </$list>
+          </$select>
+        </div>
+      </div>
+
+      <!-- COMMENTS -->
+      <div class="mi-log-section">
+        <span class="mi-label mi-label-upper">Comments</span>
+        <$edit-text tiddler=<<logState>> field="comment" tag="textarea" class="mi-input mi-textarea-sm" placeholder="Thoughts, favorite quotes, or review notes..."/>
+      </div>
+
+      <!-- LOG BUTTON -->
+      <div class="mi-log-actions">
+        <$button class="tc-btn-invisible mi-btn mi-btn-primary mi-log-btn">
+          Log Session
+          <$action-createtiddler
+            $basetitle={{{ [[$:/data/media-log/]addsuffix<currentTiddler>addsuffix[/]addsuffix<now "[UTC]YYYY0MM0DD0hh0mm0ss0XXX">] }}}
+            tags="$:/tags/media-importer/WatchLog"
+            media-title=<<currentTiddler>>
+            rating={{{ [<logState>get[rating]else[0]] }}}
+            date={{{ [<logState>get[date]else<now "YYYY-0MM-0DD">] }}}
+            comment={{{ [<logState>get[comment]] }}}
+            timestamp=<<now "YYYY-0MM-0DD 0hh:0mm:0ss">>
+          />
+          <$let chosenStatus={{{ [<logState>get[new_status]else[Completed]] }}}>
+            <$list filter="[<chosenStatus>!is[blank]]" variable="ignore">
+              <$action-setfield $tiddler=<<currentTiddler>> status=<<chosenStatus>>/>
+            </$list>
+          </$let>
+          <$action-setfield $tiddler=<<logState>> rating="0" comment="" new_status="Completed"/>
+          <$action-deletefield $tiddler=<<logState>> date/>
+        </$button>
+      </div>
+    </$vars>
+  </div>
+
+  <!-- DAILY ACTIVITY LOGS (from MediaPicker) -->
+  <$list filter="[tag[$:/tags/media-importer/Log]!has[draft.of]contains:media-log<currentTiddler>limit[1]]" variable="hasDaily">
+    <div class="mi-history-section">
+      <h4 class="mi-history-title">
+        Daily Activity (<$count filter="[tag[$:/tags/media-importer/Log]!has[draft.of]contains:media-log<currentTiddler>]"/> days)
+      </h4>
+      <div class="mi-daily-log-chips">
+        <$list filter="[tag[$:/tags/media-importer/Log]!has[draft.of]contains:media-log<currentTiddler>get[log-date]!sort[]]">
+          <span class="mi-summary-badge"><$text text=<<currentTiddler>>/></span>
+        </$list>
+      </div>
+    </div>
+  </$list>
+
+  <!-- HISTORY LIST -->
+  <div class="mi-history-section">
+    <h4 class="mi-history-title">Session Reviews</h4>
+    <$list filter="[tag[$:/tags/media-importer/WatchLog]field:media-title<currentTiddler>!sort[date]]" emptyMessage="<div class='mi-history-empty'>No session reviews yet.</div>">
+      <div class="mi-history-entry">
+        <div class="mi-history-row">
+          <span class="mi-history-date"><$view field="date"/></span>
+          <span class="mi-history-stars">
+            <$list filter="[range[1,5]]" variable="star">
+              <$list filter="[{!!rating}compare:number:gteq<star>]"><span class="mi-star-full">★</span></$list>
+              <$list filter="[{!!rating}compare:number:lt<star>]"><span class="mi-star-empty">★</span></$list>
+            </$list>
+          </span>
+          <span class="mi-history-timestamp">(Logged: <$view field="timestamp"/>)</span>
+          <span class="mi-history-actions">
+            <$button class="tc-btn-invisible mi-delete-btn" tooltip="Delete log entry" aria-label="Delete log entry">
+              ×
+              <$action-confirm $message={{{ [[Delete log entry? ]addsuffix[Media: ]addsuffix{!!media-title}addsuffix[, Rating: ]addsuffix{!!rating}addsuffix[, Timestamp: ]addsuffix{!!timestamp}] }}}>
+                <$action-deletetiddler $tiddler=<<currentTiddler>>/>
+              </$action-confirm>
+            </$button>
+          </span>
+        </div>
+        <$list filter="[all[current]has[comment]!field:comment[]]">
+          <div class="mi-history-comment-text"><$view field="comment"/></div>
+        </$list>
+      </div>
+    </$list>
+  </div>
 </div>
 </$let>
 

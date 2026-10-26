@@ -1,7 +1,7 @@
 {
   "url": "https://tiddly-gittly.github.io/Modern.TiddlyDev/",
   "license": "MIT",
-  "version": "0.0.2",
+  "version": "0.3.0",
   "scripts": {
     "dev": "node scripts/dev.js",
     "test": "npm run build && npx tiddlywiki wiki --test",

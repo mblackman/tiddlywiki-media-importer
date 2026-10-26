@@ -12,7 +12,9 @@ import { IChangedTiddlers, IParseTreeNode } from 'tiddlywiki';
 const h = (tag: string, attributes: Record<string, string | undefined> = {}, children: IParseTreeNode[] = []): IParseTreeNode => {
   const attributes_: Record<string, any> = {};
   for (const key in attributes) {
-    attributes_[key] = { type: 'string', value: attributes[key] };
+    if (attributes[key] !== undefined) {
+      attributes_[key] = { type: 'string', value: attributes[key] };
+    }
   }
   return { type: 'element', tag, attributes: attributes_, children };
 };
@@ -125,7 +127,7 @@ class MediaLibraryGridWidget extends Widget {
         lastWatched,
         created: (fields['created'] as Date) || new Date(0),
         favorite: fields['favorite'] === 'yes',
-        genres: $tw.utils.parseStringArray(fields['genres'] as string || '') || [],
+        genres: $tw.utils.parseStringArray((fields['genres'] as string) || '') || [],
       };
     });
 
@@ -157,7 +159,6 @@ class MediaLibraryGridWidget extends Widget {
 
     if (currentRating !== 'All') {
       if (currentRating === '0') {
-        // Unrated: Exclude items that have any log with rating > 0
         items = items.filter(index => !index.logs.some(l => l.rating > 0));
       } else {
         const r = parseInt(currentRating, 10);
@@ -193,28 +194,51 @@ class MediaLibraryGridWidget extends Widget {
     const inProgressItems = showActiveSplit ? items.filter(item => item.status === 'Active') : [];
     const gridItemsData = showActiveSplit ? items.filter(item => item.status !== 'Active') : items;
 
-    const totalRated = items.filter(i => i.averageRating > 0);
-    const overallRating = totalRated.length > 0 
-      ? (totalRated.reduce((sum, i) => sum + i.averageRating, 0) / totalRated.length).toFixed(1)
+    const totalRated = items.filter(index => index.averageRating > 0);
+    const overallRating = totalRated.length > 0
+      ? (totalRated.reduce((sum, index) => sum + index.averageRating, 0) / totalRated.length).toFixed(1)
       : '0';
 
-    const countLabel = h('div', { class: 'mi-sublabel mi-library-count', style: 'display: flex; justify-content: space-between; margin-bottom: 10px;' }, [
-      h('span', {}, [text('Found '), h('b', {}, [text(items.length.toString())]), text(' items')]),
+    const countLabel = h('div', { class: 'mi-sublabel mi-library-count' }, [
+      h('span', {}, [text('Showing '), h('b', {}, [text(items.length.toString())]), text(` of ${allMedia.length} items`)]),
       h('span', {}, [text(`Avg Rating: ${overallRating} ★`)]),
     ]);
 
     const makeGrid = (itemsList: MediaItem[]) => {
       if (itemsList.length === 0) {
         return h('div', { class: 'mi-empty-state' }, [
-          text('No media items match the current filters.'),
+          h('div', { style: 'font-weight: 600; font-style: normal; margin-bottom: 6px; color: <<colour foreground>>;' }, [
+            text('No media items match the current filters.'),
+          ]),
+          h('div', { style: 'margin-bottom: 12px; font-style: normal; font-size: 0.9em;' }, [
+            text('Try resetting active filters or import new media into your library.'),
+          ]),
+          h('div', { class: 'mi-flex-row', style: 'justify-content: center; gap: 10px;' }, [
+            {
+              type: 'button',
+              attributes: {
+                class: { type: 'string', value: 'mi-btn mi-btn-sm' },
+                message: { type: 'string', value: 'mi-reset-filters' },
+              },
+              children: [text('Reset Filters')],
+            },
+            {
+              type: 'link',
+              attributes: {
+                to: { type: 'string', value: '$:/plugins/mblackman/media-importer/ui' },
+                class: { type: 'string', value: 'mi-btn mi-btn-primary mi-btn-sm' },
+              },
+              children: [text('+ Import Media')],
+            },
+          ]),
         ]);
       }
       const gridItemsNodes: IParseTreeNode[] = [];
       for (const item of itemsList) {
         const cardContent = h('div', { class: 'mi-card mi-library-card' }, [
-          h('div', { class: 'mi-library-card-image-container', style: 'position: relative;' }, [
+          h('div', { class: 'mi-library-card-image-container' }, [
             item.favorite
-              ? h('div', { class: 'mi-library-card-fav' }, [text('★')])
+              ? h('div', { class: 'mi-library-card-fav', title: 'Favorite' }, [text('★')])
               : text(''),
             currentType === 'All'
               ? h('span', { class: 'mi-library-card-type-badge' }, [text(item.type)])
@@ -225,9 +249,9 @@ class MediaLibraryGridWidget extends Widget {
           ]),
           h('div', { class: 'mi-library-card-content' }, [
             h('div', { class: 'mi-library-card-title' }, [text(item.title)]),
-            h('div', { class: 'mi-sublabel mi-library-card-rating', style: 'display: flex; justify-content: space-between; align-items: center;' }, [
-              h('span', {}, [text(item.status)]),
-              h('span', { style: 'color: #f59e0b;' }, [
+            h('div', { class: 'mi-sublabel mi-library-card-rating' }, [
+              h('span', { class: `mi-status-text mi-status-${item.status.toLowerCase()}` }, [text(item.status)]),
+              h('span', { class: 'mi-star-full' }, [
                 item.averageRating > 0 ? text(`${item.averageRating.toFixed(1).replace(/\.0$/, '')} ★`) : text(''),
               ]),
             ]),
@@ -246,13 +270,13 @@ class MediaLibraryGridWidget extends Widget {
     const children: IParseTreeNode[] = [countLabel];
 
     if (inProgressItems.length > 0) {
-      children.push(h('h3', { style: 'margin-bottom: 10px; margin-top: 5px;' }, [text('Active')]));
+      children.push(h('h3', { class: 'mi-section-heading', style: 'margin-bottom: 10px; margin-top: 5px;' }, [text('Currently Active')]));
       children.push(makeGrid(inProgressItems));
       if (gridItemsData.length > 0) {
-        children.push(h('h3', { style: 'margin-bottom: 10px; margin-top: 20px;' }, [text('Library')]));
+        children.push(h('h3', { class: 'mi-section-heading', style: 'margin-bottom: 10px; margin-top: 22px;' }, [text('Collection')]));
       }
     }
-    
+
     if (gridItemsData.length > 0 || inProgressItems.length === 0) {
       children.push(makeGrid(gridItemsData));
     }
@@ -292,6 +316,7 @@ class MediaLibraryWidget extends Widget {
     this.addEventListener('mi-refresh-library', this.handleRefresh.bind(this));
     this.addEventListener('mi-reset-filters', this.handleResetFilters.bind(this));
     this.addEventListener('mi-surprise-me', this.handleSurpriseMe.bind(this));
+    this.addEventListener('mi-toggle-mobile-filters', this.handleToggleMobileFilters.bind(this));
   }
 
   handleRefresh() {
@@ -311,13 +336,20 @@ class MediaLibraryWidget extends Widget {
     return false;
   }
 
+  handleToggleMobileFilters() {
+    const mobileFilterState = '$:/state/mblackman/media-importer/library/mobile-filters';
+    const current = this.wiki.getTiddlerText(mobileFilterState, 'closed');
+    this.wiki.setText(mobileFilterState, 'text', undefined, current === 'open' ? 'closed' : 'open');
+    return false;
+  }
+
   handleSurpriseMe() {
     const typeTiddler = '$:/state/mblackman/media-importer/library/type';
     const genreTiddler = '$:/state/mblackman/media-importer/library/genre';
-    
+
     const currentType = this.wiki.getTiddlerText(typeTiddler, 'All');
     const currentGenre = this.wiki.getTiddlerText(genreTiddler, 'All');
-    
+
     let backlog = this.wiki.filterTiddlers('[tag[$:/tags/media-importer/Media]status[Backlog]]');
 
     if (currentType !== 'All') {
@@ -344,6 +376,7 @@ class MediaLibraryWidget extends Widget {
   }
 
   execute() {
+    this.computeAttributes();
     // State Tiddlers
     const typeTiddler = '$:/state/mblackman/media-importer/library/type';
     const ratingTiddler = '$:/state/mblackman/media-importer/library/rating';
@@ -353,9 +386,24 @@ class MediaLibraryWidget extends Widget {
     const searchTiddler = '$:/temp/mblackman/media-importer/search/library';
     const favoriteTiddler = '$:/state/mblackman/media-importer/library/favorite';
     const genreTiddler = '$:/state/mblackman/media-importer/library/genre';
+    const mobileFilterState = '$:/state/mblackman/media-importer/library/mobile-filters';
 
     const currentType = this.wiki.getTiddlerText(typeTiddler, 'All');
+    const currentStatus = this.wiki.getTiddlerText(statusTiddler, 'All');
+    const currentGenre = this.wiki.getTiddlerText(genreTiddler, 'All');
+    const currentRating = this.wiki.getTiddlerText(ratingTiddler, 'All');
+    const currentYear = this.wiki.getTiddlerText(yearTiddler, 'All');
+    const currentFavorite = this.wiki.getTiddlerText(favoriteTiddler, 'false').trim();
     const currentSort = this.wiki.getTiddlerText(sortTiddler, 'title-asc');
+    const isMobileFiltersOpen = this.wiki.getTiddlerText(mobileFilterState, 'closed') === 'open';
+
+    let activeFilterCount = 0;
+    if (currentType !== 'All') activeFilterCount++;
+    if (currentStatus !== 'All') activeFilterCount++;
+    if (currentGenre !== 'All') activeFilterCount++;
+    if (currentRating !== 'All') activeFilterCount++;
+    if (currentYear !== 'All') activeFilterCount++;
+    if (currentFavorite === 'true') activeFilterCount++;
 
     // --- Filters ---
 
@@ -387,13 +435,112 @@ class MediaLibraryWidget extends Widget {
     }
     const genreOptions = Array.from(genreSet).sort();
 
-    // --- UI Construction ---
+    // --- Top Navigation Header ---
+    const appHeader = h('div', { class: 'mi-app-header' }, [
+      h('div', { class: 'mi-app-header-title-group' }, [
+        h('h2', { class: 'mi-app-heading' }, [text('Media Library')]),
+      ]),
+      h('div', { class: 'mi-app-header-actions' }, [
+        {
+          type: 'button',
+          attributes: {
+            class: { type: 'string', value: 'mi-btn mi-btn-sm' },
+            tooltip: { type: 'string', value: 'Pick a random backlog item' },
+            message: { type: 'string', value: 'mi-surprise-me' },
+          },
+          children: [text('Surprise Me')],
+        },
+        {
+          type: 'link',
+          attributes: {
+            to: { type: 'string', value: '$:/plugins/mblackman/media-importer/ui' },
+            class: { type: 'string', value: 'mi-btn mi-btn-primary mi-btn-sm' },
+          },
+          children: [text('+ Import Media')],
+        },
+      ]),
+    ]);
+
+    // --- Search & Quick Toolbar Row (Always visible above the fold on mobile & desktop!) ---
+    const quickSortAddedButton = {
+      type: 'button',
+      attributes: {
+        class: { type: 'string', value: currentSort === 'added-desc' ? 'mi-btn mi-btn-primary mi-btn-sm' : 'mi-btn mi-btn-sm' },
+      },
+      children: [
+        text('Recently Added'),
+        { type: 'action-setfield', attributes: { $tiddler: { type: 'string', value: sortTiddler }, text: { type: 'string', value: 'added-desc' } } },
+      ],
+    } as IParseTreeNode;
+
+    const quickSortFinishedButton = {
+      type: 'button',
+      attributes: {
+        class: { type: 'string', value: currentSort === 'date-desc' ? 'mi-btn mi-btn-primary mi-btn-sm' : 'mi-btn mi-btn-sm' },
+      },
+      children: [
+        text('Recently Active'),
+        { type: 'action-setfield', attributes: { $tiddler: { type: 'string', value: sortTiddler }, text: { type: 'string', value: 'date-desc' } } },
+      ],
+    } as IParseTreeNode;
+
+    const mobileFilterToggleButton = {
+      type: 'button',
+      attributes: {
+        class: {
+          type: 'string',
+          value: isMobileFiltersOpen || activeFilterCount > 0
+            ? 'mi-btn mi-btn-active-subtle mi-btn-sm mi-mobile-filter-toggle'
+            : 'mi-btn mi-btn-sm mi-mobile-filter-toggle',
+        },
+        message: { type: 'string', value: 'mi-toggle-mobile-filters' },
+      },
+      children: [
+        text(
+          activeFilterCount > 0
+            ? `Filters (${activeFilterCount}) ${isMobileFiltersOpen ? '▴' : '▾'}`
+            : `Filters & Sort ${isMobileFiltersOpen ? '▴' : '▾'}`,
+        ),
+      ],
+    } as IParseTreeNode;
+
+    const searchAndQuickBar = h('div', { class: 'mi-library-top-bar' }, [
+      h('div', { class: 'mi-library-search-box' }, [
+        {
+          type: 'edit-text',
+          attributes: {
+            tiddler: { type: 'string', value: searchTiddler },
+            tag: { type: 'string', value: 'input' },
+            placeholder: { type: 'string', value: 'Search library by title...' },
+            default: { type: 'string', value: '' },
+            class: { type: 'string', value: 'mi-input' },
+          },
+          children: [],
+        },
+      ]),
+      h('div', { class: 'mi-library-quick-actions' }, [
+        mobileFilterToggleButton,
+        quickSortAddedButton,
+        quickSortFinishedButton,
+        activeFilterCount > 0
+          ? ({
+            type: 'button',
+            attributes: {
+              class: { type: 'string', value: 'mi-btn mi-btn-sm' },
+              message: { type: 'string', value: 'mi-reset-filters' },
+              tooltip: { type: 'string', value: 'Reset all filters and search' },
+            },
+            children: [text('Reset')],
+          } as IParseTreeNode)
+          : text(''),
+      ]),
+    ]);
 
     // Helper for Select Options
     const createOption = (value: string, label: string) => h('option', { value }, [text(label)]);
 
     // Type Select
-    const allCount = this.wiki.filterTiddlers(`[tag[$:/tags/media-importer/Media]]`).length;
+    const allCount = allMedia.length;
     const typeSelectChildren = [
       createOption('All', `All Types (${allCount})`),
       ...typeOptions.map(t => {
@@ -423,7 +570,7 @@ class MediaLibraryWidget extends Widget {
     ]);
 
     // Genre Select
-    const genreSelectChildren = [createOption('All', 'All Genres'), ...genreOptions.map(g => createOption(g, g))];
+    const genreSelectChildren = [createOption('All', 'All Genres'), ...genreOptions.map(g => createOption(g, g.replace(/_/g, ' ')))];
     const genreSelect = h('div', { class: 'mi-filter-group' }, [
       h('span', { class: 'mi-label' }, [text('Genre')]),
       {
@@ -441,11 +588,11 @@ class MediaLibraryWidget extends Widget {
         attributes: { tiddler: { type: 'string', value: ratingTiddler }, default: { type: 'string', value: 'All' }, class: { type: 'string', value: 'mi-input' } },
         children: [
           createOption('All', 'All Ratings'),
-          createOption('5', '⭐⭐⭐⭐⭐ (5)'),
-          createOption('4', '⭐⭐⭐⭐ (4)'),
-          createOption('3', '⭐⭐⭐ (3)'),
-          createOption('2', '⭐⭐ (2)'),
-          createOption('1', '⭐ (1)'),
+          createOption('5', '★★★★★ (5)'),
+          createOption('4', '★★★★☆ (4)'),
+          createOption('3', '★★★☆☆ (3)'),
+          createOption('2', '★★☆☆☆ (2)'),
+          createOption('1', '★☆☆☆☆ (1)'),
           createOption('0', 'Unrated'),
         ],
       },
@@ -454,7 +601,7 @@ class MediaLibraryWidget extends Widget {
     // Year Select
     const yearSelectChildren = [createOption('All', 'All Years'), ...yearOptions.map(y => createOption(y, y))];
     const yearSelect = h('div', { class: 'mi-filter-group' }, [
-      h('span', { class: 'mi-label' }, [text('Year Finished')]),
+      h('span', { class: 'mi-label' }, [text('Year Active')]),
       {
         type: 'select',
         attributes: { tiddler: { type: 'string', value: yearTiddler }, default: { type: 'string', value: 'All' }, class: { type: 'string', value: 'mi-input' } },
@@ -465,36 +612,32 @@ class MediaLibraryWidget extends Widget {
     // Favorite Toggle
     const favoriteToggle = h('div', { class: 'mi-filter-group' }, [
       h('span', { class: 'mi-label' }, [text('Favorites')]),
-      // Active State (True) -> Button to unset
       {
         type: 'list',
         attributes: { filter: { type: 'string', value: `[title[${favoriteTiddler}]get[text]else[false]match[true]]` }, variable: { type: 'string', value: 'ignore' } },
         children: [{
           type: 'button',
           attributes: {
-            class: { type: 'string', value: 'mi-input' },
-            style: { type: 'string', value: 'text-align: left; display: flex; justify-content: space-between; align-items: center; cursor: pointer; width: 100%; height: 2.5em;' },
+            class: { type: 'string', value: 'mi-input mi-fav-filter-btn mi-fav-filter-active' },
           },
           children: [
-            text('Show Favorites'),
-            h('span', { style: 'color: #f59e0b;' }, [text('★')]),
+            text('Favorites Only'),
+            h('span', { class: 'mi-star-full' }, [text('★')]),
             { type: 'action-setfield', attributes: { $tiddler: { type: 'string', value: favoriteTiddler }, text: { type: 'string', value: 'false' } } },
           ],
         }],
       },
-      // Inactive State (False) -> Button to set
       {
         type: 'list',
         attributes: { filter: { type: 'string', value: `[title[${favoriteTiddler}]get[text]else[false]!match[true]]` }, variable: { type: 'string', value: 'ignore' } },
         children: [{
           type: 'button',
           attributes: {
-            class: { type: 'string', value: 'mi-input' },
-            style: { type: 'string', value: 'text-align: left; display: flex; justify-content: space-between; align-items: center; cursor: pointer; width: 100%; height: 2.5em;' },
+            class: { type: 'string', value: 'mi-input mi-fav-filter-btn' },
           },
           children: [
             text('Show Favorites'),
-            h('span', { style: 'color: #ccc;' }, [text('☆')]),
+            h('span', { class: 'mi-star-inactive' }, [text('☆')]),
             { type: 'action-setfield', attributes: { $tiddler: { type: 'string', value: favoriteTiddler }, text: { type: 'string', value: 'true' } } },
           ],
         }],
@@ -512,8 +655,8 @@ class MediaLibraryWidget extends Widget {
           createOption('title-desc', 'Title (Z-A)'),
           createOption('rating-desc', 'Rating (High-Low)'),
           createOption('rating-asc', 'Rating (Low-High)'),
-          createOption('date-desc', 'Finished Date (Newest)'),
-          createOption('date-asc', 'Finished Date (Oldest)'),
+          createOption('date-desc', 'Active Date (Newest)'),
+          createOption('date-asc', 'Active Date (Oldest)'),
           createOption('added-desc', 'Added Date (Newest)'),
           createOption('added-asc', 'Added Date (Oldest)'),
         ],
@@ -528,105 +671,73 @@ class MediaLibraryWidget extends Widget {
         message: { type: 'string', value: 'mi-reset-filters' },
         tooltip: { type: 'string', value: 'Reset all filters and search' },
       },
-      children: [text('Reset')],
+      children: [text('Reset All')],
     } as IParseTreeNode;
 
-    // Surprise Me Button
-    const surpriseMeButton = {
-      type: 'button',
-      attributes: {
-        class: { type: 'string', value: 'mi-btn mi-action-btn' },
-        style: { type: 'string', value: 'margin-left: 8px;' },
-        tooltip: { type: 'string', value: 'Pick a random backlog item' },
-        message: { type: 'string', value: 'mi-surprise-me' },
-      },
-      children: [text('🎲 Surprise Me')],
-    } as IParseTreeNode;
-    
-    // Quick Sort: Recently Added
-    const quickSortAddedButton = {
-      type: 'button',
-      attributes: {
-        class: { type: 'string', value: currentSort === 'added-desc' ? 'mi-btn mi-btn-primary' : 'mi-btn' },
-        style: { type: 'string', value: 'margin-left: 8px;' },
-      },
-      children: [
-        text('Recently Added'),
-        { type: 'action-setfield', attributes: { $tiddler: { type: 'string', value: sortTiddler }, text: { type: 'string', value: 'added-desc' } } }
-      ],
-    } as IParseTreeNode;
-
-    // Quick Sort: Recently Finished
-    const quickSortFinishedButton = {
-      type: 'button',
-      attributes: {
-        class: { type: 'string', value: currentSort === 'date-desc' ? 'mi-btn mi-btn-primary' : 'mi-btn' },
-        style: { type: 'string', value: 'margin-left: 8px;' },
-      },
-      children: [
-        text('Recently Active'),
-        { type: 'action-setfield', attributes: { $tiddler: { type: 'string', value: sortTiddler }, text: { type: 'string', value: 'date-desc' } } }
-      ],
-    } as IParseTreeNode;
-
-    // Controls Container
-    const controls = h('div', { class: 'mi-section' }, [
-      h('div', { class: 'mi-library-controls' }, [
-        typeSelect,
-        statusSelect,
-        genreSelect,
-        ratingSelect,
-        yearSelect,
-        favoriteToggle,
-        sortSelect,
-        resetButton,
-        surpriseMeButton,
-      ]),
-      h('div', { style: 'margin-top: 10px; display: flex; align-items: center; flex-wrap: wrap; gap: 4px;' }, [
-        h('span', { class: 'mi-sublabel', style: 'margin-bottom: 0; margin-right: 4px;' }, [text('Quick Sort:')]),
-        quickSortAddedButton,
-        quickSortFinishedButton,
-      ]),
-    ]);
-
-    // Search Input
-    const searchInput = h('div', { class: 'mi-section-tight' }, [
+    // Collapsible Filter Drawer Container
+    const controls = h(
+      'div',
       {
-        type: 'edit-text',
-        attributes: {
-          tiddler: { type: 'string', value: searchTiddler },
-          tag: { type: 'string', value: 'input' },
-          placeholder: { type: 'string', value: 'Search library...' },
-          default: { type: 'string', value: '' },
-          class: { type: 'string', value: 'mi-input' },
-        },
-        children: [],
+        class: isMobileFiltersOpen
+          ? 'mi-library-filters-drawer mi-library-filters-open'
+          : 'mi-library-filters-drawer',
       },
+      [
+        h('div', { class: 'mi-library-controls' }, [
+          typeSelect,
+          statusSelect,
+          genreSelect,
+          ratingSelect,
+          yearSelect,
+          favoriteToggle,
+          sortSelect,
+          resetButton,
+        ]),
+      ],
+    );
+
+    const shell = h('div', { class: 'mi-page-shell' }, [
+      appHeader,
+      searchAndQuickBar,
+      controls,
+      { type: 'MediaLibraryGrid', attributes: {}, children: [] },
     ]);
 
-    this.makeChildWidgets([controls, searchInput, { type: 'MediaLibraryGrid', attributes: {}, children: [] }]);
+    this.makeChildWidgets([shell]);
   }
 
   refresh(changedTiddlers: IChangedTiddlers) {
     const importersTiddler = '$:/plugins/mblackman/media-importer/data/importers';
     const typeTiddler = '$:/state/mblackman/media-importer/library/type';
+    const statusTiddler = '$:/state/mblackman/media-importer/library/status';
+    const genreTiddler = '$:/state/mblackman/media-importer/library/genre';
+    const ratingTiddler = '$:/state/mblackman/media-importer/library/rating';
+    const yearTiddler = '$:/state/mblackman/media-importer/library/year';
+    const favoriteTiddler = '$:/state/mblackman/media-importer/library/favorite';
     const sortTiddler = '$:/state/mblackman/media-importer/library/sort';
+    const mobileFilterState = '$:/state/mblackman/media-importer/library/mobile-filters';
 
-    const importersChanged = changedTiddlers[importersTiddler];
-    const typeChanged = changedTiddlers[typeTiddler];
-    const sortChanged = changedTiddlers[sortTiddler];
+    const stateChanged = [
+      importersTiddler,
+      typeTiddler,
+      statusTiddler,
+      genreTiddler,
+      ratingTiddler,
+      yearTiddler,
+      favoriteTiddler,
+      sortTiddler,
+      mobileFilterState,
+    ].some(t => changedTiddlers[t]);
 
-    // Check if any media items changed or were deleted (for list updates)
     const mediaChanged = Object.keys(changedTiddlers).some(t => {
       if (changedTiddlers[t]?.deleted) return true;
       const tid = this.wiki.getTiddler(t);
       return tid?.hasTag('$:/tags/media-importer/Media');
     });
 
-    // Check if any log items changed (for list updates)
     const logsChanged = Object.keys(changedTiddlers).some(t => t.startsWith('$:/data/media-log/') || t.startsWith('$:/media-log/'));
 
-    if (importersChanged || mediaChanged || logsChanged || typeChanged || sortChanged) {
+    if (stateChanged || mediaChanged || logsChanged) {
       this.refreshSelf();
       return true;
     }

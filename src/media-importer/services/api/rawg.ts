@@ -1,5 +1,5 @@
 import { MediaDraftFields, MediaFinalFields, MediaImporterConfig } from './types';
-import { makeList, formatCustomDate } from './utils';
+import { formatCustomDate, makeList } from './utils';
 
 export const RawgConfig: MediaImporterConfig = {
   type: 'Game',
@@ -24,6 +24,9 @@ export const RawgConfig: MediaImporterConfig = {
             : '0000',
           draft_id: String(game.id),
           draft_image: game.background_image,
+          draft_genres: Array.isArray(game.genres)
+            ? game.genres.map((g: any) => g.name).filter(Boolean).join(', ')
+            : '',
         }));
       });
   },

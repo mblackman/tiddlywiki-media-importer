@@ -1,4 +1,5 @@
 title: $:/plugins/mblackman/media-importer/ui/media-library
+caption: Media Library
 type: text/vnd.tiddlywiki
 
 <$MediaLibrary />

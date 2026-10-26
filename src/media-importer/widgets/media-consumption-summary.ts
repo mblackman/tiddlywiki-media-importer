@@ -121,22 +121,14 @@ class MediaConsumptionSummaryWidget extends Widget {
 
     // --- Controls ---
     const controls = document.createElement('div');
-    controls.style.display = 'flex';
-    controls.style.alignItems = 'center';
-    controls.style.gap = '10px';
-    controls.style.marginBottom = '10px';
-    controls.style.padding = '10px';
-    controls.style.background = 'rgba(0, 0, 0, 0.05)';
-    controls.style.borderRadius = '4px';
+    controls.className = 'mi-summary-controls-bar';
 
     const isReadOnly = this.getAttribute('readonly', 'false') === 'true';
 
     const createDateInput = (value: string, onChange: (value_: string) => void) => {
       const input = document.createElement('input') as unknown as HTMLInputElement;
       input.type = 'date';
-      input.className = 'mi-input';
-      input.style.padding = '4px';
-      input.style.width = 'auto';
+      input.className = 'mi-input mi-input-sm mi-input-auto';
       input.value = value;
       if (isReadOnly) {
         input.disabled = true;
@@ -148,13 +140,21 @@ class MediaConsumptionSummaryWidget extends Widget {
       return input;
     };
 
-    controls.appendChild(document.createTextNode('From: '));
+    const fromLabel = document.createElement('span');
+    fromLabel.className = 'mi-sublabel';
+    fromLabel.style.marginBottom = '0';
+    fromLabel.textContent = 'From:';
+    controls.appendChild(fromLabel);
     controls.appendChild(createDateInput(this.startDate, (value) => {
       this.startDate = value;
       this.refreshSelf();
     }));
 
-    controls.appendChild(document.createTextNode(' To: '));
+    const toLabel = document.createElement('span');
+    toLabel.className = 'mi-sublabel';
+    toLabel.style.marginBottom = '0';
+    toLabel.textContent = 'To:';
+    controls.appendChild(toLabel);
     controls.appendChild(createDateInput(this.endDate, (value) => {
       this.endDate = value;
       this.refreshSelf();

@@ -7,12 +7,13 @@ Unified Media Manager for Books, Comics, Games, and Manga.
 Fetches data from various APIs and formats them into fields.
 \*/
 
-import { MediaImporterConfig } from './api/types';
-import { OpenLibraryConfig } from './api/openlibrary';
-import { ComicVineConfig } from './api/comicvine';
-import { RawgConfig } from './api/rawg';
 import { AniListConfig } from './api/anilist';
+import { ComicVineConfig } from './api/comicvine';
+import { OpenLibraryConfig } from './api/openlibrary';
+import { RawgConfig } from './api/rawg';
 import { TmdbMovieConfig, TmdbTvConfig } from './api/tmdb';
+import { MediaImporterConfig } from './api/types';
+import { formatCustomDate, makeList } from './api/utils';
 
 declare const $tw: any;
 
@@ -22,6 +23,45 @@ export const after = ['startup'];
 export const synchronous = true;
 
 const registeredConfigs = new Map<string, MediaImporterConfig>();
+
+function getTodayDateString(): string {
+  return $tw.utils.formatDateString(new Date(), 'YYYY-0MM-0DD');
+}
+
+function logMediaToday(mediaTitle: string) {
+  const todayDate = getTodayDateString();
+  const todayLogTitle = '$:/media-log/' + todayDate;
+  const existingLog = $tw.wiki.getTiddler(todayLogTitle) || new $tw.Tiddler({ title: todayLogTitle });
+  const currentItems: string[] = $tw.wiki.getTiddlerList(todayLogTitle, 'media-log') || [];
+  if (!currentItems.includes(mediaTitle)) {
+    currentItems.push(mediaTitle);
+  }
+  const existingTags: string[] = (existingLog.fields.tags || []).slice();
+  if (!existingTags.includes('$:/tags/media-importer/Log')) {
+    existingTags.push('$:/tags/media-importer/Log');
+  }
+  const listString = currentItems.map((item: string) => '[[' + item + ']]').join(' ');
+  $tw.wiki.addTiddler(
+    new $tw.Tiddler(existingLog, {
+      'media-log': listString,
+      tags: existingTags,
+      'log-date': todayDate,
+      modified: new Date(),
+    }),
+  );
+}
+
+function openTiddlerInStory(finalTitle: string) {
+  const storyList = ($tw.wiki.getTiddlerList('$:/StoryList') || []).slice();
+  const existingIndex = storyList.indexOf(finalTitle);
+  if (existingIndex !== -1) {
+    storyList.splice(existingIndex, 1);
+  }
+  storyList.unshift(finalTitle);
+  $tw.wiki.addTiddler(
+    new $tw.Tiddler($tw.wiki.getTiddler('$:/StoryList'), { title: '$:/StoryList', list: storyList }),
+  );
+}
 
 // --- CORE LOGIC: REGISTER IMPORTER ---
 function registerMediaImporter(config: MediaImporterConfig) {
@@ -74,8 +114,9 @@ function registerMediaImporter(config: MediaImporterConfig) {
         results.forEach(function(item, index) {
           const fields = Object.assign(
             {
-              title: searchPrefix + index,
+              title: searchPrefix + String(index).padStart(2, '0'),
               tags: config.searchTag || 'SearchResult',
+              result_index: String(index),
             },
             item,
           );
@@ -102,54 +143,125 @@ function registerMediaImporter(config: MediaImporterConfig) {
       ? ($tw.wiki.getTiddlerText(config.apiKeyTiddler) || '').trim()
       : '';
 
+    const defaultStatus = ($tw.wiki.getTiddlerText('$:/state/mblackman/media-importer/staging/status', 'Backlog') || 'Backlog').trim();
+    const namingPattern = ($tw.wiki.getTiddlerText('$:/state/mblackman/media-importer/staging/naming', 'title-year') || 'title-year').trim();
+    const globalCustomTags = ($tw.wiki.getTiddlerText('$:/state/mblackman/media-importer/staging/tags', '') || '').trim();
+    const autoLogToday = ($tw.wiki.getTiddlerText('$:/state/mblackman/media-importer/staging/log-today', 'no') || 'no').trim() === 'yes' ||
+      (event.paramObject && event.paramObject.logToday === 'yes');
+    const autoOpen = ($tw.wiki.getTiddlerText('$:/state/mblackman/media-importer/staging/auto-open', 'no') || 'no').trim() === 'yes' ||
+      (event.paramObject && event.paramObject.autoOpen === 'yes');
+
     config
       .fetchFn(temporaryTiddler.fields, apiKey)
       .then(fields => {
         $tw.wiki.deleteTiddler(fetchingStateTitle);
-        const finalTitle = fields.title;
+
+        const stagedTitle = ((temporaryTiddler.fields.staged_title as string) || '').trim();
+        const stagedStatus = ((temporaryTiddler.fields.staged_status as string) || '').trim();
+        const stagedTags = ((temporaryTiddler.fields.staged_tags as string) || '').trim();
+        const stagedCoverUri = ((temporaryTiddler.fields.staged_cover_uri as string) || '').trim();
+        const stagedCoverMode = ((temporaryTiddler.fields.staged_cover_mode as string) || '').trim();
+
+        let finalTitle = fields.title;
+        if (stagedTitle) {
+          finalTitle = stagedTitle;
+        } else if (namingPattern === 'title-only' && fields.englishTitle) {
+          finalTitle = String(fields.englishTitle).trim();
+        }
+        fields.title = finalTitle;
+
         const existingTiddler = $tw.wiki.getTiddler(finalTitle);
 
         // Preserve created date and user fields if re-importing an existing tiddler
         if (existingTiddler) {
           fields.created = existingTiddler.fields.created || new Date();
-          if (existingTiddler.fields.status) {
+          if (stagedStatus) {
+            fields.status = stagedStatus;
+          } else if (existingTiddler.fields.status) {
             fields.status = existingTiddler.fields.status;
+          } else {
+            fields.status = defaultStatus;
           }
           if (existingTiddler.fields.favorite) {
             fields.favorite = existingTiddler.fields.favorite;
           }
-          const existingTags = (existingTiddler.fields.tags || []).slice();
-          if (!existingTags.includes('$:/tags/media-importer/Media')) {
-            existingTags.push('$:/tags/media-importer/Media');
+        } else {
+          if (!fields.created) {
+            fields.created = temporaryTiddler.fields.created || new Date();
           }
-          fields.tags = existingTags;
-        } else if (!fields.created) {
-          fields.created = temporaryTiddler.fields.created || new Date();
+          fields.status = stagedStatus || defaultStatus || 'Backlog';
+        }
+
+        // Merge tags: base Media tag + existing tags + global staging tags + per-item staged tags
+        const mergedTags: string[] = existingTiddler && existingTiddler.fields.tags
+          ? existingTiddler.fields.tags.slice()
+          : [];
+        if (!mergedTags.includes('$:/tags/media-importer/Media')) {
+          mergedTags.push('$:/tags/media-importer/Media');
+        }
+        const extraGlobalTags = $tw.utils.parseStringArray(globalCustomTags) || [];
+        const extraStagedTags = $tw.utils.parseStringArray(stagedTags) || [];
+        for (const t of [...extraGlobalTags, ...extraStagedTags]) {
+          if (t && !mergedTags.includes(t)) {
+            mergedTags.push(t);
+          }
+        }
+        fields.tags = mergedTags;
+
+        // Apply custom cover URI / embedded data URI if staged
+        if (stagedCoverUri) {
+          fields.image = stagedCoverUri;
+          fields['cover-storage'] = stagedCoverMode || (stagedCoverUri.startsWith('data:') ? 'embedded' : 'external-uri');
+        } else if (fields.image) {
+          fields['cover-storage'] = String(fields.image).startsWith('data:') ? 'embedded' : 'external-uri';
+        }
+
+        // Auto-log today if enabled
+        if (autoLogToday) {
+          logMediaToday(finalTitle);
+          if (!fields.status || fields.status === 'Backlog') {
+            fields.status = 'Active';
+          }
         }
 
         // Create/Update Tiddler
         $tw.wiki.addTiddler(new $tw.Tiddler(existingTiddler, fields));
 
-        // UI Cleanup
-        $tw.notifier.display('$:/temp/notification', {
+        // Mark temporary search result tiddler with the resolved finalTitle and deselect from batch queue
+        const latestTemporary = $tw.wiki.getTiddler(temporaryTitle);
+        if (latestTemporary) {
+          $tw.wiki.addTiddler(
+            new $tw.Tiddler(latestTemporary, {
+              imported_title: finalTitle,
+              batch_selected: 'no',
+            }),
+          );
+        }
+
+        // Track last imported media for quick-jump banner
+        $tw.wiki.addTiddler(
+          new $tw.Tiddler({
+            title: '$:/temp/media-importer/last-imported',
+            text: finalTitle,
+            'media-type': type,
+            timestamp: $tw.utils.formatDateString(new Date(), '0hh:0mm:0ss'),
+          }),
+        );
+
+        // UI Notification
+        $tw.notifier.display('$:/plugins/mblackman/media-importer/ui/notification', {
           variables: { title: finalTitle },
         });
 
-        // Force Open in StoryList
-        const storyList = ($tw.wiki.getTiddlerList('$:/StoryList') || []).slice();
-        const existingIndex = storyList.indexOf(finalTitle);
-        if (existingIndex !== -1) {
-          storyList.splice(existingIndex, 1);
+        // Only open in StoryList if user explicitly enabled auto-open or passed autoOpen
+        if (autoOpen) {
+          openTiddlerInStory(finalTitle);
         }
-        storyList.unshift(finalTitle);
-        $tw.wiki.addTiddler(
-          new $tw.Tiddler($tw.wiki.getTiddler('$:/StoryList'), { title: '$:/StoryList', list: storyList }),
-        );
       })
       .catch(error => {
         $tw.wiki.deleteTiddler(fetchingStateTitle);
         console.error(type + ' Fetch Error:', error);
-        $tw.notifier.display('$:/temp/notification', {
+        $tw.notifier.display('$:/plugins/mblackman/media-importer/ui/error-notification', {
           variables: { title: 'Error fetching ' + type + ' details.' },
         });
       });
@@ -164,7 +276,153 @@ export function startup() {
   registerMediaImporter(TmdbMovieConfig);
   registerMediaImporter(TmdbTvConfig);
 
-  // 3. REFRESH EXISTING MEDIA METADATA FROM ORIGINAL SOURCE
+  // 3. BATCH IMPORT SELECTED SEARCH RESULTS
+  $tw.rootWidget.addEventListener('tm-batch-fetch-media', function(event: any) {
+    const type = (event.param || ($tw.wiki && $tw.wiki.getTiddlerText('$:/state/media-importer-selected')) || 'Book').trim();
+    const config = registeredConfigs.get(type);
+    if (!config) return;
+    const resultTag = config.searchTag || 'SearchResult';
+    const selectedResults = $tw.wiki.filterTiddlers(`[tag[${resultTag}]field:batch_selected[yes]]`);
+    for (const temporaryTitle of selectedResults) {
+      $tw.rootWidget.dispatchEvent({
+        type: 'tm-fetch-' + type,
+        param: temporaryTitle,
+      });
+    }
+  });
+
+  // 4. MANUAL / CUSTOM MEDIA ENTRY & COVER DROPZONE IMPORT
+  $tw.rootWidget.addEventListener('tm-import-manual-media', function(event: any) {
+    const statePrefix = '$:/temp/media-importer/manual';
+    const rawTitle = ($tw.wiki.getTiddlerText(statePrefix + '/title', '') || '').trim();
+    if (!rawTitle) return;
+
+    const mediaType = ($tw.wiki.getTiddlerText(statePrefix + '/type', 'Book') || 'Book').trim();
+    const year = ($tw.wiki.getTiddlerText(statePrefix + '/year', '') || '').trim() || String(new Date().getFullYear());
+    const creator = ($tw.wiki.getTiddlerText(statePrefix + '/creator', '') || '').trim();
+    const status = ($tw.wiki.getTiddlerText(statePrefix + '/status', 'Backlog') || 'Backlog').trim();
+    const genresRaw = ($tw.wiki.getTiddlerText(statePrefix + '/genres', '') || '').trim();
+    const customTagsRaw = ($tw.wiki.getTiddlerText(statePrefix + '/tags', '') || '').trim();
+    const coverUri = ($tw.wiki.getTiddlerText(statePrefix + '/cover-uri', '') || '').trim();
+    const coverMode = ($tw.wiki.getTiddlerText(statePrefix + '/cover-mode', 'external-uri') || 'external-uri').trim();
+    const externalUrl = ($tw.wiki.getTiddlerText(statePrefix + '/url', '') || '').trim();
+    const plot = ($tw.wiki.getTiddlerText(statePrefix + '/plot', '') || '').trim();
+    const namingPattern = ($tw.wiki.getTiddlerText('$:/state/mblackman/media-importer/staging/naming', 'title-year') || 'title-year').trim();
+    const autoLogToday = ($tw.wiki.getTiddlerText('$:/state/mblackman/media-importer/staging/log-today', 'no') || 'no').trim() === 'yes';
+    const autoOpen = ($tw.wiki.getTiddlerText('$:/state/mblackman/media-importer/staging/auto-open', 'no') || 'no').trim() === 'yes' ||
+      (event.paramObject && event.paramObject.autoOpen === 'yes');
+
+    const hasYearSuffix = /\(\d{4}\)$/.test(rawTitle);
+    const finalTitle = namingPattern === 'title-only' || hasYearSuffix
+      ? rawTitle
+      : `${rawTitle} (${year})`;
+
+    const genresList = genresRaw
+      ? makeList(genresRaw.split(',').map((g: string) => g.trim()).filter(Boolean))
+      : '';
+    const creatorList = creator
+      ? makeList(creator.split(',').map((c: string) => c.trim()).filter(Boolean))
+      : '';
+
+    const tags = ['$:/tags/media-importer/Media'];
+    const parsedExtraTags = $tw.utils.parseStringArray(customTagsRaw) || [];
+    for (const t of parsedExtraTags) {
+      if (t && !tags.includes(t)) tags.push(t);
+    }
+
+    const fields: Record<string, any> = {
+      title: finalTitle,
+      englishTitle: rawTitle,
+      year: year,
+      dataSource: 'Manual',
+      url: externalUrl,
+      id: '',
+      status: status,
+      tags: tags,
+      'media-type': mediaType,
+      image: coverUri,
+      'cover-storage': coverUri ? coverMode : '',
+      genres: genresList,
+      plot: plot,
+      onlineRating: '0',
+      created: new Date(),
+      modified: formatCustomDate(),
+    };
+
+    if (mediaType === 'Book' || mediaType === 'Manga') {
+      fields.author = creatorList || '[[Unknown]]';
+      if (mediaType === 'Book') {
+        fields.book_title = rawTitle;
+        fields.pages = 'unknown';
+        fields.isbn = 'unknown';
+      } else {
+        fields.volumes = 'unknown';
+      }
+    } else if (mediaType === 'Movie') {
+      fields.director = creatorList;
+      fields.runtime = 'unknown';
+    } else if (mediaType === 'TV Show') {
+      fields.creator = creatorList;
+      fields.seasons = 'unknown';
+      fields.episodes = 'unknown';
+    } else if (mediaType === 'Game') {
+      fields.developers = creatorList;
+    } else if (mediaType === 'Comic') {
+      fields.publisher = creatorList;
+      fields.count_of_issues = 'unknown';
+    }
+
+    if (autoLogToday) {
+      logMediaToday(finalTitle);
+      if (fields.status === 'Backlog') {
+        fields.status = 'Active';
+      }
+    }
+
+    const existingTiddler = $tw.wiki.getTiddler(finalTitle);
+    $tw.wiki.addTiddler(new $tw.Tiddler(existingTiddler, fields));
+
+    // Also create a companion cover media tiddler with _canonical_uri if requested by user
+    const createCanonicalCoverTiddler = ($tw.wiki.getTiddlerText(statePrefix + '/create-canonical-tiddler', 'no') || 'no').trim() === 'yes';
+    if (createCanonicalCoverTiddler && coverUri && !coverUri.startsWith('data:')) {
+      const coverTiddlerTitle = finalTitle + '/Cover';
+      $tw.wiki.addTiddler(
+        new $tw.Tiddler({
+          title: coverTiddlerTitle,
+          type: 'image/jpeg',
+          _canonical_uri: coverUri,
+          tags: '$:/tags/media-importer/Cover',
+          'media-parent': finalTitle,
+          modified: formatCustomDate(),
+        }),
+      );
+    }
+
+    // Clear manual form inputs
+    for (const suffix of ['/title', '/creator', '/genres', '/tags', '/cover-uri', '/url', '/plot', '/cover-filename']) {
+      $tw.wiki.deleteTiddler(statePrefix + suffix);
+    }
+
+    // Track last imported media for quick-jump banner
+    $tw.wiki.addTiddler(
+      new $tw.Tiddler({
+        title: '$:/temp/media-importer/last-imported',
+        text: finalTitle,
+        'media-type': mediaType,
+        timestamp: $tw.utils.formatDateString(new Date(), '0hh:0mm:0ss'),
+      }),
+    );
+
+    $tw.notifier.display('$:/plugins/mblackman/media-importer/ui/notification', {
+      variables: { title: finalTitle },
+    });
+
+    if (autoOpen) {
+      openTiddlerInStory(finalTitle);
+    }
+  });
+
+  // 5. REFRESH EXISTING MEDIA METADATA FROM ORIGINAL SOURCE
   $tw.rootWidget.addEventListener('tm-refresh-media', function(event: any) {
     const targetTitle = event.param;
     if (!targetTitle) return;

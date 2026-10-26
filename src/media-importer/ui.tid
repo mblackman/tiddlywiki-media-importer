@@ -1,31 +1,91 @@
 title: $:/plugins/mblackman/media-importer/ui
 caption: Media Importer
 
-<div style="max-width: 1000px; margin: 0 auto;">
+\define mi-type-svg(iconName)
+<$list filter="[<__iconName__>match[book]]" variable="ignore">
+<svg class="mi-svg-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg>
+</$list>
+<$list filter="[<__iconName__>match[comic]]" variable="ignore">
+<svg class="mi-svg-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+</$list>
+<$list filter="[<__iconName__>match[game]]" variable="ignore">
+<svg class="mi-svg-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="6" y1="12" x2="10" y2="12"/><line x1="8" y1="10" x2="8" y2="14"/><line x1="15" y1="13" x2="15.01" y2="13"/><line x1="18" y1="11" x2="18.01" y2="11"/><rect x="2" y="6" width="20" height="12" rx="2"/></svg>
+</$list>
+<$list filter="[<__iconName__>match[manga]]" variable="ignore">
+<svg class="mi-svg-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+</$list>
+<$list filter="[<__iconName__>match[movie]]" variable="ignore">
+<svg class="mi-svg-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"/><line x1="7" y1="2" x2="7" y2="22"/><line x1="17" y1="2" x2="17" y2="22"/><line x1="2" y1="12" x2="22" y2="12"/><line x1="2" y1="7" x2="7" y2="7"/><line x1="2" y1="17" x2="7" y2="17"/><line x1="17" y1="17" x2="22" y2="17"/><line x1="17" y1="7" x2="22" y2="7"/></svg>
+</$list>
+<$list filter="[<__iconName__>match[tv]]" variable="ignore">
+<svg class="mi-svg-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="7" width="20" height="15" rx="2" ry="2"/><polyline points="17 2 12 7 7 2"/></svg>
+</$list>
+<$list filter="[<__iconName__>match[manual]]" variable="ignore">
+<svg class="mi-svg-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+</$list>
+\end
+
+<div class="mi-page-shell">
+
+<!-- TOP NAVIGATION BAR -->
+<div class="mi-app-header">
+  <div class="mi-app-header-title-group">
+    <svg class="mi-svg-icon mi-app-header-icon" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+    <h2 class="mi-app-heading">Import Media</h2>
+  </div>
+  <div class="mi-app-header-actions">
+    <$button class="mi-btn mi-btn-sm" message="tm-navigate" param="$:/plugins/mblackman/media-importer/config" tooltip="Configure ComicVine, RAWG, and TMDB API keys">
+      API Keys
+    </$button>
+    <$link to="$:/plugins/mblackman/media-importer/ui/media-library" class="mi-btn mi-btn-primary mi-btn-sm">
+      Media Library (<$count filter="[tag[$:/tags/media-importer/Media]]"/>) →
+    </$link>
+  </div>
+</div>
+
+<!-- RECENTLY IMPORTED JUMP BANNER -->
+<$list filter="[[$:/temp/media-importer/last-imported]has[text]!field:text[]]" variable="ignoreBanner">
+  <$let lastImportedTitle={{{ [[$:/temp/media-importer/last-imported]get[text]] }}}>
+    <div class="mi-last-imported-banner">
+      <div class="mi-last-imported-info">
+        <span class="mi-last-imported-check">✓</span>
+        <span>Imported <b><$text text=<<lastImportedTitle>>/></b> into your library.</span>
+      </div>
+      <div class="mi-last-imported-actions">
+        <$link to=<<lastImportedTitle>> class="mi-btn mi-btn-primary mi-btn-sm">
+          ↗ Jump to Media
+        </$link>
+        <$button class="tc-btn-invisible mi-banner-dismiss-btn" tooltip="Dismiss notification" aria-label="Dismiss notification">
+          ×
+          <$action-deletetiddler $tiddler="$:/temp/media-importer/last-imported"/>
+        </$button>
+      </div>
+    </div>
+  </$let>
+</$list>
 
 <div class="mi-section">
-  <div class="mi-flex-row" style="gap:10px; margin-bottom: 15px; border-bottom: 1px solid <<colour table-border>>; padding-bottom: 10px;">
-    <h2 style="margin:0; font-size: 1.5em; color:<<colour primary>>; line-height:1;">📥 Import Media</h2>
-  </div>
-  
-  <div style="margin-top: 10px;">
-    
-    <$let
-      defaultTab={{{ [[$:/plugins/mblackman/media-importer/data/importers]indexes[]first[]] }}}
-      activeType={{{ [[$:/state/media-importer-selected]get[text]else<defaultTab>] }}}
-      importersJson={{{ [[$:/plugins/mblackman/media-importer/data/importers]get[text]] }}}
-    >
-      <!-- Segmented Media Type Pill Selector -->
-      <div class="mi-segmented-bar" role="tablist" aria-label="Media type selector">
-        <$list filter="[[$:/plugins/mblackman/media-importer/data/importers]indexes[]]" variable="importerType">
+  <$let
+    defaultTab={{{ [[$:/plugins/mblackman/media-importer/data/importers]indexes[]first[]] }}}
+    activeType={{{ [[$:/state/media-importer-selected]get[text]else<defaultTab>] }}}
+    importersJson={{{ [[$:/plugins/mblackman/media-importer/data/importers]get[text]] }}}
+  >
+    <!-- Segmented Media Type Pill Selector -->
+    <div class="mi-segmented-bar" role="tablist" aria-label="Media type selector">
+      <$list filter="[[$:/plugins/mblackman/media-importer/data/importers]indexes[]]" variable="importerType">
+        <$let
+          iconKey={{{ [<importersJson>jsonget<importerType>,[icon]] }}}
+          apiKeyTid={{{ [<importersJson>jsonget<importerType>,[apiKeyTiddler]] }}}
+          hasApiKey={{{ [<apiKeyTid>is[blank]then[yes]] :else[<apiKeyTid>get[text]trim[]!is[blank]then[yes]else[no]] }}}
+        >
           <$button
             class={{{ [<activeType>match<importerType>then[tc-btn-invisible mi-segmented-pill mi-segmented-pill-active]else[tc-btn-invisible mi-segmented-pill]] }}}
+            tooltip={{{ [<hasApiKey>match[no]then[API key not configured yet — click to search or configure]else[]] }}}
           >
             <$action-setfield $tiddler="$:/state/media-importer-selected" text=<<importerType>> />
             <$list filter="[[$:/temp/media-importer/search-input]!has[title]]">
               <$action-setfield $tiddler="$:/temp/media-importer/search-input" text="" />
             </$list>
-            <!-- If a search query is already typed, automatically search the newly selected media type -->
             <$let currentQuery={{{ [[$:/temp/media-importer/search-input]get[text]trim[]] }}}>
               <$list filter="[<currentQuery>!is[blank]]" variable="ignore">
                 <$action-setfield $tiddler={{{ [[$:/state/]addsuffix<importerType>addsuffix[-search-page]] }}} text="1" />
@@ -33,16 +93,88 @@ caption: Media Importer
               </$list>
             </$let>
             <span class="mi-segmented-pill-icon">
-              <$text text={{{ [<importersJson>jsonget<importerType>,[icon]] }}} />
+              <$macrocall $name="mi-type-svg" iconName=<<iconKey>> />
             </span>
             <span class="mi-segmented-pill-label">
               <$text text={{{ [<importersJson>jsonget<importerType>,[label]else<importerType>] }}} />
             </span>
+            <$list filter="[<hasApiKey>match[no]]" variable="ignoreKeyDot">
+              <span class="mi-key-dot-missing" title="API Key required"></span>
+            </$list>
           </$button>
-        </$list>
+        </$let>
+      </$list>
+
+      <!-- Manual / Cover Dropzone Entry Tab -->
+      <$button
+        class={{{ [<activeType>match[Manual]then[tc-btn-invisible mi-segmented-pill mi-segmented-pill-active]else[tc-btn-invisible mi-segmented-pill]] }}}
+        tooltip="Create custom media or drop/paste a cover image"
+      >
+        <$action-setfield $tiddler="$:/state/media-importer-selected" text="Manual" />
+        <span class="mi-segmented-pill-icon">
+          <<mi-type-svg "manual">>
+        </span>
+        <span class="mi-segmented-pill-label">Manual / Cover Drop</span>
+      </$button>
+    </div>
+
+    <!-- PRE-IMPORT STAGING & BATCH DEFAULTS BAR -->
+    <div class="mi-staging-bar">
+      <div class="mi-staging-group">
+        <span class="mi-sublabel">Import Status</span>
+        <$select tiddler="$:/state/mblackman/media-importer/staging/status" default="Backlog" class="mi-input mi-input-sm mi-input-auto">
+          <$list filter="[enlist{$:/plugins/mblackman/media-importer/data/statuses}]" variable="stOpt">
+            <option value=<<stOpt>>><<stOpt>></option>
+          </$list>
+        </$select>
       </div>
 
-      <!-- Unified Shared Search & Results -->
+      <div class="mi-staging-group">
+        <span class="mi-sublabel">Title Pattern</span>
+        <$select tiddler="$:/state/mblackman/media-importer/staging/naming" default="title-year" class="mi-input mi-input-sm mi-input-auto">
+          <option value="title-year">Title (Year)</option>
+          <option value="title-only">Title Only</option>
+        </$select>
+      </div>
+
+      <div class="mi-staging-group mi-staging-group-grow">
+        <span class="mi-sublabel">Batch Tags</span>
+        <$edit-text
+          tiddler="$:/state/mblackman/media-importer/staging/tags"
+          tag="input"
+          default=""
+          placeholder="Optional tags (e.g. sci-fi [[Reading List]])"
+          class="mi-input mi-input-sm"
+        />
+      </div>
+
+      <div class="mi-staging-group">
+        <span class="mi-sublabel">Options</span>
+        <div class="mi-staging-toggles">
+          <$let logTodayState={{{ [[$:/state/mblackman/media-importer/staging/log-today]get[text]else[no]] }}}>
+            <$button
+              class={{{ [<logTodayState>match[yes]then[mi-btn mi-btn-active-subtle mi-btn-sm]else[mi-btn mi-btn-sm]] }}}
+              tooltip="Automatically log imported items into today's daily activity log"
+            >
+              <$text text={{{ [<logTodayState>match[yes]then[✓ Auto-Log Today]else[+ Auto-Log Today]] }}} />
+              <$action-setfield $tiddler="$:/state/mblackman/media-importer/staging/log-today" text={{{ [<logTodayState>match[yes]then[no]else[yes]] }}} />
+            </$button>
+          </$let>
+          <$let autoOpenState={{{ [[$:/state/mblackman/media-importer/staging/auto-open]get[text]else[no]] }}}>
+            <$button
+              class={{{ [<autoOpenState>match[yes]then[mi-btn mi-btn-active-subtle mi-btn-sm]else[mi-btn mi-btn-sm]] }}}
+              tooltip="Toggle whether importing stays on the search screen or opens the tiddler immediately"
+            >
+              <$text text={{{ [<autoOpenState>match[yes]then[↗ Auto-Open]else[Stay on Search]] }}} />
+              <$action-setfield $tiddler="$:/state/mblackman/media-importer/staging/auto-open" text={{{ [<autoOpenState>match[yes]then[no]else[yes]] }}} />
+            </$button>
+          </$let>
+        </div>
+      </div>
+    </div>
+
+    <!-- API SEARCH MODE -->
+    <$list filter="[<activeType>!match[Manual]]" variable="ignoreSearchMode">
       <$MediaImporter
           type=<<activeType>>
           inputTiddler="$:/temp/media-importer/search-input"
@@ -53,8 +185,8 @@ caption: Media Importer
           imageField={{{ [<importersJson>jsonget<activeType>,[imageField]] }}}
           subtitleContent={{{ [<importersJson>jsonget<activeType>,[subtitle]] }}}
       >
-          <div class="mi-flex-row mi-unified-search-row">
-              <$keyboard key="enter" message="ui-trigger-search" class="mi-flex-grow">
+          <div class="mi-unified-search-row">
+              <$keyboard key="enter" message="ui-trigger-search" class="mi-search-input-wrap">
                   <$edit-text
                       tiddler="$:/temp/media-importer/search-input"
                       tag="input"
@@ -63,52 +195,117 @@ caption: Media Importer
                       class="mi-input mi-unified-search-input"
                   />
               </$keyboard>
-              <$button class="mi-btn mi-btn-primary" message="ui-trigger-search">Search</$button>
-              <$button class="mi-btn" message="ui-clear-search">Clear</$button>
+              <div class="mi-search-actions-wrap">
+                  <$button class="mi-btn mi-btn-primary mi-search-submit-btn" message="ui-trigger-search">Search</$button>
+                  <$button class="mi-btn mi-search-clear-btn" message="ui-clear-search">Clear</$button>
+              </div>
           </div>
       </$MediaImporter>
-    </$let>
+    </$list>
 
-  </div>
+    <!-- MANUAL / CUSTOM ENTRY & COVER DROPZONE MODE -->
+    <$list filter="[<activeType>match[Manual]]" variable="ignoreManualMode">
+      <div class="mi-card mi-manual-card">
+        <div class="mi-manual-header">
+          <h3 class="mi-manual-title">Create Custom Media & Cover Art</h3>
+          <span class="mi-manual-subtitle">Drop a cover file, paste from clipboard, or link an external <code>_canonical_uri</code> image URL.</span>
+        </div>
+
+        <!-- Interactive Cover Dropzone & URI Input -->
+        <$MediaCoverDropzone statePrefix="$:/temp/media-importer/manual" />
+
+        <div class="mi-manual-grid">
+          <div class="mi-stage-field">
+            <span class="mi-label">Title *</span>
+            <$edit-text tiddler="$:/temp/media-importer/manual/title" tag="input" default="" placeholder="e.g. House of Leaves" class="mi-input" />
+          </div>
+
+          <div class="mi-stage-field">
+            <span class="mi-label">Media Type</span>
+            <$select tiddler="$:/temp/media-importer/manual/type" default="Book" class="mi-input">
+              <$list filter="[[$:/plugins/mblackman/media-importer/data/importers]indexes[]]" variable="mType">
+                <option value=<<mType>>><<mType>></option>
+              </$list>
+            </$select>
+          </div>
+
+          <div class="mi-stage-field">
+            <span class="mi-label">Release Year</span>
+            <$edit-text tiddler="$:/temp/media-importer/manual/year" tag="input" default=<<now "YYYY">> placeholder="YYYY" class="mi-input" />
+          </div>
+
+          <div class="mi-stage-field">
+            <span class="mi-label">Creator / Author / Director</span>
+            <$edit-text tiddler="$:/temp/media-importer/manual/creator" tag="input" default="" placeholder="Comma-separated names..." class="mi-input" />
+          </div>
+
+          <div class="mi-stage-field">
+            <span class="mi-label">Genres</span>
+            <$edit-text tiddler="$:/temp/media-importer/manual/genres" tag="input" default="" placeholder="e.g. Horror, Experimental" class="mi-input" />
+          </div>
+
+          <div class="mi-stage-field">
+            <span class="mi-label">Source / Reference URL</span>
+            <$edit-text tiddler="$:/temp/media-importer/manual/url" tag="input" default="" placeholder="https://..." class="mi-input" />
+          </div>
+        </div>
+
+        <div class="mi-stage-field" style="margin-top: 12px;">
+          <span class="mi-label">Plot / Synopsis</span>
+          <$edit-text tiddler="$:/temp/media-importer/manual/plot" tag="textarea" default="" placeholder="Enter plot summary or notes..." class="mi-input mi-textarea-sm" />
+        </div>
+
+        <div class="mi-manual-footer">
+          <label class="mi-checkbox-label">
+            <$checkbox tiddler="$:/temp/media-importer/manual/create-canonical-tiddler" field="text" checked="yes" unchecked="no" default="no"/>
+            <span>Also create companion <code>_canonical_uri</code> cover image tiddler (<code>Title/Cover</code>)</span>
+          </label>
+          <$button class="mi-btn mi-btn-primary" message="tm-import-manual-media">
+            + Import Custom Media
+          </$button>
+        </div>
+      </div>
+    </$list>
+  </$let>
 </div>
 
-<div>
-  <div>
-    <div class="mi-flex-row mi-flex-between" style="margin-bottom: 15px;">
-      <h3 style="margin: 0; font-size: 1.1em; text-transform: uppercase; letter-spacing: 1px; color: <<colour muted-foreground>>;">
-        ⏱️ Recently Added
-      </h3>
-      <$link to="$:/plugins/mblackman/media-importer/ui/media-library" class="mi-btn" style="padding: 4px 12px; font-size: 0.75em;">
-        Open Full Library →
-      </$link>
-    </div>
+<!-- RECENTLY ADDED SECTION -->
+<div class="mi-recent-section">
+  <div class="mi-flex-row mi-flex-between" style="margin-bottom: 14px;">
+    <h3 class="mi-section-heading">
+      Recently Added
+    </h3>
+    <$link to="$:/plugins/mblackman/media-importer/ui/media-library" class="mi-btn mi-btn-sm">
+      Open Full Library →
+    </$link>
+  </div>
 
-    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 15px;">
-      <$list filter="[tag[$:/tags/media-importer/Media]!sort[created]limit[8]]" emptyMessage="<div style='grid-column: 1/-1; padding:20px; font-style:italic; text-align:center; opacity:0.6;'>No items added yet.</div>">
-        
-        <$link to={{!!title}} style="text-decoration: none; display: block; color: inherit;">
-        <div class="mi-card" style="padding: 0; overflow: hidden; position: relative; aspect-ratio: 1/1; margin-bottom: 0; border: none;">
-          
-          <$image source={{!!image}} style="width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0;" />
-          
-          <div style="position: absolute; bottom: 0; left: 0; right: 0; height: 70%; background: linear-gradient(to bottom, transparent, rgba(0,0,0,0.85)); pointer-events: none;"></div>
-
-          <span style="position: absolute; top: 6px; right: 6px; font-size:0.65em; font-weight: bold; text-transform:uppercase; background: rgba(0,0,0,0.75); color: #fff; padding: 2px 6px; border-radius: 4px;">
+  <div class="mi-recent-grid">
+    <$list filter="[tag[$:/tags/media-importer/Media]!sort[created]limit[8]]" emptyMessage="<div class='mi-empty-state' style='grid-column: 1/-1;'>No items added yet. Search above or drop a custom cover to start your library.</div>">
+      <$link to={{!!title}} class="mi-library-card-link">
+        <div class="mi-card mi-recent-card">
+          <$list filter="[all[current]has[image]!field:image[]]" variable="ignoreImg">
+            <$image source={{!!image}} class="mi-recent-card-img" />
+          </$list>
+          <$list filter="[all[current]!has[image]] [all[current]field:image[]] +[limit[1]]" variable="ignoreNoImg">
+            <div class="mi-library-card-placeholder">{{!!media-type}}</div>
+          </$list>
+          <div class="mi-recent-card-scrim"></div>
+          <span class="mi-library-card-type-badge">
             {{!!media-type}}
           </span>
-
-          <div style="position: absolute; bottom: 0; left: 0; right: 0; padding: 10px; z-index: 1;">
-            <div style="font-weight: 600; font-size: 0.85em; line-height: 1.2; margin-bottom: 2px; text-shadow: 0 1px 2px rgba(0,0,0,0.8); color: #fff;">
+          <div class="mi-recent-card-caption">
+            <div class="mi-recent-card-title">
               <$view field="title"/>
             </div>
-            <div style="font-size: 0.7em; color: rgba(255,255,255,0.75);">
+            <div class="mi-recent-card-date">
                <$view field="created" format="date" template="YYYY-0MM-0DD"/>
             </div>
           </div>
         </div>
-        </$link>
-      </$list>
-    </div>
+      </$link>
+    </$list>
   </div>
 </div>
+
 </div>

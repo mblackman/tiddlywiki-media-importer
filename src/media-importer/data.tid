@@ -5,17 +5,18 @@ type: application/json
     "Book": {
         "caption": "Add Book",
         "label": "Books",
-        "icon": "📚",
-        "placeholder": "Search books by title or author...",
+        "icon": "book",
+        "placeholder": "Search books by title, author, or ISBN...",
         "loadingText": "Searching OpenLibrary...",
         "resultTag": "SearchResult",
         "imageField": "draft_cover",
-        "subtitle": "By <$list filter='[list[!!draft_author]]'><$view field='title'/>, </$list>"
+        "subtitle": "By <$text text={{{ [enlist{!!draft_author}search-replace:g[_],[ ]join[, ]] }}}/>"
     },
     "Comic": {
         "caption": "Add Comic",
         "label": "Comics",
-        "icon": "💬",
+        "icon": "comic",
+        "apiKeyTiddler": "$:/plugins/mblackman/media-importer/configs/comicvine-api-key",
         "placeholder": "Search comic volumes...",
         "loadingText": "Searching ComicVine...",
         "resultTag": "ComicSearchResult",
@@ -25,17 +26,18 @@ type: application/json
     "Game": {
         "caption": "Add Game",
         "label": "Games",
-        "icon": "🎮",
+        "icon": "game",
+        "apiKeyTiddler": "$:/plugins/mblackman/media-importer/configs/rawg-api-key",
         "placeholder": "Search video games...",
         "loadingText": "Searching RAWG...",
         "resultTag": "GameSearchResult",
         "imageField": "draft_image",
-        "subtitle": ""
+        "subtitle": "{{!!draft_genres}}"
     },
     "Manga": {
         "caption": "Add Manga",
         "label": "Manga",
-        "icon": "📖",
+        "icon": "manga",
         "placeholder": "Search manga series...",
         "loadingText": "Searching AniList...",
         "resultTag": "MangaSearchResult",
@@ -45,7 +47,8 @@ type: application/json
     "Movie": {
         "caption": "Add Movie",
         "label": "Movies",
-        "icon": "🎬",
+        "icon": "movie",
+        "apiKeyTiddler": "$:/plugins/mblackman/media-importer/configs/tmdb-api-key",
         "placeholder": "Search movies...",
         "loadingText": "Searching TMDB...",
         "resultTag": "MovieSearchResult",
@@ -55,7 +58,8 @@ type: application/json
     "TV Show": {
         "caption": "Add TV Show",
         "label": "TV Shows",
-        "icon": "📺",
+        "icon": "tv",
+        "apiKeyTiddler": "$:/plugins/mblackman/media-importer/configs/tmdb-api-key",
         "placeholder": "Search TV series...",
         "loadingText": "Searching TMDB...",
         "resultTag": "TVShowSearchResult",
