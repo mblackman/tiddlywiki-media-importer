@@ -136,7 +136,7 @@ class MediaImporterResultsWidget extends Widget {
     } else if (results.length === 0 && searchState === 'done') {
       resultsNodes.push(
         h('div', { class: 'mi-section mi-status-banner' }, [
-          h('div', { style: 'font-weight: 600; font-style: normal; margin-bottom: 6px; color: <<colour foreground>>;' }, [
+          h('div', { style: 'font-weight: 600; font-style: normal; margin-bottom: 6px; color: var(--suite-fg-primary);' }, [
             text(`No ${type.toLowerCase()} results found.`),
           ]),
           h('div', { style: 'margin-bottom: 12px; font-style: normal; font-size: 0.9em;' }, [

@@ -71,16 +71,36 @@ function minifyFolderRecursive(dir) {
       minifyFolderRecursive(fullPath);
     } else {
       const ext = path.extname(fullPath);
-      if (ext === '.js' || ext === '.css') {
+      if (ext === '.js') {
         try {
           const content = fs.readFileSync(fullPath, 'utf8');
           const result = esbuild.transformSync(content, {
             minify: true,
-            loader: ext === '.js' ? 'js' : 'css',
+            loader: 'js',
           });
           fs.writeFileSync(fullPath, result.code, 'utf8');
         } catch (e) {
           console.error(`❌ Minification failed for ${file}:`, e.message);
+        }
+      } else if (ext === '.css') {
+        try {
+          const content = fs.readFileSync(fullPath, 'utf8');
+          // Preserve TiddlyWiki \rules pragma and <<colour ...>> macros from esbuild CSS parser
+          const lines = content.split(/\r?\n/);
+          const pragmaLines = [];
+          while (lines.length > 0 && lines[0].trim().startsWith('\\')) {
+            pragmaLines.push(lines.shift());
+          }
+          // Strip block comments and collapse blank lines without breaking <<colour ...>> syntax
+          const cssBody = lines
+            .join('\n')
+            .replace(/\/\*[\s\S]*?\*\//g, '')
+            .replace(/\n{2,}/g, '\n')
+            .trim();
+          const finalCss = (pragmaLines.length > 0 ? pragmaLines.join('\n') + '\n\n' : '') + cssBody + '\n';
+          fs.writeFileSync(fullPath, finalCss, 'utf8');
+        } catch (e) {
+          console.error(`❌ CSS processing failed for ${file}:`, e.message);
         }
       }
     }

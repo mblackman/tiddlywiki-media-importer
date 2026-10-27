@@ -207,7 +207,7 @@ class MediaLibraryGridWidget extends Widget {
     const makeGrid = (itemsList: MediaItem[]) => {
       if (itemsList.length === 0) {
         return h('div', { class: 'mi-empty-state' }, [
-          h('div', { style: 'font-weight: 600; font-style: normal; margin-bottom: 6px; color: <<colour foreground>>;' }, [
+          h('div', { style: 'font-weight: 600; font-style: normal; margin-bottom: 6px; color: var(--suite-fg-primary);' }, [
             text('No media items match the current filters.'),
           ]),
           h('div', { style: 'margin-bottom: 12px; font-style: normal; font-size: 0.9em;' }, [

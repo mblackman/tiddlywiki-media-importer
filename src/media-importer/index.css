@@ -1,8 +1,86 @@
+\rules only filteredtranscludeinline transcludeinline macrodef macrocallinline
+
+/* Standalone-safe fallback contract (specificity 0,0,0 via :where).
+   Automatically overridden when Slipstream ($:/plugins/mblackman/slipstream) is active. */
+:where(:root, .tc-page-container) {
+  --suite-bg-canvas: var(--mn-bg-app, var(--tpc-page-background, <<colour page-background>>));
+  --suite-surface-primary: var(--mn-bg-surface, var(--tpc-tiddler-background, <<colour tiddler-background>>));
+  --suite-surface-card: var(--mn-bg-card, color-mix(in srgb, var(--tpc-tiddler-background, <<colour tiddler-background>>) 96.5%, var(--tpc-foreground, <<colour foreground>>) 3.5%));
+  --suite-surface-subtle: var(--mn-bg-subtle, color-mix(in srgb, var(--tpc-tiddler-background, <<colour tiddler-background>>) 93%, var(--tpc-foreground, <<colour foreground>>) 7%));
+  --suite-surface-elevated: var(--mn-bg-elevated, color-mix(in srgb, var(--tpc-tiddler-background, <<colour tiddler-background>>) 90%, var(--tpc-foreground, <<colour foreground>>) 10%));
+  --suite-surface-input: var(--tpc-tiddler-background, <<colour tiddler-background>>);
+  --suite-surface-hover: var(--mn-bg-hover, color-mix(in srgb, var(--tpc-foreground, <<colour foreground>>) 5.5%, var(--tpc-tiddler-background, <<colour tiddler-background>>)));
+  --suite-surface-active: var(--mn-bg-active, color-mix(in srgb, var(--tpc-foreground, <<colour foreground>>) 9%, var(--tpc-tiddler-background, <<colour tiddler-background>>)));
+  --suite-surface-selected: var(--mn-accent-soft, color-mix(in srgb, var(--tpc-primary, <<colour primary>>) 12%, var(--tpc-tiddler-background, <<colour tiddler-background>>)));
+  --suite-surface-dropzone: color-mix(in srgb, var(--tpc-primary, <<colour primary>>) 8%, var(--suite-surface-subtle));
+
+  --suite-fg-primary: var(--mn-fg-primary, var(--tpc-foreground, <<colour foreground>>));
+  --suite-fg-secondary: var(--mn-fg-secondary, color-mix(in srgb, var(--tpc-foreground, <<colour foreground>>) 72%, var(--tpc-muted-foreground, <<colour muted-foreground>>) 28%));
+  --suite-fg-muted: var(--mn-fg-muted, color-mix(in srgb, var(--tpc-foreground, <<colour foreground>>) 58%, var(--tpc-muted-foreground, <<colour muted-foreground>>) 42%));
+  --suite-fg-on-accent: #ffffff;
+
+  --suite-border-hairline: var(--mn-border-hairline, color-mix(in srgb, var(--suite-fg-primary) 7%, transparent));
+  --suite-border-subtle: var(--mn-border-subtle, color-mix(in srgb, var(--suite-fg-primary) 12%, transparent));
+  --suite-border-strong: var(--mn-border-strong, color-mix(in srgb, var(--suite-fg-primary) 22%, transparent));
+
+  --suite-radius-xs: 6px;
+  --suite-radius-sm: 8px;
+  --suite-radius-md: 10px;
+  --suite-radius-lg: 14px;
+  --suite-radius-pill: 9999px;
+
+  --suite-shadow-xs: 0 1px 2px rgba(15, 23, 42, 0.04);
+  --suite-shadow-sm: var(--mn-shadow-card, 0 2px 8px -2px rgba(15, 23, 42, 0.06), 0 1px 3px -1px rgba(15, 23, 42, 0.04));
+
+  --suite-control-height-sm: 30px;
+  --suite-control-height-md: 36px;
+  --suite-touch-target: 36px;
+
+  --suite-font-sans: var(--mn-font-sans, -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif);
+  --suite-font-mono: var(--mn-font-mono, "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace);
+
+  --suite-accent: var(--mn-accent, var(--tpc-primary, <<colour primary>>));
+  --suite-accent-hover: var(--mn-accent-hover, color-mix(in srgb, var(--suite-accent) 86%, var(--suite-fg-primary)));
+  --suite-accent-bg: var(--mn-accent-soft, color-mix(in srgb, var(--suite-accent) 12%, var(--suite-surface-primary)));
+  --suite-accent-border: color-mix(in srgb, var(--suite-accent) 30%, transparent);
+
+  --suite-status-success-accent: #10b981;
+  --suite-status-success-fg: color-mix(in srgb, #059669 82%, var(--suite-fg-primary));
+  --suite-status-success-bg: color-mix(in srgb, #10b981 13%, var(--suite-surface-primary));
+  --suite-status-success-border: color-mix(in srgb, #10b981 32%, transparent);
+
+  --suite-status-warning-accent: #f59e0b;
+  --suite-status-warning-fg: color-mix(in srgb, #d97706 82%, var(--suite-fg-primary));
+  --suite-status-warning-bg: color-mix(in srgb, #f59e0b 14%, var(--suite-surface-primary));
+  --suite-status-warning-border: color-mix(in srgb, #f59e0b 35%, transparent);
+
+  --suite-status-danger-accent: var(--mn-danger, var(--tpc-alert-highlight, #ef4444));
+  --suite-status-danger-fg: color-mix(in srgb, var(--suite-status-danger-accent) 85%, var(--suite-fg-primary));
+  --suite-status-danger-bg: color-mix(in srgb, var(--suite-status-danger-accent) 12%, var(--suite-surface-primary));
+  --suite-status-danger-border: color-mix(in srgb, var(--suite-status-danger-accent) 32%, transparent);
+
+  --suite-status-info-accent: #3b82f6;
+  --suite-status-info-fg: color-mix(in srgb, #2563eb 82%, var(--suite-fg-primary));
+  --suite-status-info-bg: color-mix(in srgb, #3b82f6 12%, var(--suite-surface-primary));
+  --suite-status-info-border: color-mix(in srgb, #3b82f6 30%, transparent);
+
+  --suite-focus-ring: 0 0 0 3px color-mix(in srgb, var(--suite-accent) 28%, transparent);
+}
+
+@media (max-width: 640px) {
+  :where(:root, .tc-page-container) {
+    --suite-control-height-sm: 36px;
+    --suite-control-height-md: 44px;
+    --suite-touch-target: 44px;
+  }
+}
+
 /* --- Hide Raw System Path Heading on Dashboard Tiddlers While Keeping Tiddler Controls --- */
-[data-tiddler-title^="$:/plugins/mblackman/media-importer/ui"] .tc-titlebar h2.tc-title {
-  font-size: 0;
-  line-height: 0;
-  margin: 0;
+.tc-tiddler-frame[data-tiddler-title^="$:/plugins/mblackman/media-importer/ui"] .tc-tiddler-title .tc-title,
+.tc-tiddler-frame[data-tiddler-title="$:/plugins/mblackman/media-importer/config"] .tc-tiddler-title .tc-title,
+[data-tiddler-title^="$:/plugins/mblackman/media-importer/ui"] .tc-titlebar h2.tc-title,
+[data-tiddler-title="$:/plugins/mblackman/media-importer/config"] .tc-titlebar h2.tc-title {
+  display: none;
 }
 
 /* --- Page Shell & App Header --- */
@@ -19,7 +97,7 @@
   gap: 12px;
   margin-bottom: 16px;
   padding-bottom: 12px;
-  border-bottom: 1px solid <<colour table-border>>;
+  border-bottom: 1px solid var(--suite-border-subtle, <<colour table-border>>);
 }
 
 .mi-app-header-title-group {
@@ -29,7 +107,7 @@
 }
 
 .mi-app-header-icon {
-  color: <<colour primary>>;
+  color: var(--suite-accent, <<colour primary>>);
   flex-shrink: 0;
 }
 
@@ -37,7 +115,7 @@
   margin: 0;
   font-size: 1.45em;
   font-weight: 700;
-  color: <<colour foreground>>;
+  color: var(--suite-fg-primary, <<colour foreground>>);
   line-height: 1.2;
 }
 
@@ -60,28 +138,33 @@
   align-items: center;
   justify-content: center;
   gap: 6px;
-  min-height: 36px;
+  min-height: var(--suite-control-height-md, 36px);
   padding: 6px 14px;
-  border: 1px solid <<colour table-border>>;
-  border-radius: 8px;
-  background: <<colour tiddler-editor-background>>;
-  color: <<colour foreground>>;
+  border: 1px solid var(--suite-border-subtle, <<colour table-border>>);
+  border-radius: var(--suite-radius-sm, 8px);
+  background: var(--suite-surface-card, <<colour tiddler-editor-background>>);
+  color: var(--suite-fg-primary, <<colour foreground>>);
   font-weight: 600;
   text-decoration: none;
   font-size: 0.84em;
-  text-transform: uppercase;
-  letter-spacing: 0.02em;
-  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+  text-transform: none;
+  letter-spacing: normal;
+  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
   cursor: pointer;
   box-sizing: border-box;
   white-space: nowrap;
 }
 
 .mi-btn:hover {
-  background: <<colour primary>>;
-  color: <<colour background>>;
-  border-color: <<colour primary>>;
+  background: var(--suite-surface-hover, <<colour primary>>);
+  color: var(--suite-fg-primary, <<colour background>>);
+  border-color: var(--suite-border-strong, <<colour primary>>);
   text-decoration: none;
+}
+
+.mi-btn:focus-visible {
+  outline: none;
+  box-shadow: var(--suite-focus-ring);
 }
 
 .mi-btn:disabled,
@@ -92,7 +175,7 @@
 }
 
 .mi-btn-sm {
-  min-height: 34px;
+  min-height: var(--suite-control-height-sm, 30px);
   padding: 5px 12px;
   font-size: 0.78em;
 }
@@ -102,85 +185,114 @@
 }
 
 /* Primary Button */
+.tc-tiddler-frame a.tc-tiddlylink.mi-btn-primary,
+.tc-tiddler-frame a.tc-tiddlylink.mi-btn-primary:link,
+.tc-tiddler-frame a.tc-tiddlylink.mi-btn-primary:visited,
 .mi-btn-primary,
 a.mi-btn-primary,
 a.tc-tiddlylink.mi-btn-primary,
 a.tc-tiddlylink.mi-btn-primary:link,
 a.tc-tiddlylink.mi-btn-primary:visited {
-  background-color: <<colour primary>>;
-  color: <<colour background>>;
-  border-color: <<colour primary>>;
-  font-weight: 700;
+  background-color: var(--suite-accent, <<colour primary>>);
+  color: var(--suite-fg-on-accent, <<colour background>>);
+  border: 1px solid var(--suite-accent, <<colour primary>>);
+  font-weight: 600;
 }
 
+.tc-tiddler-frame a.tc-tiddlylink.mi-btn-primary:hover,
 .mi-btn-primary:hover,
 a.mi-btn-primary:hover,
 a.tc-tiddlylink.mi-btn-primary:hover {
-  background-color: <<colour tiddler-editor-background>>;
-  color: <<colour primary>>;
-  border-color: <<colour primary>>;
+  background-color: var(--suite-accent-hover, <<colour primary>>);
+  color: var(--suite-fg-on-accent, <<colour background>>);
+  border-color: var(--suite-accent-hover, <<colour primary>>);
 }
 
+.tc-tiddler-frame a.tc-tiddlylink.mi-btn:not(.mi-btn-primary),
 a.mi-btn:not(.mi-btn-primary),
 a.tc-tiddlylink.mi-btn:not(.mi-btn-primary) {
-  color: <<colour foreground>>;
+  color: var(--suite-fg-primary, <<colour foreground>>);
+  border: 1px solid var(--suite-border-subtle, <<colour table-border>>);
 }
 
+.tc-tiddler-frame a.tc-tiddlylink.mi-btn:not(.mi-btn-primary):hover,
 a.mi-btn:not(.mi-btn-primary):hover,
 a.tc-tiddlylink.mi-btn:not(.mi-btn-primary):hover {
-  color: <<colour background>>;
+  color: var(--suite-fg-primary, <<colour background>>);
+  border-color: var(--suite-border-strong, <<colour primary>>);
 }
 
 .mi-btn-active-subtle {
-  border-color: <<colour primary>>;
-  color: <<colour primary>>;
-  background: <<colour tiddler-editor-background>>;
+  border-color: var(--suite-accent, <<colour primary>>);
+  color: var(--suite-accent, <<colour primary>>);
+  background: var(--suite-accent-bg, <<colour tiddler-editor-background>>);
 }
 
 .mi-btn-warning {
-  border-color: #f59e0b;
-  color: #f59e0b;
+  border-color: var(--suite-status-warning-border, #f59e0b);
+  color: var(--suite-status-warning-fg, #d97706);
+  background: var(--suite-status-warning-bg, transparent);
 }
 
 .mi-btn-danger {
-  border-color: #ef4444;
-  color: #ef4444;
+  border-color: var(--suite-status-danger-border, #ef4444);
+  color: var(--suite-status-danger-fg, #ef4444);
+  background: var(--suite-status-danger-bg, transparent);
 }
 
 /* --- Media Importer Input Styles --- */
+.tc-tiddler-frame input.mi-input,
+.tc-tiddler-frame textarea.mi-input,
+.tc-tiddler-frame select.mi-input,
+input.mi-input,
+textarea.mi-input,
+select.mi-input,
 .mi-input {
-  background: <<colour tiddler-editor-background>>;
-  color: <<colour foreground>>;
-  border: 1px solid <<colour table-border>>;
+  background-color: var(--suite-surface-input, <<colour tiddler-editor-background>>);
+  color: var(--suite-fg-primary, <<colour foreground>>);
+  border: 1px solid var(--suite-border-subtle, <<colour table-border>>);
   width: 100%;
-  min-height: 38px;
+  min-height: var(--suite-control-height-md, 36px);
   padding: 7px 10px;
-  border-radius: 6px;
+  border-radius: var(--suite-radius-sm, 8px);
   line-height: 1.4em;
+  font-family: inherit;
+  font-size: 0.94em;
+  box-shadow: none;
   box-sizing: border-box;
-  transition: border-color 0.15s ease;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
 }
 
+.tc-tiddler-frame input.mi-input:focus,
+.tc-tiddler-frame textarea.mi-input:focus,
+.tc-tiddler-frame select.mi-input:focus,
+input.mi-input:focus,
+textarea.mi-input:focus,
+select.mi-input:focus,
 .mi-input:focus {
-  outline: 2px solid <<colour primary>>;
-  outline-offset: 1px;
-  border-color: <<colour primary>>;
+  outline: none;
+  border-color: var(--suite-accent, <<colour primary>>);
+  box-shadow: var(--suite-focus-ring);
 }
 
 .mi-input::placeholder {
-  color: <<colour muted-foreground>>;
+  color: var(--suite-fg-muted, <<colour muted-foreground>>);
   opacity: 0.75;
 }
 
 /* Select Dropdown Styling */
+.tc-tiddler-frame select.mi-input,
 select.mi-input {
   appearance: none;
   -webkit-appearance: none;
-  background-color: <<colour tiddler-editor-background>>;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23888888' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-color: var(--suite-surface-input, <<colour tiddler-editor-background>>);
+  background-image: linear-gradient(45deg, transparent 50%, var(--suite-fg-muted, #888888) 50%),
+                    linear-gradient(135deg, var(--suite-fg-muted, #888888) 50%, transparent 50%);
+  background-position:
+    calc(100% - 16px) calc(50% - 2px),
+    calc(100% - 11px) calc(50% - 2px);
+  background-size: 5px 5px, 5px 5px;
   background-repeat: no-repeat;
-  background-position: right 8px center;
-  background-size: 16px;
   padding: 6px 32px 6px 10px;
   cursor: pointer;
 }
@@ -247,11 +359,12 @@ select.mi-input {
 
 /* --- Card Styles --- */
 .mi-card {
-  border: 1px solid <<colour table-border>>;
-  border-radius: 8px;
+  border: 1px solid var(--suite-border-subtle, <<colour table-border>>);
+  border-radius: var(--suite-radius-md, 10px);
   padding: 16px;
   margin-bottom: 10px;
-  background: <<colour tiddler-background>>;
+  background: var(--suite-surface-card, <<colour tiddler-background>>);
+  box-shadow: var(--suite-shadow-xs);
 }
 
 /* --- Recently Imported Jump Banner --- */
@@ -263,9 +376,9 @@ select.mi-input {
   gap: 10px;
   padding: 10px 14px;
   margin-bottom: 14px;
-  border-radius: 8px;
-  border: 1px solid <<colour primary>>;
-  background: <<colour tiddler-editor-background>>;
+  border-radius: var(--suite-radius-md, 10px);
+  border: 1px solid var(--suite-accent-border, <<colour primary>>);
+  background: var(--suite-surface-subtle, <<colour tiddler-editor-background>>);
 }
 
 .mi-last-imported-info {
@@ -320,9 +433,9 @@ select.mi-input {
   flex-wrap: wrap;
   gap: 4px;
   padding: 5px;
-  background: <<colour tiddler-editor-background>>;
-  border: 1px solid <<colour table-border>>;
-  border-radius: 10px;
+  background: var(--suite-surface-subtle, <<colour tiddler-editor-background>>);
+  border: 1px solid var(--suite-border-subtle, <<colour table-border>>);
+  border-radius: var(--suite-radius-md, 10px);
   margin-bottom: 12px;
 }
 
@@ -330,12 +443,12 @@ select.mi-input {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  min-height: 36px;
+  min-height: var(--suite-control-height-md, 36px);
   padding: 6px 13px;
   border: 1px solid transparent;
-  border-radius: 7px;
+  border-radius: var(--suite-radius-sm, 8px);
   background: transparent;
-  color: <<colour muted-foreground>>;
+  color: var(--suite-fg-secondary, <<colour muted-foreground>>);
   font-weight: 600;
   font-size: 0.88em;
   cursor: pointer;
@@ -344,14 +457,14 @@ select.mi-input {
 }
 
 .mi-segmented-pill:hover {
-  color: <<colour foreground>>;
-  background: <<colour table-header-background>>;
+  color: var(--suite-fg-primary, <<colour foreground>>);
+  background: var(--suite-surface-hover, <<colour table-header-background>>);
 }
 
 .mi-segmented-pill-active,
 .mi-segmented-pill-active:hover {
-  background: <<colour primary>>;
-  color: <<colour background>>;
+  background: var(--suite-accent, <<colour primary>>);
+  color: var(--suite-fg-on-accent, <<colour background>>);
 }
 
 .mi-segmented-pill-icon {
@@ -364,7 +477,7 @@ select.mi-input {
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: #f59e0b;
+  background: var(--suite-status-warning-accent, #f59e0b);
   display: inline-block;
   margin-left: 2px;
 }
@@ -377,9 +490,9 @@ select.mi-input {
   gap: 12px;
   padding: 10px 14px;
   margin-bottom: 14px;
-  border-radius: 8px;
-  border: 1px solid <<colour table-border>>;
-  background: <<colour tiddler-editor-background>>;
+  border-radius: var(--suite-radius-md, 10px);
+  border: 1px solid var(--suite-border-subtle, <<colour table-border>>);
+  background: var(--suite-surface-subtle, <<colour tiddler-editor-background>>);
 }
 
 .mi-staging-group {
@@ -436,9 +549,9 @@ select.mi-input {
   gap: 10px;
   padding: 8px 12px;
   margin-bottom: 10px;
-  border-radius: 8px;
-  border: 1px solid <<colour table-border>>;
-  background: <<colour tiddler-editor-background>>;
+  border-radius: var(--suite-radius-md, 10px);
+  border: 1px solid var(--suite-border-subtle, <<colour table-border>>);
+  background: var(--suite-surface-subtle, <<colour tiddler-editor-background>>);
 }
 
 .mi-batch-bar-left,
@@ -452,24 +565,25 @@ select.mi-input {
 .mi-batch-toggle-link {
   font-size: 0.85em;
   font-weight: 600;
-  color: <<colour foreground>>;
+  color: var(--suite-fg-primary, <<colour foreground>>);
   cursor: pointer;
   padding: 4px 6px;
   border-radius: 4px;
 }
 
 .mi-batch-toggle-link:hover {
-  color: <<colour primary>>;
+  color: var(--suite-accent, <<colour primary>>);
 }
 
 .mi-batch-count-pill {
   font-size: 0.78em;
   font-weight: 700;
+  font-variant-numeric: tabular-nums;
   text-transform: uppercase;
   padding: 2px 8px;
-  border-radius: 10px;
-  background: <<colour primary>>;
-  color: <<colour background>>;
+  border-radius: var(--suite-radius-pill, 999px);
+  background: var(--suite-accent, <<colour primary>>);
+  color: var(--suite-fg-on-accent, <<colour background>>);
 }
 
 .mi-batch-hint {
@@ -481,10 +595,10 @@ select.mi-input {
   width: 24px;
   height: 24px;
   min-width: 24px;
-  border: 1.5px solid <<colour table-border>>;
-  border-radius: 5px;
-  background: <<colour tiddler-editor-background>>;
-  color: <<colour background>>;
+  border: 1.5px solid var(--suite-border-subtle, <<colour table-border>>);
+  border-radius: var(--suite-radius-sm, 6px);
+  background: var(--suite-surface-input, <<colour tiddler-editor-background>>);
+  color: var(--suite-fg-on-accent, <<colour background>>);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -495,13 +609,13 @@ select.mi-input {
 }
 
 .mi-batch-checkbox:hover {
-  border-color: <<colour primary>>;
+  border-color: var(--suite-accent, <<colour primary>>);
 }
 
 .mi-batch-checkbox-checked {
-  background: <<colour primary>>;
-  border-color: <<colour primary>>;
-  color: <<colour background>>;
+  background: var(--suite-accent, <<colour primary>>);
+  border-color: var(--suite-accent, <<colour primary>>);
+  color: var(--suite-fg-on-accent, <<colour background>>);
 }
 
 /* --- Search Result Cards, Staging Drawer & Skeletons --- */
@@ -529,10 +643,10 @@ select.mi-input {
   width: 54px;
   aspect-ratio: 2 / 3;
   position: relative;
-  border-radius: 5px;
+  border-radius: var(--suite-radius-sm, 6px);
   overflow: hidden;
-  background: <<colour tiddler-editor-background>>;
-  border: 1px solid <<colour table-border>>;
+  background: var(--suite-surface-subtle, <<colour tiddler-editor-background>>);
+  border: 1px solid var(--suite-border-subtle, <<colour table-border>>);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -602,10 +716,10 @@ select.mi-input {
   text-transform: uppercase;
   font-weight: 700;
   padding: 2px 7px;
-  border-radius: 8px;
-  background: <<colour tiddler-editor-background>>;
-  border: 1px solid <<colour primary>>;
-  color: <<colour primary>>;
+  border-radius: var(--suite-radius-pill, 999px);
+  background: var(--suite-accent-bg, <<colour tiddler-editor-background>>);
+  border: 1px solid var(--suite-accent-border, <<colour primary>>);
+  color: var(--suite-accent, <<colour primary>>);
 }
 
 .mi-staged-pill {
@@ -613,9 +727,10 @@ select.mi-input {
   text-transform: uppercase;
   font-weight: 700;
   padding: 2px 7px;
-  border-radius: 8px;
-  border: 1px solid #f59e0b;
-  color: #f59e0b;
+  border-radius: var(--suite-radius-pill, 999px);
+  background: var(--suite-status-warning-bg, transparent);
+  border: 1px solid var(--suite-status-warning-border, #f59e0b);
+  color: var(--suite-status-warning-fg, #d97706);
 }
 
 .mi-search-subtitle {
@@ -713,15 +828,15 @@ select.mi-input {
 .mi-skeleton-thumb {
   width: 54px;
   height: 81px;
-  border-radius: 5px;
-  background: <<colour tiddler-editor-background>>;
+  border-radius: var(--suite-radius-sm, 6px);
+  background: var(--suite-surface-subtle, <<colour tiddler-editor-background>>);
   flex-shrink: 0;
 }
 
 .mi-skeleton-line {
   height: 12px;
   border-radius: 4px;
-  background: <<colour tiddler-editor-background>>;
+  background: var(--suite-surface-subtle, <<colour tiddler-editor-background>>);
   margin-bottom: 8px;
 }
 
@@ -737,8 +852,8 @@ select.mi-input {
 .mi-skeleton-btn {
   width: 78px;
   height: 32px;
-  border-radius: 6px;
-  background: <<colour tiddler-editor-background>>;
+  border-radius: var(--suite-radius-sm, 8px);
+  background: var(--suite-surface-subtle, <<colour tiddler-editor-background>>);
   flex-shrink: 0;
 }
 
@@ -774,18 +889,19 @@ select.mi-input {
 }
 
 .mi-dropzone {
-  border: 2px dashed <<colour table-border>>;
-  border-radius: 10px;
+  border: 1.5px dashed var(--suite-border-strong, <<colour table-border>>);
+  border-radius: var(--suite-radius-lg, 14px);
   padding: 14px;
-  background: <<colour tiddler-editor-background>>;
+  background: var(--suite-surface-subtle, <<colour tiddler-editor-background>>);
   transition: border-color 0.15s ease, background-color 0.15s ease;
 }
 
 .mi-dropzone:hover,
 .mi-dropzone:focus,
 .mi-dropzone-active {
-  border-color: <<colour primary>>;
-  background: <<colour table-header-background>>;
+  border-color: var(--suite-accent, <<colour primary>>);
+  border-style: solid;
+  background: var(--suite-surface-dropzone, <<colour table-header-background>>);
   outline: none;
 }
 
@@ -859,20 +975,20 @@ select.mi-input {
   font-weight: 700;
   text-transform: uppercase;
   padding: 2px 8px;
-  border-radius: 8px;
+  border-radius: var(--suite-radius-pill, 999px);
   letter-spacing: 0.03em;
 }
 
 .mi-storage-badge-uri {
-  border: 1px solid <<colour primary>>;
-  color: <<colour primary>>;
-  background: <<colour tiddler-editor-background>>;
+  border: 1px solid var(--suite-accent-border, <<colour primary>>);
+  color: var(--suite-accent, <<colour primary>>);
+  background: var(--suite-accent-bg, <<colour tiddler-editor-background>>);
 }
 
 .mi-storage-badge-embedded {
-  border: 1px solid #f59e0b;
-  color: #f59e0b;
-  background: <<colour tiddler-editor-background>>;
+  border: 1px solid var(--suite-status-warning-border, #f59e0b);
+  color: var(--suite-status-warning-fg, #d97706);
+  background: var(--suite-status-warning-bg, <<colour tiddler-editor-background>>);
 }
 
 .mi-manual-grid {
@@ -918,7 +1034,7 @@ select.mi-input {
   position: relative;
   aspect-ratio: 2 / 3;
   margin-bottom: 0;
-  background: <<colour tiddler-editor-background>>;
+  background: var(--suite-surface-subtle, <<colour tiddler-editor-background>>);
   transition: transform 0.18s ease;
 }
 
@@ -984,35 +1100,35 @@ select.mi-input {
 .mi-picker-chip {
   display: inline-flex;
   align-items: center;
-  background: <<colour tiddler-editor-background>>;
-  border: 1px solid <<colour table-border>>;
-  border-radius: 16px;
+  background: var(--suite-surface-subtle, <<colour tiddler-editor-background>>);
+  border: 1px solid var(--suite-border-subtle, <<colour table-border>>);
+  border-radius: var(--suite-radius-pill, 999px);
   padding: 3px 12px 3px 6px;
-  font-size: 0.9em;
+  font-size: 0.88em;
 }
 
 .mi-picker-chip-remove {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 26px;
-  min-height: 26px;
+  min-width: 24px;
+  min-height: 24px;
   margin-right: 4px;
   border-radius: 50%;
-  color: <<colour muted-foreground>>;
+  color: var(--suite-fg-muted, <<colour muted-foreground>>);
   cursor: pointer;
   font-weight: bold;
   line-height: 1;
 }
 
 .mi-picker-chip-remove:hover {
-  color: <<colour primary>>;
-  background: <<colour table-header-background>>;
+  color: var(--suite-accent, <<colour primary>>);
+  background: var(--suite-surface-hover, <<colour table-header-background>>);
 }
 
 .mi-picker-chip-link {
   text-decoration: none;
-  color: <<colour foreground>>;
+  color: var(--suite-fg-primary, <<colour foreground>>);
 }
 
 .mi-picker-dropdown-header {
@@ -1021,13 +1137,13 @@ select.mi-input {
   font-weight: bold;
   letter-spacing: 0.5px;
   padding: 6px 14px 4px;
-  color: <<colour muted-foreground>>;
-  border-bottom: 1px solid <<colour table-border>>;
+  color: var(--suite-fg-muted, <<colour muted-foreground>>);
+  border-bottom: 1px solid var(--suite-border-subtle, <<colour table-border>>);
 }
 
 .tc-drop-down .mi-picker-option.mi-dropdown-item-active {
-  background-color: <<colour primary>>;
-  color: <<colour background>>;
+  background-color: var(--suite-accent, <<colour primary>>);
+  color: var(--suite-fg-on-accent, <<colour background>>);
 }
 
 .mi-media-picker-input-wrapper {
@@ -1043,7 +1159,7 @@ select.mi-input {
   max-height: 250px;
   overflow-y: auto;
   width: 100%;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  box-shadow: var(--suite-shadow-lg, 0 4px 12px rgba(0, 0, 0, 0.3));
 }
 
 .mi-media-picker-dropdown .mi-disabled-item {
@@ -1061,19 +1177,19 @@ select.mi-input {
   gap: 10px;
   margin-bottom: 12px;
   padding: 10px 12px;
-  background: <<colour tiddler-editor-background>>;
-  border: 1px solid <<colour table-border>>;
-  border-radius: 8px;
+  background: var(--suite-surface-subtle, <<colour tiddler-editor-background>>);
+  border: 1px solid var(--suite-border-subtle, <<colour table-border>>);
+  border-radius: var(--suite-radius-md, 10px);
 }
 
 .mi-summary-group {
   display: flex;
   flex-direction: column;
-  border: 1px solid <<colour table-border>>;
-  border-radius: 8px;
+  border: 1px solid var(--suite-border-subtle, <<colour table-border>>);
+  border-radius: var(--suite-radius-md, 10px);
   overflow: hidden;
   margin-top: 4px;
-  background-color: <<colour tiddler-background>>;
+  background-color: var(--suite-surface-card, <<colour tiddler-background>>);
 }
 
 .mi-summary-item {
@@ -1081,7 +1197,7 @@ select.mi-input {
   justify-content: space-between;
   align-items: center;
   padding: 8px 12px;
-  border-bottom: 1px solid <<colour table-border>>;
+  border-bottom: 1px solid var(--suite-border-subtle, <<colour table-border>>);
   font-size: 0.9em;
 }
 
@@ -1090,7 +1206,7 @@ select.mi-input {
 }
 
 .mi-summary-item:hover {
-  background-color: <<colour table-header-background>>;
+  background-color: var(--suite-surface-hover, <<colour table-header-background>>);
 }
 
 .mi-summary-link {
@@ -1101,13 +1217,14 @@ select.mi-input {
 }
 
 .mi-summary-badge {
-  background-color: <<colour tiddler-editor-background>>;
-  color: <<colour foreground>>;
-  border: 1px solid <<colour table-border>>;
-  border-radius: 12px;
+  background-color: var(--suite-surface-subtle, <<colour tiddler-editor-background>>);
+  color: var(--suite-fg-primary, <<colour foreground>>);
+  border: 1px solid var(--suite-border-subtle, <<colour table-border>>);
+  border-radius: var(--suite-radius-pill, 999px);
   padding: 2px 8px;
   font-size: 0.85em;
   font-weight: 600;
+  font-variant-numeric: tabular-nums;
   white-space: nowrap;
   flex-shrink: 0;
 }
@@ -1163,7 +1280,7 @@ select.mi-input {
 }
 
 .mi-fav-star-btn:hover {
-  background: <<colour tiddler-editor-background>>;
+  background: var(--suite-surface-hover, <<colour tiddler-editor-background>>);
 }
 
 .mi-view-container {
@@ -1193,10 +1310,10 @@ select.mi-input {
 }
 
 .mi-rating-box {
-  background: <<colour tiddler-editor-background>>;
-  border: 1px solid <<colour table-border>>;
+  background: var(--suite-surface-subtle, <<colour tiddler-editor-background>>);
+  border: 1px solid var(--suite-border-subtle, <<colour table-border>>);
   padding: 8px 10px;
-  border-radius: 6px;
+  border-radius: var(--suite-radius-sm, 8px);
   text-align: center;
 }
 
@@ -1214,22 +1331,22 @@ select.mi-input {
 }
 
 .mi-star-full {
-  color: #f59e0b;
+  color: var(--suite-status-warning-accent, #f59e0b);
 }
 
 .mi-star-inactive {
-  color: <<colour muted-foreground>>;
+  color: var(--suite-fg-muted, <<colour muted-foreground>>);
 }
 
 .mi-star-empty {
-  color: <<colour muted-foreground>>;
+  color: var(--suite-fg-muted, <<colour muted-foreground>>);
   opacity: 0.35;
 }
 
 .mi-star-half {
   position: relative;
   display: inline-block;
-  color: <<colour muted-foreground>>;
+  color: var(--suite-fg-muted, <<colour muted-foreground>>);
 }
 
 .mi-star-half::after {
@@ -1239,13 +1356,14 @@ select.mi-input {
   top: 0;
   width: 50%;
   overflow: hidden;
-  color: #f59e0b;
+  color: var(--suite-status-warning-accent, #f59e0b);
 }
 
 .mi-rating-score {
   font-weight: bold;
   font-size: 0.9em;
-  color: <<colour foreground>>;
+  font-variant-numeric: tabular-nums;
+  color: var(--suite-fg-primary, <<colour foreground>>);
 }
 
 .mi-content {
@@ -1277,15 +1395,15 @@ select.mi-input {
 
 /* --- Control Card & Interactive Star Rating Picker --- */
 .mi-control-card {
-  background: <<colour tiddler-background>>;
-  border-left: 4px solid <<colour primary>>;
+  background: var(--suite-surface-card, <<colour tiddler-background>>);
+  border-left: 3px solid var(--suite-accent, <<colour primary>>);
   padding: 16px;
 }
 
 .mi-control-header {
   margin-bottom: 12px;
   padding-bottom: 6px;
-  border-bottom: 1px solid <<colour table-border>>;
+  border-bottom: 1px solid var(--suite-border-subtle, <<colour table-border>>);
 }
 
 .mi-control-title {
@@ -1293,7 +1411,7 @@ select.mi-input {
   font-size: 0.95em;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  color: <<colour primary>>;
+  color: var(--suite-accent, <<colour primary>>);
 }
 
 .mi-control-body {
@@ -1320,11 +1438,11 @@ select.mi-input {
   display: inline-flex;
   align-items: center;
   gap: 2px;
-  background: <<colour tiddler-editor-background>>;
-  border: 1px solid <<colour table-border>>;
-  border-radius: 6px;
+  background: var(--suite-surface-input, <<colour tiddler-editor-background>>);
+  border: 1px solid var(--suite-border-subtle, <<colour table-border>>);
+  border-radius: var(--suite-radius-sm, 8px);
   padding: 2px 8px;
-  min-height: 36px;
+  min-height: var(--suite-control-height-md, 36px);
   box-sizing: border-box;
 }
 
@@ -1397,15 +1515,17 @@ select.mi-input {
 
 .mi-history-date {
   font-weight: 600;
+  font-variant-numeric: tabular-nums;
 }
 
 .mi-history-stars {
-  color: #f59e0b;
+  color: var(--suite-status-warning-accent, #f59e0b);
 }
 
 .mi-history-timestamp {
-  color: <<colour muted-foreground>>;
+  color: var(--suite-fg-muted, <<colour muted-foreground>>);
   font-size: 0.82em;
+  font-variant-numeric: tabular-nums;
 }
 
 .mi-history-actions {
@@ -1419,28 +1539,38 @@ select.mi-input {
   min-width: 32px;
   min-height: 32px;
   border-radius: 6px;
-  color: <<colour muted-foreground>>;
+  color: var(--suite-fg-muted, <<colour muted-foreground>>);
   cursor: pointer;
   font-weight: bold;
   font-size: 1.15em;
 }
 
 .mi-delete-btn:hover {
-  color: #ef4444;
-  background: <<colour tiddler-editor-background>>;
+  color: var(--suite-status-danger-fg, #ef4444);
+  background: var(--suite-status-danger-bg, <<colour tiddler-editor-background>>);
 }
 
 /* --- Log & History Helpers --- */
+.tc-tiddler-frame input.mi-input.mi-input-sm,
+.tc-tiddler-frame select.mi-input.mi-input-sm,
 .mi-input-sm {
-  min-height: 36px;
-  font-size: 0.9em;
-  padding: 5px 10px;
+  min-height: var(--suite-control-height-sm, 32px);
+  font-size: 0.88em;
+  padding: 4px 10px;
 }
 
+.tc-tiddler-frame select.mi-input.mi-input-sm,
+select.mi-input.mi-input-sm {
+  padding-right: 30px;
+}
+
+.tc-tiddler-frame input.mi-input.mi-input-auto,
+.tc-tiddler-frame select.mi-input.mi-input-auto,
 .mi-input-auto {
   width: auto;
 }
 
+.tc-tiddler-frame textarea.mi-input.mi-textarea-sm,
 .mi-textarea-sm {
   min-height: 68px;
   font-size: 0.92em;
@@ -1498,9 +1628,9 @@ select.mi-input {
 .mi-library-filters-drawer {
   margin-bottom: 16px;
   padding: 12px 14px;
-  border-radius: 8px;
-  border: 1px solid <<colour table-border>>;
-  background: <<colour tiddler-editor-background>>;
+  border-radius: var(--suite-radius-md, 10px);
+  border: 1px solid var(--suite-border-subtle, <<colour table-border>>);
+  background: var(--suite-surface-subtle, <<colour tiddler-editor-background>>);
 }
 
 .mi-library-controls {
@@ -1569,7 +1699,7 @@ select.mi-input {
 .mi-library-card-image-container {
   aspect-ratio: 2 / 3;
   overflow: hidden;
-  background: <<colour tiddler-editor-background>>;
+  background: var(--suite-surface-subtle, <<colour tiddler-editor-background>>);
   position: relative;
 }
 
@@ -1584,7 +1714,7 @@ select.mi-input {
   position: absolute;
   top: 6px;
   left: 6px;
-  color: #f59e0b;
+  color: var(--suite-status-warning-accent, #f59e0b);
   background: rgba(0, 0, 0, 0.72);
   border-radius: 50%;
   width: 24px;
@@ -1647,23 +1777,23 @@ select.mi-input {
 
 /* --- Callouts & Empty States --- */
 .mi-callout-warning {
-  border-left: 4px solid #f59e0b;
+  border-left: 3px solid var(--suite-status-warning-accent, #f59e0b);
 }
 
 .mi-callout-error {
-  border-left: 4px solid #ef4444;
+  border-left: 3px solid var(--suite-status-danger-accent, #ef4444);
 }
 
 .mi-callout-title {
   font-weight: 700;
   margin-bottom: 6px;
-  color: <<colour foreground>>;
+  color: var(--suite-fg-primary, <<colour foreground>>);
 }
 
 .mi-callout-body {
   font-size: 0.9em;
   margin-bottom: 12px;
-  color: <<colour muted-foreground>>;
+  color: var(--suite-fg-secondary, <<colour muted-foreground>>);
 }
 
 .mi-callout-actions {
@@ -1676,9 +1806,10 @@ select.mi-input {
   padding: 24px 16px;
   text-align: center;
   font-style: italic;
-  color: <<colour muted-foreground>>;
-  border: 1px dashed <<colour table-border>>;
-  border-radius: 8px;
+  color: var(--suite-fg-muted, <<colour muted-foreground>>);
+  background: var(--suite-surface-subtle, transparent);
+  border: 1.5px dashed var(--suite-border-strong, <<colour table-border>>);
+  border-radius: var(--suite-radius-lg, 14px);
 }
 
 .mi-external-link {
@@ -1700,12 +1831,12 @@ select.mi-input {
 }
 
 .mi-genre-pill {
-  background: <<colour tiddler-editor-background>>;
-  color: <<colour foreground>>;
-  border: 1px solid <<colour table-border>>;
-  border-radius: 14px;
+  background: var(--suite-surface-subtle, <<colour tiddler-editor-background>>);
+  color: var(--suite-fg-primary, <<colour foreground>>);
+  border: 1px solid var(--suite-border-subtle, <<colour table-border>>);
+  border-radius: var(--suite-radius-pill, 999px);
   padding: 4px 12px;
-  min-height: 30px;
+  min-height: var(--suite-control-height-sm, 30px);
   display: inline-flex;
   align-items: center;
   font-size: 0.85em;
@@ -1714,13 +1845,13 @@ select.mi-input {
 }
 
 .mi-genre-pill:hover {
-  background: <<colour primary>>;
-  color: <<colour background>>;
-  border-color: <<colour primary>>;
+  background: var(--suite-accent, <<colour primary>>);
+  color: var(--suite-fg-on-accent, <<colour background>>);
+  border-color: var(--suite-accent, <<colour primary>>);
 }
 
-/* --- Responsive Mobile Ergonomics (<= 700px) --- */
-@media (max-width: 700px) {
+/* --- Responsive Mobile Ergonomics (<= 640px) --- */
+@media (max-width: 640px) {
   .mi-btn,
   .mi-btn-sm,
   .mi-segmented-pill,
@@ -1731,9 +1862,9 @@ select.mi-input {
   }
 
   .mi-batch-checkbox {
-    width: 32px;
-    height: 32px;
-    min-width: 32px;
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
   }
 
   .mi-picker-chip-remove,

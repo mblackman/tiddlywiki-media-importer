@@ -11,11 +11,11 @@ Manage your media consumption within TiddlyWiki
 Please enter your API keys for the following services:
 
 ;ComicVine
-:<$edit-text tiddler="$:/plugins/mblackman/media-importer/configs/comicvine-api-key" tag="input" type="password" default="" placeholder="Enter Key" />
+:<$edit-text tiddler="$:/plugins/mblackman/media-importer/configs/comicvine-api-key" tag="input" type="password" default="" placeholder="Enter Key" class="mi-input" />
 :[[Link|https://comicvine.gamespot.com/api/]]
 ;RAWG
-:<$edit-text tiddler="$:/plugins/mblackman/media-importer/configs/rawg-api-key" tag="input" type="password" default="" placeholder="Enter Key" />
+:<$edit-text tiddler="$:/plugins/mblackman/media-importer/configs/rawg-api-key" tag="input" type="password" default="" placeholder="Enter Key" class="mi-input" />
 :[[Link|https://rawg.io/apidocs]]
 ;TMDB
-:<$edit-text tiddler="$:/plugins/mblackman/media-importer/configs/tmdb-api-key" tag="input" type="password" default="" placeholder="Enter Key" />
+:<$edit-text tiddler="$:/plugins/mblackman/media-importer/configs/tmdb-api-key" tag="input" type="password" default="" placeholder="Enter Key" class="mi-input" />
 :[[Link|https://www.themoviedb.org/documentation/api]]
