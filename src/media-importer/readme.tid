@@ -14,6 +14,7 @@ This plugin allows you to search and import metadata for various media types int
 * ''Games'': RAWG (Requires API Key)
 * ''Manga'': AniList
 * ''Movies'': TMDB (Requires API Key)
+* ''Music'': MusicBrainz + Cover Art Archive
 * ''TV Shows'': TMDB (Requires API Key)
 
 !! Setup

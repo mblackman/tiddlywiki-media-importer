@@ -50,7 +50,7 @@ list-before: $:/core/ui/ViewTemplate/body
           </$button>
         </$list>
         <$list filter="[<refreshState>match[missing-key]]" variable="ignore">
-          <$button class="mi-btn mi-btn-sm mi-btn-warning" message="tm-navigate" param="$:/plugins/mblackman/media-importer/config" tooltip="Configure API key in settings">
+          <$button class="mi-btn mi-btn-sm mi-btn-warning" to="$:/plugins/mblackman/media-importer/config" tooltip="Configure API key in settings">
             Missing Key
           </$button>
         </$list>
@@ -226,6 +226,16 @@ list-before: $:/core/ui/ViewTemplate/body
         <div class="mi-label">Publisher</div> <div><$text text={{{ [enlist{!!publisher}search-replace:g[_],[ ]join[, ]] }}}/></div>
         <div class="mi-label">Issues</div> <div>{{!!count_of_issues}}</div>
       </$list>
+      <$list filter="[all[current]media-type[Music]]">
+        <div class="mi-label">Artist</div> <div><$text text={{{ [enlist{!!artist}search-replace:g[_],[ ]join[, ]] }}}/></div>
+        <$list filter="[all[current]has[releaseType]!field:releaseType[]]" variable="ignoreRelType">
+          <div class="mi-label">Type</div> <div>{{!!releaseType}}</div>
+        </$list>
+        <div class="mi-label">Tracks</div> <div>{{!!tracks}}</div>
+        <$list filter="[all[current]has[label]!field:label[]]" variable="ignoreLbl">
+          <div class="mi-label">Label</div> <div><$text text={{{ [enlist{!!label}search-replace:g[_],[ ]join[, ]] }}}/></div>
+        </$list>
+      </$list>
       <$list filter="[all[current]has[genres]!field:genres[]]">
         <div class="mi-label">Genres</div>
         <div class="mi-genre-pills">
@@ -250,8 +260,8 @@ list-before: $:/core/ui/ViewTemplate/body
 <!-- USER CONTROLS (EDITABLE) -->
 <$let
   mediaType={{!!media-type}}
-  historyTitle={{{ [<mediaType>match[Book]then[Reading & Review History]] [<mediaType>match[Manga]then[Reading & Review History]] [<mediaType>match[Comic]then[Reading & Review History]] [<mediaType>match[Game]then[Play & Review History]] ~[[Watch & Review History]] }}}
-  dateLabel={{{ [<mediaType>match[Book]then[Date Read]] [<mediaType>match[Manga]then[Date Read]] [<mediaType>match[Comic]then[Date Read]] [<mediaType>match[Game]then[Date Played]] ~[[Date Watched]] }}}
+  historyTitle={{{ [<mediaType>match[Book]then[Reading & Review History]] [<mediaType>match[Manga]then[Reading & Review History]] [<mediaType>match[Comic]then[Reading & Review History]] [<mediaType>match[Game]then[Play & Review History]] [<mediaType>match[Music]then[Listening & Review History]] ~[[Watch & Review History]] }}}
+  dateLabel={{{ [<mediaType>match[Book]then[Date Read]] [<mediaType>match[Manga]then[Date Read]] [<mediaType>match[Comic]then[Date Read]] [<mediaType>match[Game]then[Date Played]] [<mediaType>match[Music]then[Date Listened]] ~[[Date Watched]] }}}
 >
 <div class="mi-card mi-control-card">
 

@@ -88,8 +88,7 @@ class MediaImporterResultsWidget extends Widget {
               type: 'button',
               attributes: {
                 class: { type: 'string', value: 'mi-btn mi-btn-primary' },
-                message: { type: 'string', value: 'tm-navigate' },
-                param: { type: 'string', value: '$:/plugins/mblackman/media-importer/config' },
+                to: { type: 'string', value: '$:/plugins/mblackman/media-importer/config' },
               },
               children: [text('Configure API Key')],
             },

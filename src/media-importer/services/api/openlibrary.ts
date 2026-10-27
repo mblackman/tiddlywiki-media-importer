@@ -1,5 +1,5 @@
 import { MediaDraftFields, MediaFinalFields, MediaImporterConfig } from './types';
-import { makeList, formatCustomDate, stripHtml } from './utils';
+import { fetchJsonWithRetry, formatCustomDate, makeList, stripHtml } from './utils';
 
 export const OpenLibraryConfig: MediaImporterConfig = {
   type: 'Book',
@@ -11,8 +11,7 @@ export const OpenLibraryConfig: MediaImporterConfig = {
       encodeURIComponent(query) +
       '&page=' +
       p;
-    return fetch(url)
-      .then(res => res.json())
+    return fetchJsonWithRetry(url, 2, 600)
       .then(data => {
         return (data.docs || []).slice(0, 5).map((book: any) => {
           const coverUrl = book.cover_i
@@ -47,10 +46,7 @@ export const OpenLibraryConfig: MediaImporterConfig = {
       ? 'https://openlibrary.org' + id + '.json'
       : 'https://openlibrary.org/isbn/' + id + '.json';
 
-    const detailPromise = fetch(url).then(res => {
-      if (!res.ok) throw new Error('API Request failed');
-      return res.json();
-    });
+    const detailPromise = fetchJsonWithRetry(url, 2, 600);
 
     // If fetching by work key, also query search API for median pages, ISBN, ratings_average, and cover fallback
     const searchEnrichPromise = isWorkKey

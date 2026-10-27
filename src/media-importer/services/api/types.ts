@@ -6,6 +6,7 @@ export interface MediaDraftFields {
   draft_cover?: string;
   draft_poster?: string;
   draft_author?: string;
+  draft_artist?: string;
   draft_publisher?: string;
   draft_overview?: string;
   [key: string]: any;

@@ -67,6 +67,58 @@ export function fetchGraphQL(query: string, variables: any): Promise<any> {
   }).then(r => r.json());
 }
 
+const hostQueues = new Map<string, Promise<any>>();
+const hostLastCompleted = new Map<string, number>();
+
+// --- HELPER: Fetch JSON with automatic retry, exponential backoff, and per-host rate-limit queueing ---
+export function fetchJsonWithRetry(url: string, retries = 4, delayMs = 800, minIntervalMs = 0): Promise<any> {
+  const doRequest = (): Promise<any> => {
+    return fetch(url, {
+      headers: {
+        Accept: 'application/json',
+      },
+    }).then(res => {
+      if (!res.ok) {
+        if ((res.status === 503 || res.status === 429) && retries > 0) {
+          return new Promise(resolve => setTimeout(resolve, delayMs)).then(() =>
+            fetchJsonWithRetry(url, retries - 1, Math.round(delayMs * 1.6), 0),
+          );
+        }
+        throw new Error(`HTTP ${res.status}`);
+      }
+      return res.json();
+    });
+  };
+
+  if (minIntervalMs <= 0) {
+    return doRequest();
+  }
+
+  let hostKey = 'default';
+  try {
+    hostKey = new URL(url).hostname;
+  } catch {
+    hostKey = url.split('/')[2] || 'default';
+  }
+
+  const prev = hostQueues.get(hostKey) || Promise.resolve();
+  const next = prev
+    .catch(() => {})
+    .then(() => {
+      const last = hostLastCompleted.get(hostKey) || 0;
+      const elapsed = Date.now() - last;
+      const waitMs = Math.max(0, minIntervalMs - elapsed);
+      return waitMs > 0 ? new Promise(resolve => setTimeout(resolve, waitMs)) : Promise.resolve();
+    })
+    .then(() => doRequest())
+    .finally(() => {
+      hostLastCompleted.set(hostKey, Date.now());
+    });
+
+  hostQueues.set(hostKey, next);
+  return next;
+}
+
 // --- HELPER: Pagination Strategy ---
 // Maps a smaller UI page size to a larger API page size (e.g. 5 items from a 20-item API page)
 export function getPagedSlice(uiPage: number, uiSize: number, apiSize: number) {

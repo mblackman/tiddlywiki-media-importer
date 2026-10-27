@@ -1,6 +1,6 @@
 # TiddlyWiki Media Importer
 
-A TiddlyWiki 5 plugin that serves as a unified media manager for Books, Comics, Games, Manga, Movies, and TV Shows. It fetches metadata from various public APIs and formats them into rich Tiddlers with cover images, descriptions, and ratings.
+A TiddlyWiki 5 plugin that serves as a unified media manager for Books, Comics, Games, Manga, Movies, Music, and TV Shows. It fetches metadata from various public APIs and formats them into rich Tiddlers with cover images, descriptions, and ratings.
 
 ## Features
 
@@ -18,6 +18,7 @@ A TiddlyWiki 5 plugin that serves as a unified media manager for Books, Comics, 
 | **Games**    | [RAWG](https://rawg.io/)                     | ✅ Yes            |
 | **Manga**    | [AniList](https://anilist.co/)               | ❌ No             |
 | **Movies**   | [TMDB](https://www.themoviedb.org/)          | ✅ Yes            |
+| **Music**    | [MusicBrainz](https://musicbrainz.org/)      | ❌ No             |
 | **TV Shows** | [TMDB](https://www.themoviedb.org/)          | ✅ Yes            |
 
 ## Installation

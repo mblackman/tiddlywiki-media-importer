@@ -3,12 +3,13 @@ title: $:/plugins/mblackman/media-importer/services/manager.ts
 type: application/javascript
 module-type: startup
 
-Unified Media Manager for Books, Comics, Games, and Manga.
+Unified Media Manager for Books, Comics, Games, Manga, Movies, Music, and TV Shows.
 Fetches data from various APIs and formats them into fields.
 \*/
 
 import { AniListConfig } from './api/anilist';
 import { ComicVineConfig } from './api/comicvine';
+import { MusicBrainzConfig } from './api/musicbrainz';
 import { OpenLibraryConfig } from './api/openlibrary';
 import { RawgConfig } from './api/rawg';
 import { TmdbMovieConfig, TmdbTvConfig } from './api/tmdb';
@@ -23,6 +24,13 @@ export const after = ['startup'];
 export const synchronous = true;
 
 const registeredConfigs = new Map<string, MediaImporterConfig>();
+
+function formatLogError(error: unknown): string {
+  if (error instanceof Error) {
+    return error.message;
+  }
+  return String(error);
+}
 
 function getTodayDateString(): string {
   return $tw.utils.formatDateString(new Date(), 'YYYY-0MM-0DD');
@@ -125,7 +133,7 @@ function registerMediaImporter(config: MediaImporterConfig) {
         $tw.wiki.setText(stateTiddler, 'text', null, 'done');
       })
       .catch(error => {
-        console.error(type + ' Search Error:', error);
+        console.error(type + ' Search Error: ' + formatLogError(error));
         $tw.wiki.setText(stateTiddler, 'text', null, 'error');
       });
   });
@@ -260,7 +268,7 @@ function registerMediaImporter(config: MediaImporterConfig) {
       })
       .catch(error => {
         $tw.wiki.deleteTiddler(fetchingStateTitle);
-        console.error(type + ' Fetch Error:', error);
+        console.error(type + ' Fetch Error: ' + formatLogError(error));
         $tw.notifier.display('$:/plugins/mblackman/media-importer/ui/error-notification', {
           variables: { title: 'Error fetching ' + type + ' details.' },
         });
@@ -274,6 +282,7 @@ export function startup() {
   registerMediaImporter(RawgConfig);
   registerMediaImporter(AniListConfig);
   registerMediaImporter(TmdbMovieConfig);
+  registerMediaImporter(MusicBrainzConfig);
   registerMediaImporter(TmdbTvConfig);
 
   // 3. BATCH IMPORT SELECTED SEARCH RESULTS
@@ -370,6 +379,9 @@ export function startup() {
     } else if (mediaType === 'Comic') {
       fields.publisher = creatorList;
       fields.count_of_issues = 'unknown';
+    } else if (mediaType === 'Music') {
+      fields.artist = creatorList || '[[Unknown]]';
+      fields.tracks = 'unknown';
     }
 
     if (autoLogToday) {
@@ -458,7 +470,8 @@ export function startup() {
       draft_image: String(existingFields.image || ''),
       draft_cover: String(existingFields.image || ''),
       draft_poster: String(existingFields.image || ''),
-      draft_author: String(existingFields.author || ''),
+      draft_author: String(existingFields.author || existingFields.artist || ''),
+      draft_artist: String(existingFields.artist || ''),
       draft_publisher: String(existingFields.publisher || ''),
       draft_pages: existingFields.pages && existingFields.pages !== 'unknown' ? String(existingFields.pages) : '',
       draft_isbn: existingFields.isbn && existingFields.isbn !== 'unknown' ? String(existingFields.isbn) : '',
@@ -489,7 +502,7 @@ export function startup() {
         }, 2500);
       })
       .catch(error => {
-        console.error(mediaType + ' Refresh Error:', error);
+        console.error(mediaType + ' Refresh Error: ' + formatLogError(error));
         $tw.wiki.setText(refreshStateTitle, 'text', null, 'error');
         setTimeout(() => {
           $tw.wiki.deleteTiddler(refreshStateTitle);

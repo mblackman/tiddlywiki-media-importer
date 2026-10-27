@@ -125,4 +125,67 @@ describe('Media Importer UI & Workflow', function() {
     $tw.wiki.deleteTiddler('$:/temp/media-importer/search-input');
     $tw.wiki.deleteTiddler('$:/state/media-importer-selected');
   });
+
+  it('supports Music search results and Music view template rendering', function() {
+    $tw.wiki.setText('$:/state/media-importer-selected', 'text', null, 'Music');
+    $tw.wiki.addTiddler(
+      new $tw.Tiddler({
+        title: '$:/temp/search/music-result/00',
+        tags: 'MusicSearchResult',
+        draft_title: 'OK Computer',
+        draft_year: '1997',
+        draft_artist: '[[Radiohead]]',
+        draft_cover: 'https://coverartarchive.org/release-group/b1392450-e666-3926-a536-22c65f834433/front-250',
+      }),
+    );
+    $tw.wiki.setText('$:/state/Music-search', 'text', null, 'done');
+
+    const uiHtml = $tw.wiki.renderTiddler('text/html', '$:/plugins/mblackman/media-importer/ui');
+    expect(uiHtml).toContain('OK Computer');
+    expect(uiHtml).toContain('By Radiohead');
+
+    // Create an imported Music tiddler and verify its ViewTemplate
+    $tw.wiki.addTiddler(
+      new $tw.Tiddler({
+        title: 'OK Computer (1997)',
+        englishTitle: 'OK Computer',
+        year: '1997',
+        releaseDate: '1997-05-21',
+        dataSource: 'MusicBrainz',
+        url: 'https://musicbrainz.org/release-group/b1392450-e666-3926-a536-22c65f834433',
+        id: 'b1392450-e666-3926-a536-22c65f834433',
+        artist: '[[Radiohead]]',
+        releaseType: 'Album',
+        tracks: '12',
+        label: '[[EMI]]',
+        genres: '[[alternative rock]] [[art rock]]',
+        onlineRating: '4.6',
+        image: 'https://coverartarchive.org/release-group/b1392450-e666-3926-a536-22c65f834433/front-500',
+        status: 'Backlog',
+        tags: '$:/tags/media-importer/Media',
+        'media-type': 'Music',
+        plot: 'Tracklist:\n1. Airbag\n2. Paranoid Android',
+      }),
+    );
+
+    const tplHtml = $tw.wiki.renderTiddler(
+      'text/html',
+      '$:/plugins/mblackman/media-importer/view-template',
+      { variables: { currentTiddler: 'OK Computer (1997)' } },
+    );
+    expect(tplHtml).toContain('MusicBrainz Score');
+    expect(tplHtml).toContain('View on MusicBrainz ↗');
+    expect(tplHtml).toContain('Radiohead');
+    expect(tplHtml).toContain('Album');
+    expect(tplHtml).toContain('12');
+    expect(tplHtml).toContain('EMI');
+    expect(tplHtml).toContain('Listening &amp; Review History');
+    expect(tplHtml).toContain('Date Listened');
+
+    // Clean up
+    $tw.wiki.deleteTiddler('$:/temp/search/music-result/00');
+    $tw.wiki.deleteTiddler('$:/state/Music-search');
+    $tw.wiki.deleteTiddler('$:/state/media-importer-selected');
+    $tw.wiki.deleteTiddler('OK Computer (1997)');
+  });
 });

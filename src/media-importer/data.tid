@@ -55,6 +55,16 @@ type: application/json
         "imageField": "draft_poster",
         "subtitle": "{{!!draft_overview}}"
     },
+    "Music": {
+        "caption": "Add Music",
+        "label": "Music",
+        "icon": "music",
+        "placeholder": "Search albums, EPs, or artists...",
+        "loadingText": "Searching MusicBrainz...",
+        "resultTag": "MusicSearchResult",
+        "imageField": "draft_cover",
+        "subtitle": "By <$text text={{{ [enlist{!!draft_artist}search-replace:g[_],[ ]join[, ]] }}}/>"
+    },
     "TV Show": {
         "caption": "Add TV Show",
         "label": "TV Shows",
