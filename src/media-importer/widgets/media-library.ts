@@ -201,10 +201,6 @@ class MediaLibraryGridWidget extends Widget {
       }
     });
 
-    const showActiveSplit = currentStatus === 'All';
-    const inProgressItems = showActiveSplit ? items.filter(item => item.status === 'Active') : [];
-    const gridItemsData = showActiveSplit ? items.filter(item => item.status !== 'Active') : items;
-
     const totalRated = items.filter(index => index.averageRating > 0);
     const overallRating = totalRated.length > 0
       ? (totalRated.reduce((sum, index) => sum + index.averageRating, 0) / totalRated.length).toFixed(1)
@@ -280,19 +276,7 @@ class MediaLibraryGridWidget extends Widget {
       return h('div', { class: 'mi-library-grid' }, gridItemsNodes);
     };
 
-    const children: IParseTreeNode[] = [countLabel];
-
-    if (inProgressItems.length > 0) {
-      children.push(h('h3', { class: 'mi-section-heading', style: 'margin-bottom: 10px; margin-top: 5px;' }, [text('Currently Active')]));
-      children.push(makeGrid(inProgressItems));
-      if (gridItemsData.length > 0) {
-        children.push(h('h3', { class: 'mi-section-heading', style: 'margin-bottom: 10px; margin-top: 22px;' }, [text('Collection')]));
-      }
-    }
-
-    if (gridItemsData.length > 0 || inProgressItems.length === 0) {
-      children.push(makeGrid(gridItemsData));
-    }
+    const children: IParseTreeNode[] = [countLabel, makeGrid(items)];
 
     this.makeChildWidgets(children);
   }
@@ -490,6 +474,27 @@ class MediaLibraryWidget extends Widget {
     ]);
 
     // --- Search & Quick Toolbar Row (Always visible above the fold on mobile & desktop!) ---
+    const activeCount = this.wiki.filterTiddlers('[tag[$:/tags/media-importer/Media]status[Active]]').length;
+    const isFilteringActive = currentStatus === 'Active';
+
+    const quickFilterActiveButton = {
+      type: 'button',
+      attributes: {
+        class: { type: 'string', value: isFilteringActive ? 'mi-btn mi-btn-primary mi-btn-sm' : 'mi-btn mi-btn-sm' },
+        tooltip: { type: 'string', value: isFilteringActive ? 'Show all media statuses' : 'Filter to currently active media' },
+      },
+      children: [
+        text(`Active (${activeCount})`),
+        {
+          type: 'action-setfield',
+          attributes: {
+            $tiddler: { type: 'string', value: statusTiddler },
+            text: { type: 'string', value: isFilteringActive ? 'All' : 'Active' },
+          },
+        },
+      ],
+    } as IParseTreeNode;
+
     const quickSortAddedButton = {
       type: 'button',
       attributes: {
@@ -497,7 +502,13 @@ class MediaLibraryWidget extends Widget {
       },
       children: [
         text('Recently Added'),
-        { type: 'action-setfield', attributes: { $tiddler: { type: 'string', value: sortTiddler }, text: { type: 'string', value: 'added-desc' } } },
+        {
+          type: 'action-setfield',
+          attributes: {
+            $tiddler: { type: 'string', value: sortTiddler },
+            text: { type: 'string', value: currentSort === 'added-desc' ? 'title-asc' : 'added-desc' },
+          },
+        },
       ],
     } as IParseTreeNode;
 
@@ -508,9 +519,17 @@ class MediaLibraryWidget extends Widget {
       },
       children: [
         text('Recently Active'),
-        { type: 'action-setfield', attributes: { $tiddler: { type: 'string', value: sortTiddler }, text: { type: 'string', value: 'date-desc' } } },
+        {
+          type: 'action-setfield',
+          attributes: {
+            $tiddler: { type: 'string', value: sortTiddler },
+            text: { type: 'string', value: currentSort === 'date-desc' ? 'title-asc' : 'date-desc' },
+          },
+        },
       ],
     } as IParseTreeNode;
+
+    const hasQuickReset = activeFilterCount > 0 || currentSort !== 'title-asc';
 
     const mobileFilterToggleButton = {
       type: 'button',
@@ -548,9 +567,10 @@ class MediaLibraryWidget extends Widget {
       ]),
       h('div', { class: 'mi-library-quick-actions' }, [
         mobileFilterToggleButton,
+        quickFilterActiveButton,
         quickSortAddedButton,
         quickSortFinishedButton,
-        activeFilterCount > 0
+        hasQuickReset
           ? ({
             type: 'button',
             attributes: {
@@ -587,7 +607,15 @@ class MediaLibraryWidget extends Widget {
     ]);
 
     // Status Select
-    const statusSelectChildren = [createOption('All', 'All Statuses'), ...statusOptions.map(s => createOption(s, s))];
+    const statusSelectChildren = [
+      createOption('All', `All Statuses (${allCount})`),
+      ...statusOptions.map(s => {
+        const count = s === 'Backlog'
+          ? backlogCount
+          : this.wiki.filterTiddlers(`[tag[$:/tags/media-importer/Media]status[${s}]]`).length;
+        return createOption(s, `${s} (${count})`);
+      }),
+    ];
     const statusSelect = h('div', { class: 'mi-filter-group' }, [
       h('span', { class: 'mi-label' }, [text('Status')]),
       {
