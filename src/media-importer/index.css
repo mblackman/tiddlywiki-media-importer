@@ -3,71 +3,119 @@
 /* Standalone-safe fallback contract (specificity 0,0,0 via :where).
    Automatically overridden when Slipstream ($:/plugins/mblackman/slipstream) is active. */
 :where(:root, .tc-page-container) {
+  color-scheme: light dark;
+
   --suite-bg-canvas: var(--mn-bg-app, var(--tpc-page-background, <<colour page-background>>));
   --suite-surface-primary: var(--mn-bg-surface, var(--tpc-tiddler-background, <<colour tiddler-background>>));
-  --suite-surface-card: var(--mn-bg-card, color-mix(in srgb, var(--tpc-tiddler-background, <<colour tiddler-background>>) 96.5%, var(--tpc-foreground, <<colour foreground>>) 3.5%));
-  --suite-surface-subtle: var(--mn-bg-subtle, color-mix(in srgb, var(--tpc-tiddler-background, <<colour tiddler-background>>) 93%, var(--tpc-foreground, <<colour foreground>>) 7%));
-  --suite-surface-elevated: var(--mn-bg-elevated, color-mix(in srgb, var(--tpc-tiddler-background, <<colour tiddler-background>>) 90%, var(--tpc-foreground, <<colour foreground>>) 10%));
+  --suite-surface-card: var(--mn-bg-card, color-mix(in oklab, var(--tpc-tiddler-background, <<colour tiddler-background>>) 96.5%, var(--tpc-foreground, <<colour foreground>>) 3.5%));
+  --suite-surface-subtle: var(--mn-bg-subtle, color-mix(in oklab, var(--tpc-tiddler-background, <<colour tiddler-background>>) 93%, var(--tpc-foreground, <<colour foreground>>) 7%));
+  --suite-surface-elevated: var(--mn-bg-elevated, color-mix(in oklab, var(--tpc-tiddler-background, <<colour tiddler-background>>) 90%, var(--tpc-foreground, <<colour foreground>>) 10%));
   --suite-surface-input: var(--tpc-tiddler-background, <<colour tiddler-background>>);
-  --suite-surface-hover: var(--mn-bg-hover, color-mix(in srgb, var(--tpc-foreground, <<colour foreground>>) 5.5%, var(--tpc-tiddler-background, <<colour tiddler-background>>)));
-  --suite-surface-active: var(--mn-bg-active, color-mix(in srgb, var(--tpc-foreground, <<colour foreground>>) 9%, var(--tpc-tiddler-background, <<colour tiddler-background>>)));
-  --suite-surface-selected: var(--mn-accent-soft, color-mix(in srgb, var(--tpc-primary, <<colour primary>>) 12%, var(--tpc-tiddler-background, <<colour tiddler-background>>)));
-  --suite-surface-dropzone: color-mix(in srgb, var(--tpc-primary, <<colour primary>>) 8%, var(--suite-surface-subtle));
+  --suite-surface-hover: var(--mn-bg-hover, color-mix(in oklab, var(--tpc-foreground, <<colour foreground>>) 5.5%, var(--tpc-tiddler-background, <<colour tiddler-background>>)));
+  --suite-surface-active: var(--mn-bg-active, color-mix(in oklab, var(--tpc-foreground, <<colour foreground>>) 9%, var(--tpc-tiddler-background, <<colour tiddler-background>>)));
+  --suite-surface-selected: var(--mn-accent-soft, color-mix(in oklab, var(--tpc-primary, <<colour primary>>) 12%, var(--tpc-tiddler-background, <<colour tiddler-background>>)));
+  --suite-surface-dropzone: color-mix(in oklab, var(--tpc-primary, <<colour primary>>) 8%, var(--suite-surface-subtle));
 
   --suite-fg-primary: var(--mn-fg-primary, var(--tpc-foreground, <<colour foreground>>));
-  --suite-fg-secondary: var(--mn-fg-secondary, color-mix(in srgb, var(--tpc-foreground, <<colour foreground>>) 72%, var(--tpc-muted-foreground, <<colour muted-foreground>>) 28%));
-  --suite-fg-muted: var(--mn-fg-muted, color-mix(in srgb, var(--tpc-foreground, <<colour foreground>>) 58%, var(--tpc-muted-foreground, <<colour muted-foreground>>) 42%));
+  --suite-fg-secondary: var(--mn-fg-secondary, color-mix(in oklab, var(--tpc-foreground, <<colour foreground>>) 72%, var(--tpc-muted-foreground, <<colour muted-foreground>>) 28%));
+  --suite-fg-muted: var(--mn-fg-muted, color-mix(in oklab, var(--tpc-foreground, <<colour foreground>>) 58%, var(--tpc-muted-foreground, <<colour muted-foreground>>) 42%));
   --suite-fg-on-accent: #ffffff;
 
-  --suite-border-hairline: var(--mn-border-hairline, color-mix(in srgb, var(--suite-fg-primary) 7%, transparent));
-  --suite-border-subtle: var(--mn-border-subtle, color-mix(in srgb, var(--suite-fg-primary) 12%, transparent));
-  --suite-border-strong: var(--mn-border-strong, color-mix(in srgb, var(--suite-fg-primary) 22%, transparent));
+  --suite-border-hairline: var(--mn-border-hairline, color-mix(in oklab, var(--suite-fg-primary) 7%, transparent));
+  --suite-border-subtle: var(--mn-border-subtle, color-mix(in oklab, var(--suite-fg-primary) 12%, transparent));
+  --suite-border-strong: var(--mn-border-strong, color-mix(in oklab, var(--suite-fg-primary) 22%, transparent));
+  --suite-border-control: var(--mn-border-control, color-mix(in oklab, var(--suite-fg-primary) 46%, var(--suite-surface-primary)));
 
   --suite-radius-xs: 6px;
   --suite-radius-sm: 8px;
   --suite-radius-md: 10px;
   --suite-radius-lg: 14px;
+  --suite-radius-xl: 18px;
   --suite-radius-pill: 9999px;
 
   --suite-shadow-xs: 0 1px 2px rgba(15, 23, 42, 0.04);
   --suite-shadow-sm: var(--mn-shadow-card, 0 2px 8px -2px rgba(15, 23, 42, 0.06), 0 1px 3px -1px rgba(15, 23, 42, 0.04));
+  --suite-shadow-md: 0 6px 16px -4px rgba(15, 23, 42, 0.10), 0 2px 6px -1px rgba(15, 23, 42, 0.05);
+  --suite-shadow-lg: var(--mn-shadow-popover, 0 12px 32px -4px rgba(15, 23, 42, 0.16), 0 4px 12px -2px rgba(15, 23, 42, 0.08));
+  --suite-scrim: var(--mn-scrim, rgba(15, 23, 42, 0.45));
+
+  --suite-space-1: 0.25rem;
+  --suite-space-2: 0.5rem;
+  --suite-space-3: 0.75rem;
+  --suite-space-4: 1rem;
+  --suite-space-5: 1.25rem;
+  --suite-space-6: 1.5rem;
+  --suite-space-8: 2rem;
+
+  --suite-card-padding-sm: 0.625rem 0.75rem;
+  --suite-card-padding-md: 0.875rem 1rem;
+  --suite-card-padding-lg: 1.125rem 1.25rem;
+  --suite-card-gap: 0.75rem;
+  --suite-section-gap: 1.25rem;
+  --suite-row-padding-y: 0.5rem;
 
   --suite-control-height-sm: 30px;
   --suite-control-height-md: 36px;
+  --suite-control-height-lg: 44px;
   --suite-touch-target: 36px;
 
   --suite-font-sans: var(--mn-font-sans, -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif);
   --suite-font-mono: var(--mn-font-mono, "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace);
 
+  --suite-text-xs: 0.75rem;
+  --suite-text-sm: 0.84rem;
+  --suite-text-base: 0.9375rem;
+  --suite-text-lg: 1.125rem;
+  --suite-text-xl: 1.375rem;
+
   --suite-accent: var(--mn-accent, var(--tpc-primary, <<colour primary>>));
-  --suite-accent-hover: var(--mn-accent-hover, color-mix(in srgb, var(--suite-accent) 86%, var(--suite-fg-primary)));
-  --suite-accent-bg: var(--mn-accent-soft, color-mix(in srgb, var(--suite-accent) 12%, var(--suite-surface-primary)));
-  --suite-accent-border: color-mix(in srgb, var(--suite-accent) 30%, transparent);
+  --suite-accent-hover: var(--mn-accent-hover, color-mix(in oklab, var(--suite-accent) 86%, var(--suite-fg-primary)));
+  --suite-accent-bg: var(--mn-accent-soft, color-mix(in oklab, var(--suite-accent) 12%, var(--suite-surface-primary)));
+  --suite-accent-border: color-mix(in oklab, var(--suite-accent) 30%, transparent);
+  accent-color: var(--suite-accent);
 
   --suite-status-success-accent: #10b981;
-  --suite-status-success-fg: color-mix(in srgb, #059669 82%, var(--suite-fg-primary));
-  --suite-status-success-bg: color-mix(in srgb, #10b981 13%, var(--suite-surface-primary));
-  --suite-status-success-border: color-mix(in srgb, #10b981 32%, transparent);
+  --suite-status-success-fg: color-mix(in oklab, #059669 82%, var(--suite-fg-primary));
+  --suite-status-success-bg: color-mix(in oklab, #10b981 13%, var(--suite-surface-primary));
+  --suite-status-success-border: color-mix(in oklab, #10b981 32%, transparent);
 
   --suite-status-warning-accent: #f59e0b;
-  --suite-status-warning-fg: color-mix(in srgb, #d97706 82%, var(--suite-fg-primary));
-  --suite-status-warning-bg: color-mix(in srgb, #f59e0b 14%, var(--suite-surface-primary));
-  --suite-status-warning-border: color-mix(in srgb, #f59e0b 35%, transparent);
+  --suite-status-warning-fg: color-mix(in oklab, #d97706 82%, var(--suite-fg-primary));
+  --suite-status-warning-bg: color-mix(in oklab, #f59e0b 14%, var(--suite-surface-primary));
+  --suite-status-warning-border: color-mix(in oklab, #f59e0b 35%, transparent);
 
   --suite-status-danger-accent: var(--mn-danger, var(--tpc-alert-highlight, #ef4444));
-  --suite-status-danger-fg: color-mix(in srgb, var(--suite-status-danger-accent) 85%, var(--suite-fg-primary));
-  --suite-status-danger-bg: color-mix(in srgb, var(--suite-status-danger-accent) 12%, var(--suite-surface-primary));
-  --suite-status-danger-border: color-mix(in srgb, var(--suite-status-danger-accent) 32%, transparent);
+  --suite-status-danger-fg: color-mix(in oklab, var(--suite-status-danger-accent) 85%, var(--suite-fg-primary));
+  --suite-status-danger-bg: color-mix(in oklab, var(--suite-status-danger-accent) 12%, var(--suite-surface-primary));
+  --suite-status-danger-border: color-mix(in oklab, var(--suite-status-danger-accent) 32%, transparent);
 
   --suite-status-info-accent: #3b82f6;
-  --suite-status-info-fg: color-mix(in srgb, #2563eb 82%, var(--suite-fg-primary));
-  --suite-status-info-bg: color-mix(in srgb, #3b82f6 12%, var(--suite-surface-primary));
-  --suite-status-info-border: color-mix(in srgb, #3b82f6 30%, transparent);
+  --suite-status-info-fg: color-mix(in oklab, #2563eb 82%, var(--suite-fg-primary));
+  --suite-status-info-bg: color-mix(in oklab, #3b82f6 12%, var(--suite-surface-primary));
+  --suite-status-info-border: color-mix(in oklab, #3b82f6 30%, transparent);
 
-  --suite-focus-ring: 0 0 0 3px color-mix(in srgb, var(--suite-accent) 28%, transparent);
+  --suite-focus-ring: 0 0 0 3px color-mix(in oklab, var(--suite-accent) 28%, transparent);
 }
 
-@media (max-width: 640px) {
+:where([data-suite-density="compact"], .suite-density-compact) {
+  --suite-row-padding-y: 0.25rem;
+  --suite-card-padding-sm: 0.45rem 0.625rem;
+  --suite-card-gap: 0.5rem;
+}
+
+:where([data-suite-density="touch"], .suite-density-touch) {
+  --suite-control-height-sm: 36px;
+  --suite-control-height-md: 44px;
+  --suite-touch-target: 44px;
+}
+
+:where([data-suite-density="editorial"], .suite-density-editorial) {
+  max-inline-size: var(--suite-measure-reading, 65ch);
+  line-height: var(--suite-leading-relaxed, 1.68);
+  text-wrap: pretty;
+}
+
+@media (max-width: 640px), (pointer: coarse) {
   :where(:root, .tc-page-container) {
     --suite-control-height-sm: 36px;
     --suite-control-height-md: 44px;
@@ -85,8 +133,9 @@
 
 /* --- Page Shell & App Header --- */
 .mi-page-shell {
-  max-width: 1040px;
-  margin: 0 auto;
+  max-width: 1060px;
+  margin-inline: auto;
+  container: mi-view / inline-size;
 }
 
 .mi-app-header {
@@ -94,10 +143,10 @@
   justify-content: space-between;
   align-items: center;
   flex-wrap: wrap;
-  gap: 12px;
-  margin-bottom: 16px;
-  padding-bottom: 12px;
-  border-bottom: 1px solid var(--suite-border-subtle, <<colour table-border>>);
+  gap: 14px;
+  margin-block-end: 20px;
+  padding-block-end: 14px;
+  border-block-end: 1px solid var(--suite-border-subtle, <<colour table-border>>);
 }
 
 .mi-app-header-title-group {
@@ -163,7 +212,8 @@
 }
 
 .mi-btn:focus-visible {
-  outline: none;
+  outline: 2px solid var(--suite-accent, <<colour primary>>);
+  outline-offset: 2px;
   box-shadow: var(--suite-focus-ring);
 }
 
@@ -270,7 +320,8 @@ input.mi-input:focus,
 textarea.mi-input:focus,
 select.mi-input:focus,
 .mi-input:focus {
-  outline: none;
+  outline: 2px solid transparent;
+  outline-offset: 2px;
   border-color: var(--suite-accent, <<colour primary>>);
   box-shadow: var(--suite-focus-ring);
 }
@@ -293,8 +344,17 @@ select.mi-input {
     calc(100% - 11px) calc(50% - 2px);
   background-size: 5px 5px, 5px 5px;
   background-repeat: no-repeat;
-  padding: 6px 32px 6px 10px;
+  padding: 6px 32px 6px 12px;
   cursor: pointer;
+}
+
+@media (forced-colors: active) {
+  .tc-tiddler-frame select.mi-input,
+  select.mi-input {
+    appearance: auto;
+    background-image: none;
+    padding-inline-end: 10px;
+  }
 }
 
 /* --- Layout & Typography --- */
@@ -620,8 +680,14 @@ select.mi-input {
 
 /* --- Search Result Cards, Staging Drawer & Skeletons --- */
 .mi-search-result-wrapper {
-  padding: 12px 14px;
-  transition: border-color 0.15s ease;
+  padding: 16px 18px;
+  margin-block-end: 12px;
+  border-radius: var(--suite-radius-lg, 14px);
+  transition: border-color 0.16s ease, box-shadow 0.16s ease;
+}
+
+.mi-search-result-wrapper:hover {
+  border-color: var(--suite-border-strong, <<colour primary>>);
 }
 
 .mi-search-result-selected {
@@ -629,24 +695,25 @@ select.mi-input {
 }
 
 .mi-search-result-imported {
-  border-left: 4px solid <<colour primary>>;
+  border-inline-start: 4px solid <<colour primary>>;
 }
 
 .mi-search-result-card {
-  gap: 12px;
+  gap: 16px;
   align-items: center;
   margin-bottom: 0;
 }
 
 .mi-search-result-thumb {
   flex-shrink: 0;
-  width: 54px;
+  width: 60px;
   aspect-ratio: 2 / 3;
   position: relative;
-  border-radius: var(--suite-radius-sm, 6px);
+  border-radius: var(--suite-radius-sm, 8px);
   overflow: hidden;
   background: var(--suite-surface-subtle, <<colour tiddler-editor-background>>);
   border: 1px solid var(--suite-border-subtle, <<colour table-border>>);
+  box-shadow: var(--suite-shadow-xs);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -734,13 +801,14 @@ select.mi-input {
 }
 
 .mi-search-subtitle {
-  font-size: 0.85em;
+  font-size: 0.86em;
   color: <<colour muted-foreground>>;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  line-height: 1.35;
+  line-height: 1.45;
+  text-wrap: pretty;
 }
 
 .mi-search-result-actions {
@@ -1286,7 +1354,9 @@ select.mi-input {
 .mi-view-container {
   display: flex;
   flex-wrap: wrap;
-  gap: 20px;
+  gap: 24px;
+  padding: 20px 22px;
+  border-radius: var(--suite-radius-lg, 14px);
 }
 
 .mi-sidebar {
@@ -1672,8 +1742,8 @@ select.mi-input.mi-input-sm {
 
 .mi-library-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(145px, 1fr));
-  gap: 18px;
+  grid-template-columns: repeat(auto-fill, minmax(154px, 1fr));
+  gap: 20px;
 }
 
 .mi-library-card-link {
@@ -1953,5 +2023,607 @@ select.mi-input.mi-input-sm {
 
   .mi-content {
     min-width: 100%;
+  }
+}
+
+/* --- Media Backlog Manager & Priority Queue --- */
+.mi-backlog-active-shelf {
+  margin-block-end: 18px;
+  padding: 14px 18px;
+  border-radius: var(--suite-radius-lg, 14px);
+  border: 1px solid var(--suite-border-subtle, <<colour table-border>>);
+  border-inline-start: 4px solid var(--suite-status-success-accent, #10b981);
+  background: var(--suite-surface-subtle, <<colour tiddler-editor-background>>);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.mi-backlog-active-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.mi-backlog-active-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.mi-backlog-active-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 10px 6px 12px;
+  border-radius: var(--suite-radius-md, 10px);
+  border: 1px solid var(--suite-border-subtle, <<colour table-border>>);
+  background: var(--suite-surface-card, <<colour tiddler-background>>);
+  box-shadow: var(--suite-shadow-xs);
+  font-size: 0.88em;
+}
+
+.mi-backlog-active-link {
+  font-weight: 600;
+  color: var(--suite-fg-primary, <<colour foreground>>);
+  text-decoration: none;
+}
+
+.mi-backlog-active-link:hover {
+  color: var(--suite-accent, <<colour primary>>);
+  text-decoration: underline;
+}
+
+.mi-backlog-complete-btn {
+  min-height: 28px;
+  padding: 3px 10px;
+  font-size: 0.78em;
+}
+
+/* Streamlined Backlog Top Controls */
+.mi-backlog-type-bar {
+  margin-block-end: 14px;
+  gap: 6px;
+  padding: 6px;
+}
+
+.mi-backlog-controls-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-block-end: 16px;
+}
+
+.mi-backlog-search-wrap {
+  flex: 1 1 260px;
+  min-width: 220px;
+}
+
+.mi-backlog-selects-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.tc-tiddler-frame select.mi-input.mi-backlog-select,
+select.mi-input.mi-backlog-select {
+  width: auto;
+  min-width: 148px;
+}
+
+/* Subtle Queue Summary Row (replaces heavy always-on batch box) */
+.mi-backlog-list-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 4px 4px 12px;
+  margin-block-end: 4px;
+  border-block-end: 1px solid var(--suite-border-hairline, <<colour table-border>>);
+}
+
+.mi-backlog-list-meta-left,
+.mi-backlog-list-meta-right {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.mi-backlog-count-text {
+  font-size: 0.86rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--suite-fg-secondary, <<colour muted-foreground>>);
+}
+
+.mi-backlog-meta-sep {
+  color: var(--suite-fg-muted, <<colour muted-foreground>>);
+  opacity: 0.5;
+}
+
+.mi-backlog-meta-action {
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: var(--suite-fg-secondary, <<colour muted-foreground>>);
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: var(--suite-radius-xs, 6px);
+  transition: color 0.14s ease, background-color 0.14s ease;
+}
+
+.mi-backlog-meta-action:hover {
+  color: var(--suite-accent, <<colour primary>>);
+  background: var(--suite-surface-hover, <<colour table-header-background>>);
+}
+
+.mi-backlog-drag-hint {
+  font-size: 0.8rem;
+  color: var(--suite-fg-muted, <<colour muted-foreground>>);
+}
+
+.mi-backlog-batch-bar {
+  margin-block-end: 14px;
+  padding: 10px 16px;
+}
+
+/* Up Next #1 Spotlight Card */
+.mi-backlog-spotlight {
+  border-inline-start: 4px solid var(--suite-accent, <<colour primary>>);
+  background: var(--suite-surface-subtle, <<colour tiddler-editor-background>>);
+  padding: 18px 20px;
+  margin-block-end: 18px;
+  border-radius: var(--suite-radius-lg, 14px);
+}
+
+.mi-backlog-spotlight-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-block-end: 12px;
+}
+
+.mi-backlog-spotlight-badge {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 3px 10px;
+  border-radius: var(--suite-radius-pill, 999px);
+  background: var(--suite-accent, <<colour primary>>);
+  color: var(--suite-fg-on-accent, <<colour background>>);
+}
+
+.mi-backlog-spotlight-body {
+  display: flex;
+  align-items: flex-start;
+  gap: 18px;
+}
+
+.mi-backlog-spotlight-thumb {
+  width: 76px;
+  aspect-ratio: 2 / 3;
+}
+
+.mi-backlog-spotlight-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.mi-backlog-spotlight-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-block-start: 6px;
+}
+
+/* Spacious Backlog Queue Rows */
+.mi-backlog-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.mi-backlog-row {
+  padding: 16px 20px;
+  margin-block-end: 0;
+  border-radius: var(--suite-radius-lg, 14px);
+  border: 1px solid var(--suite-border-subtle, <<colour table-border>>);
+  background: var(--suite-surface-card, <<colour tiddler-background>>);
+  box-shadow: var(--suite-shadow-xs);
+  transition: border-color 0.16s ease, background-color 0.16s ease, box-shadow 0.16s ease, transform 0.14s ease;
+}
+
+.mi-backlog-row:hover {
+  border-color: var(--suite-border-strong, <<colour primary>>);
+  box-shadow: var(--suite-shadow-sm);
+}
+
+.mi-backlog-row-top {
+  border-inline-start: 4px solid var(--suite-accent, <<colour primary>>);
+}
+
+.mi-backlog-row-dragging {
+  opacity: 0.5;
+}
+
+.mi-backlog-row-dragover {
+  border-color: var(--suite-accent, <<colour primary>>);
+  background: var(--suite-surface-dropzone, <<colour table-header-background>>);
+}
+
+.mi-backlog-row-main {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+/* Zone 1: Rank & Selection Column */
+.mi-backlog-rank-zone {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.mi-backlog-rank-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  min-width: 44px;
+}
+
+.mi-backlog-step-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 20px;
+  border-radius: var(--suite-radius-xs, 5px);
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--suite-fg-muted, <<colour muted-foreground>>);
+  font-size: 0.68rem;
+  line-height: 1;
+  cursor: pointer;
+  opacity: 0.65;
+  transition: opacity 0.14s ease, background-color 0.14s ease, color 0.14s ease, border-color 0.14s ease;
+}
+
+.mi-backlog-row:hover .mi-backlog-step-btn:not([disabled="yes"]),
+.mi-backlog-step-btn:focus-visible {
+  opacity: 1;
+}
+
+.mi-backlog-step-btn:hover:not([disabled="yes"]) {
+  background: var(--suite-surface-hover, <<colour table-header-background>>);
+  border-color: var(--suite-border-subtle, <<colour table-border>>);
+  color: var(--suite-accent, <<colour primary>>);
+}
+
+.mi-backlog-step-btn[disabled="yes"] {
+  opacity: 0.2;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.mi-backlog-rank-badge {
+  display: inline-flex;
+  align-items: baseline;
+  justify-content: center;
+  min-width: 42px;
+  padding: 3px 8px;
+  border-radius: var(--suite-radius-sm, 8px);
+  background: var(--suite-surface-subtle, <<colour tiddler-editor-background>>);
+  border: 1px solid var(--suite-border-subtle, <<colour table-border>>);
+  color: var(--suite-fg-secondary, <<colour muted-foreground>>);
+  font-variant-numeric: tabular-nums;
+  cursor: grab;
+  user-select: none;
+  line-height: 1.2;
+}
+
+.mi-backlog-rank-badge-ranked {
+  background: var(--suite-accent-bg, <<colour tiddler-editor-background>>);
+  border-color: var(--suite-accent-border, <<colour primary>>);
+  color: var(--suite-accent, <<colour primary>>);
+}
+
+.mi-backlog-rank-badge-top {
+  background: var(--suite-accent, <<colour primary>>);
+  border-color: var(--suite-accent, <<colour primary>>);
+  color: var(--suite-fg-on-accent, <<colour background>>);
+}
+
+.mi-backlog-rank-hash {
+  font-size: 0.72rem;
+  font-weight: 600;
+  opacity: 0.75;
+  margin-inline-end: 1px;
+}
+
+.mi-backlog-rank-num {
+  font-size: 0.94rem;
+  font-weight: 750;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Zone 2: Poster Thumbnail (64px x 96px, 2:3 aspect-ratio) */
+.mi-backlog-poster-link {
+  display: block;
+  flex-shrink: 0;
+  text-decoration: none;
+}
+
+.mi-backlog-poster {
+  width: 64px;
+  aspect-ratio: 2 / 3;
+  position: relative;
+  border-radius: var(--suite-radius-sm, 8px);
+  overflow: hidden;
+  background: var(--suite-surface-subtle, <<colour tiddler-editor-background>>);
+  border: 1px solid var(--suite-border-subtle, <<colour table-border>>);
+  box-shadow: var(--suite-shadow-xs);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.16s ease, border-color 0.16s ease;
+}
+
+.mi-backlog-poster-link:hover .mi-backlog-poster {
+  transform: scale(1.03);
+  border-color: var(--suite-accent, <<colour primary>>);
+}
+
+.mi-backlog-thumb-fav {
+  position: absolute;
+  top: 4px;
+  inset-inline-start: 4px;
+  font-size: 0.72rem;
+  color: var(--suite-status-warning-accent, #f59e0b);
+  background: rgba(0, 0, 0, 0.76);
+  border-radius: 50%;
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+}
+
+/* Zone 3: Editorial Info Column */
+.mi-backlog-info-col {
+  flex: 1 1 260px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.mi-backlog-row-title-line {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+}
+
+.mi-backlog-title-group {
+  display: inline-flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 8px;
+  min-width: 0;
+}
+
+.mi-backlog-item-link {
+  text-decoration: none;
+  color: var(--suite-fg-primary, <<colour foreground>>);
+}
+
+.mi-backlog-item-link:hover {
+  color: var(--suite-accent, <<colour primary>>);
+  text-decoration: underline;
+}
+
+.mi-backlog-item-title {
+  font-size: 1.06rem;
+  font-weight: 650;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+}
+
+.mi-backlog-item-year {
+  font-size: 0.88rem;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  color: var(--suite-fg-muted, <<colour muted-foreground>>);
+}
+
+.mi-backlog-creator,
+.mi-backlog-creator-inline {
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: var(--suite-fg-secondary, <<colour muted-foreground>>);
+}
+
+.mi-backlog-meta-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-block-start: 2px;
+}
+
+.mi-backlog-type-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 9px;
+  border-radius: var(--suite-radius-pill, 999px);
+  background: var(--suite-surface-subtle, <<colour tiddler-editor-background>>);
+  border: 1px solid var(--suite-border-subtle, <<colour table-border>>);
+  color: var(--suite-fg-primary, <<colour foreground>>);
+  font-size: 0.74rem;
+  font-weight: 650;
+  letter-spacing: 0.02em;
+}
+
+.mi-backlog-meta-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: var(--suite-radius-sm, 6px);
+  background: var(--suite-surface-subtle, <<colour tiddler-editor-background>>);
+  color: var(--suite-fg-secondary, <<colour muted-foreground>>);
+  font-size: 0.76rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.mi-backlog-genre-chip {
+  font-size: 0.76rem;
+  padding: 2px 9px;
+  border-radius: var(--suite-radius-pill, 999px);
+  background: transparent;
+  color: var(--suite-fg-secondary, <<colour muted-foreground>>);
+  border: 1px solid var(--suite-border-hairline, <<colour table-border>>);
+}
+
+.mi-backlog-plot-snippet {
+  font-size: 0.86rem;
+  line-height: 1.48;
+  color: var(--suite-fg-muted, <<colour muted-foreground>>);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-wrap: pretty;
+  margin-block-start: 2px;
+  max-width: 68ch;
+}
+
+.mi-backlog-note-preview {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px;
+  margin-block-start: 4px;
+  font-size: 0.84rem;
+  line-height: 1.45;
+  color: var(--suite-fg-secondary, <<colour muted-foreground>>);
+  background: var(--suite-surface-subtle, <<colour tiddler-editor-background>>);
+  padding: 6px 12px;
+  border-radius: var(--suite-radius-sm, 8px);
+  border-inline-start: 3px solid var(--suite-accent, <<colour primary>>);
+}
+
+.mi-backlog-source-tag {
+  font-weight: 650;
+  color: var(--suite-fg-primary, <<colour foreground>>);
+}
+
+.mi-backlog-note-text {
+  font-style: italic;
+  text-wrap: pretty;
+}
+
+/* Zone 4: Calm Action Column */
+.mi-backlog-actions-col {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.mi-backlog-start-btn {
+  min-height: 36px;
+  padding-inline: 14px;
+  font-size: 0.84rem;
+}
+
+.mi-backlog-top-jump-btn {
+  min-height: 36px;
+  min-width: 36px;
+  padding-inline: 10px;
+  color: var(--suite-fg-secondary, <<colour muted-foreground>>);
+}
+
+.mi-view-backlog-box {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.mi-view-backlog-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.mi-view-backlog-row > *:first-child {
+  flex: 1 1 200px;
+}
+
+.tc-tiddler-frame input.mi-input.mi-view-rank-input,
+.mi-view-rank-input {
+  width: 96px;
+  flex: 0 0 96px;
+  font-variant-numeric: tabular-nums;
+}
+
+@container mi-view (inline-size <= 640px) {
+  .mi-backlog-row {
+    padding: 14px 16px;
+  }
+
+  .mi-backlog-row-main {
+    flex-wrap: wrap;
+    gap: 14px;
+  }
+
+  .mi-backlog-actions-col {
+    width: 100%;
+    justify-content: flex-end;
+    padding-block-start: 10px;
+    border-block-start: 1px solid var(--suite-border-hairline, <<colour table-border>>);
+  }
+
+  .mi-backlog-step-btn {
+    opacity: 1;
+    width: 36px;
+    height: 26px;
+  }
+}
+
+@media (max-width: 640px) {
+  .mi-backlog-row {
+    padding: 14px 16px;
+  }
+
+  .mi-backlog-row-main {
+    flex-wrap: wrap;
+    gap: 14px;
+  }
+
+  .mi-backlog-actions-col {
+    width: 100%;
+    justify-content: flex-end;
+    padding-block-start: 10px;
+    border-block-start: 1px solid var(--suite-border-hairline, <<colour table-border>>);
+  }
+
+  .mi-backlog-step-btn {
+    opacity: 1;
+    width: 36px;
+    height: 26px;
   }
 }

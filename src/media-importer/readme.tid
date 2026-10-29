@@ -27,6 +27,8 @@ Create a new tiddler for media imports and paste the text: `{{$:/plugins/mblackm
 
 To create the library browser, create a tiddler with this text: `{{$:/plugins/mblackman/media-importer/ui/media-library}}` (or use `<$MediaLibrary />`).
 
+To create a dedicated backlog manager for ranking, prioritizing, and triaging your backlog queue, use `{{$:/plugins/mblackman/media-importer/ui/media-backlog}}` (or `<$MediaBacklog />`).
+
 !! Widgets
 
 * ''Media Picker'': Log media consumption for a specific date.
@@ -43,3 +45,7 @@ To create the library browser, create a tiddler with this text: `{{$:/plugins/mb
 * ''Media Library'': Browse and filter your imported media collection.
 ** Tiddler: [[$:/plugins/mblackman/media-importer/ui/media-library]]
 ** You can add a toolbar button from the tools menu to quickly access the library.
+
+* ''Media Backlog'': Rank (`#1`–`#N`), filter by length/commitment, add recommender notes, and pick what to consume next.
+** Tiddler: [[$:/plugins/mblackman/media-importer/ui/media-backlog]] (`<$MediaBacklog />`)
+** Includes a PageControls toolbar button (`$:/plugins/mblackman/media-importer/ui/toolbar-media-backlog`).

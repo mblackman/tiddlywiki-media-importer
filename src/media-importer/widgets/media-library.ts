@@ -39,6 +39,7 @@ interface MediaItem {
   created: Date;
   favorite: boolean;
   genres: string[];
+  backlogRank: number;
 }
 
 class MediaLibraryGridWidget extends Widget {
@@ -116,6 +117,8 @@ class MediaLibraryGridWidget extends Widget {
       });
       const lastWatched = logs.length > 0 ? logs[0].date : '';
 
+      const rawRank = parseInt((fields['backlog-rank'] as string) || '0', 10);
+
       return {
         title,
         englishTitle: (fields['englishTitle'] as string) || '',
@@ -128,6 +131,7 @@ class MediaLibraryGridWidget extends Widget {
         created: (fields['created'] as Date) || new Date(0),
         favorite: fields['favorite'] === 'yes',
         genres: $tw.utils.parseStringArray((fields['genres'] as string) || '') || [],
+        backlogRank: Number.isFinite(rawRank) && rawRank > 0 ? rawRank : 0,
       };
     });
 
@@ -169,6 +173,13 @@ class MediaLibraryGridWidget extends Widget {
     // 5. Sort
     items.sort((a, b) => {
       switch (currentSort) {
+        case 'rank-asc': {
+          const aRanked = a.backlogRank > 0;
+          const bRanked = b.backlogRank > 0;
+          if (aRanked && bRanked && a.backlogRank !== b.backlogRank) return a.backlogRank - b.backlogRank;
+          if (aRanked !== bRanked) return aRanked ? -1 : 1;
+          return a.title.localeCompare(b.title);
+        }
         case 'title-asc':
           return a.title.localeCompare(b.title);
         case 'title-desc':
@@ -250,7 +261,9 @@ class MediaLibraryGridWidget extends Widget {
           h('div', { class: 'mi-library-card-content' }, [
             h('div', { class: 'mi-library-card-title' }, [text(item.title)]),
             h('div', { class: 'mi-sublabel mi-library-card-rating' }, [
-              h('span', { class: `mi-status-text mi-status-${item.status.toLowerCase()}` }, [text(item.status)]),
+              h('span', { class: `mi-status-text mi-status-${item.status.toLowerCase()}` }, [
+                text(item.status === 'Backlog' && item.backlogRank > 0 ? `Backlog #${item.backlogRank}` : item.status),
+              ]),
               h('span', { class: 'mi-star-full' }, [
                 item.averageRating > 0 ? text(`${item.averageRating.toFixed(1).replace(/\.0$/, '')} ★`) : text(''),
               ]),
@@ -436,29 +449,44 @@ class MediaLibraryWidget extends Widget {
     const genreOptions = Array.from(genreSet).sort();
 
     // --- Top Navigation Header ---
+    const headerActions: IParseTreeNode[] = [];
+    const backlogCount = this.wiki.filterTiddlers(
+      '[tag[$:/tags/media-importer/Media]status[Backlog]] [tag[$:/tags/media-importer/Media]!has[status]] +[unique[]]',
+    ).length;
+    headerActions.push(
+      {
+        type: 'link',
+        attributes: {
+          to: { type: 'string', value: '$:/plugins/mblackman/media-importer/ui/media-backlog' },
+          class: { type: 'string', value: 'mi-btn mi-btn-sm' },
+          tooltip: { type: 'string', value: 'Open Backlog Manager to rank & prioritize media' },
+        },
+        children: [text(`📋 Backlog (${backlogCount})`)],
+      },
+      {
+        type: 'button',
+        attributes: {
+          class: { type: 'string', value: 'mi-btn mi-btn-sm' },
+          tooltip: { type: 'string', value: 'Pick a random backlog item' },
+          message: { type: 'string', value: 'mi-surprise-me' },
+        },
+        children: [text('Surprise Me')],
+      },
+      {
+        type: 'link',
+        attributes: {
+          to: { type: 'string', value: '$:/plugins/mblackman/media-importer/ui' },
+          class: { type: 'string', value: 'mi-btn mi-btn-primary mi-btn-sm' },
+        },
+        children: [text('+ Import Media')],
+      },
+    );
+
     const appHeader = h('div', { class: 'mi-app-header' }, [
       h('div', { class: 'mi-app-header-title-group' }, [
         h('h2', { class: 'mi-app-heading' }, [text('Media Library')]),
       ]),
-      h('div', { class: 'mi-app-header-actions' }, [
-        {
-          type: 'button',
-          attributes: {
-            class: { type: 'string', value: 'mi-btn mi-btn-sm' },
-            tooltip: { type: 'string', value: 'Pick a random backlog item' },
-            message: { type: 'string', value: 'mi-surprise-me' },
-          },
-          children: [text('Surprise Me')],
-        },
-        {
-          type: 'link',
-          attributes: {
-            to: { type: 'string', value: '$:/plugins/mblackman/media-importer/ui' },
-            class: { type: 'string', value: 'mi-btn mi-btn-primary mi-btn-sm' },
-          },
-          children: [text('+ Import Media')],
-        },
-      ]),
+      h('div', { class: 'mi-app-header-actions' }, headerActions),
     ]);
 
     // --- Search & Quick Toolbar Row (Always visible above the fold on mobile & desktop!) ---
@@ -653,6 +681,7 @@ class MediaLibraryWidget extends Widget {
         children: [
           createOption('title-asc', 'Title (A-Z)'),
           createOption('title-desc', 'Title (Z-A)'),
+          createOption('rank-asc', 'Backlog Rank (#1-N)'),
           createOption('rating-desc', 'Rating (High-Low)'),
           createOption('rating-asc', 'Rating (Low-High)'),
           createOption('date-desc', 'Active Date (Newest)'),

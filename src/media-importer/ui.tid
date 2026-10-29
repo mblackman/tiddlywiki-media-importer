@@ -40,6 +40,9 @@ caption: Media Importer
     <$button class="mi-btn mi-btn-sm" to="$:/plugins/mblackman/media-importer/config" tooltip="Configure ComicVine, RAWG, and TMDB API keys">
       API Keys
     </$button>
+    <$link to="$:/plugins/mblackman/media-importer/ui/media-backlog" class="mi-btn mi-btn-sm" tooltip="Open Backlog Manager to rank & prioritize media">
+      📋 Backlog (<$count filter="[tag[$:/tags/media-importer/Media]status[Backlog]] [tag[$:/tags/media-importer/Media]!has[status]] +[unique[]]"/>)
+    </$link>
     <$link to="$:/plugins/mblackman/media-importer/ui/media-library" class="mi-btn mi-btn-primary mi-btn-sm">
       Media Library (<$count filter="[tag[$:/tags/media-importer/Media]]"/>) →
     </$link>

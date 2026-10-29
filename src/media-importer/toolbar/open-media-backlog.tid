@@ -1,0 +1,15 @@
+title: $:/plugins/mblackman/media-importer/ui/toolbar-media-backlog
+tags: $:/tags/PageControls
+caption: Media Backlog
+description: Opens the media importer backlog manager
+
+\whitespace trim
+<$button class=<<tv-config-toolbar-class>> tooltip="Open the media backlog manager" aria-label="Media Backlog">
+    <$action-navigate $to="$:/plugins/mblackman/media-importer/ui/media-backlog"/>
+    {{$:/plugins/mblackman/media-importer/images/media-backlog-icon}}
+    <$list filter="[<tv-config-toolbar-text>match[yes]]">
+    <span class="tc-btn-text">
+      <$text text="Media Backlog"/>
+    </span>
+  </$list>
+</$button>

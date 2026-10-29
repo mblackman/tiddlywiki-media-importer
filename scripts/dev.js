@@ -30,8 +30,9 @@ function startServer() {
     return;
   }
 
-  console.log('🌐 Starting TiddlyWiki local dev server...');
-  tiddlyWikiProcess = spawn('npx', ['tiddlywiki', 'wiki', '--listen', 'port=8080', 'host=127.0.0.1'], {
+  const port = process.env.PORT || '8080';
+  console.log(`🌐 Starting TiddlyWiki local dev server on port ${port}...`);
+  tiddlyWikiProcess = spawn('npx', ['tiddlywiki', 'wiki', '--listen', `port=${port}`, 'host=0.0.0.0'], {
     stdio: 'inherit',
     shell: true,
     cwd: rootDir
@@ -61,23 +62,25 @@ function stopServer() {
       return;
     }
 
+    const procToKill = tiddlyWikiProcess;
     console.log('⏹️ Stopping TiddlyWiki server...');
-    tiddlyWikiProcess.removeAllListeners('exit');
-    tiddlyWikiProcess.on('exit', () => {
-      tiddlyWikiProcess = null;
+    procToKill.removeAllListeners('exit');
+    const killTimer = setTimeout(() => {
+      try {
+        procToKill.kill('SIGKILL');
+      } catch (_e) {}
+    }, 1000);
+
+    procToKill.on('exit', () => {
+      clearTimeout(killTimer);
+      if (tiddlyWikiProcess === procToKill) {
+        tiddlyWikiProcess = null;
+      }
       console.log('⏹️ TiddlyWiki server stopped successfully.');
       resolve();
     });
 
-    // Send SIGTERM, fallback to kill if needed
-    tiddlyWikiProcess.kill('SIGTERM');
-    // For Windows compatibility, sometimes child process might not respond to standard SIGTERM,
-    // so we call kill() which does a TaskKill under Windows shell.
-    setTimeout(() => {
-      if (tiddlyWikiProcess) {
-        tiddlyWikiProcess.kill('SIGKILL');
-      }
-    }, 1000);
+    procToKill.kill('SIGTERM');
   });
 }
 

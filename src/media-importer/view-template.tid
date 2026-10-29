@@ -33,6 +33,9 @@ list-before: $:/core/ui/ViewTemplate/body
     <$link to="$:/plugins/mblackman/media-importer/ui/media-library" class="mi-btn mi-btn-sm" tooltip="Back to Media Library">
       ← Library
     </$link>
+    <$link to="$:/plugins/mblackman/media-importer/ui/media-backlog" class="mi-btn mi-btn-sm" tooltip="Open Media Backlog Manager">
+      📋 Backlog
+    </$link>
 
     <$list filter="[all[current]has[id]!field:id[]]" variable="ignoreId">
       <$let
@@ -190,13 +193,26 @@ list-before: $:/core/ui/ViewTemplate/body
     <!-- METADATA GRID -->
     <div class="mi-section mi-grid">
       <div class="mi-label">Status</div>
-      <div>
+      <div class="mi-flex-row" style="flex-wrap: wrap; margin-bottom: 0;">
         <$select field="status" default="Backlog" class="mi-input mi-input-sm mi-input-auto">
           <$list filter="[enlist{$:/plugins/mblackman/media-importer/data/statuses}]">
             <option value=<<currentTiddler>>><<currentTiddler>></option>
           </$list>
         </$select>
+        <$list filter="[all[current]has[backlog-rank]!field:backlog-rank[]]" variable="ignoreRank">
+          <span class="mi-backlog-rank-pill mi-backlog-rank-pill-active" title="Backlog Queue Rank">Rank #{{!!backlog-rank}}</span>
+        </$list>
       </div>
+      <$list filter="[all[current]field:status[Backlog]] [all[current]!has[status]] [all[current]has[backlog-notes]!field:backlog-notes[]] [all[current]has[backlog-source]!field:backlog-source[]] +[limit[1]]" variable="ignoreBacklogMeta">
+        <div class="mi-label">Backlog Queue</div>
+        <div class="mi-view-backlog-box">
+          <div class="mi-view-backlog-row">
+            <$edit-text field="backlog-source" tag="input" default="" placeholder="Recommended by / Streaming service / Source..." class="mi-input mi-input-sm"/>
+            <$edit-text field="backlog-rank" tag="input" type="number" default="" placeholder="Rank #" class="mi-input mi-input-sm mi-view-rank-input"/>
+          </div>
+          <$edit-text field="backlog-notes" tag="input" default="" placeholder="Backlog note: why watch/read/play or mood tags..." class="mi-input mi-input-sm"/>
+        </div>
+      </$list>
       <!-- Dynamic Fields based on Type -->
       <$list filter="[all[current]media-type[Book]]">
         <div class="mi-label">Author</div> <div><$text text={{{ [enlist{!!author}search-replace:g[_],[ ]join[, ]] }}}/></div>
@@ -251,7 +267,7 @@ list-before: $:/core/ui/ViewTemplate/body
       </$list>
       <div class="mi-label">Plot</div>
       <div class="mi-plot">
-        <$transclude field="plot" mode="block"/>
+        <$transclude field="plot" mode="block"><$transclude field="description" mode="block"/></$transclude>
       </div>
     </div>
   </div>

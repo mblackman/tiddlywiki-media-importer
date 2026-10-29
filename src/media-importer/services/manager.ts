@@ -25,6 +25,39 @@ export const synchronous = true;
 
 const registeredConfigs = new Map<string, MediaImporterConfig>();
 
+const RESERVED_DRAFT_FIELDS = new Set([
+  'title',
+  'tags',
+  'text',
+  'type',
+  'created',
+  'modified',
+  'creator',
+  'modifier',
+  'extra_tags',
+  'silent',
+  'cleanup_draft',
+  'result_index',
+  'imported_title',
+  'batch_selected',
+]);
+
+function mergeTagLists(...tagInputs: Array<string | string[] | undefined>): string[] {
+  const seen = new Set<string>();
+  const merged: string[] = [];
+  for (const raw of tagInputs) {
+    if (!raw) continue;
+    const parsed: string[] = Array.isArray(raw) ? raw : ($tw.utils.parseStringArray(raw) || []);
+    for (const tag of parsed) {
+      if (tag && !seen.has(tag)) {
+        seen.add(tag);
+        merged.push(tag);
+      }
+    }
+  }
+  return merged;
+}
+
 function formatLogError(error: unknown): string {
   if (error instanceof Error) {
     return error.message;
@@ -144,8 +177,20 @@ function registerMediaImporter(config: MediaImporterConfig) {
     const temporaryTiddler = $tw.wiki.getTiddler(temporaryTitle);
     if (!temporaryTiddler) return;
 
+    const draftFields: Record<string, any> = temporaryTiddler.fields || {};
+    const isSilent = Boolean(
+      draftFields.silent === 'yes' ||
+        (event.paramObject && event.paramObject.silent === 'yes'),
+    );
+    const cleanupDraft = Boolean(
+      draftFields.cleanup_draft === 'yes' ||
+        (event.paramObject && event.paramObject.cleanupDraft === 'yes'),
+    );
+
     const fetchingStateTitle = '$:/temp/fetching/' + temporaryTitle;
-    $tw.wiki.setText(fetchingStateTitle, 'text', null, 'loading');
+    if (!isSilent) {
+      $tw.wiki.setText(fetchingStateTitle, 'text', null, 'loading');
+    }
 
     const apiKey = config.apiKeyTiddler
       ? ($tw.wiki.getTiddlerText(config.apiKeyTiddler) || '').trim()
@@ -154,21 +199,29 @@ function registerMediaImporter(config: MediaImporterConfig) {
     const defaultStatus = ($tw.wiki.getTiddlerText('$:/state/mblackman/media-importer/staging/status', 'Backlog') || 'Backlog').trim();
     const namingPattern = ($tw.wiki.getTiddlerText('$:/state/mblackman/media-importer/staging/naming', 'title-year') || 'title-year').trim();
     const globalCustomTags = ($tw.wiki.getTiddlerText('$:/state/mblackman/media-importer/staging/tags', '') || '').trim();
-    const autoLogToday = ($tw.wiki.getTiddlerText('$:/state/mblackman/media-importer/staging/log-today', 'no') || 'no').trim() === 'yes' ||
-      (event.paramObject && event.paramObject.logToday === 'yes');
-    const autoOpen = ($tw.wiki.getTiddlerText('$:/state/mblackman/media-importer/staging/auto-open', 'no') || 'no').trim() === 'yes' ||
-      (event.paramObject && event.paramObject.autoOpen === 'yes');
+    const autoLogToday = !isSilent && (
+      ($tw.wiki.getTiddlerText('$:/state/mblackman/media-importer/staging/log-today', 'no') || 'no').trim() === 'yes' ||
+      (event.paramObject && event.paramObject.logToday === 'yes')
+    );
+    const autoOpen = !isSilent && (
+      ($tw.wiki.getTiddlerText('$:/state/mblackman/media-importer/staging/auto-open', 'no') || 'no').trim() === 'yes' ||
+      (event.paramObject && event.paramObject.autoOpen === 'yes')
+    );
 
     config
-      .fetchFn(temporaryTiddler.fields, apiKey)
+      .fetchFn(draftFields, apiKey)
       .then(fields => {
-        $tw.wiki.deleteTiddler(fetchingStateTitle);
+        if (!isSilent) {
+          $tw.wiki.deleteTiddler(fetchingStateTitle);
+        }
 
-        const stagedTitle = ((temporaryTiddler.fields.staged_title as string) || '').trim();
-        const stagedStatus = ((temporaryTiddler.fields.staged_status as string) || '').trim();
-        const stagedTags = ((temporaryTiddler.fields.staged_tags as string) || '').trim();
-        const stagedCoverUri = ((temporaryTiddler.fields.staged_cover_uri as string) || '').trim();
-        const stagedCoverMode = ((temporaryTiddler.fields.staged_cover_mode as string) || '').trim();
+        const stagedTitle = ((draftFields.staged_title as string) || '').trim();
+        const stagedStatus = ((draftFields.staged_status as string) || '').trim();
+        const stagedNotes = ((draftFields.staged_notes as string) || '').trim();
+        const stagedSource = ((draftFields.staged_source as string) || '').trim();
+        const stagedTags = ((draftFields.staged_tags as string) || '').trim();
+        const stagedCoverUri = ((draftFields.staged_cover_uri as string) || '').trim();
+        const stagedCoverMode = ((draftFields.staged_cover_mode as string) || '').trim();
 
         let finalTitle = fields.title;
         if (stagedTitle) {
@@ -182,7 +235,7 @@ function registerMediaImporter(config: MediaImporterConfig) {
 
         // Preserve created date and user fields if re-importing an existing tiddler
         if (existingTiddler) {
-          fields.created = existingTiddler.fields.created || new Date();
+          fields.created = existingTiddler.fields.created || fields.created || new Date();
           if (stagedStatus) {
             fields.status = stagedStatus;
           } else if (existingTiddler.fields.status) {
@@ -193,28 +246,50 @@ function registerMediaImporter(config: MediaImporterConfig) {
           if (existingTiddler.fields.favorite) {
             fields.favorite = existingTiddler.fields.favorite;
           }
+          if (existingTiddler.fields.rating) {
+            fields.rating = existingTiddler.fields.rating;
+          }
+          for (const bKey of ['backlog-rank', 'backlog-notes', 'backlog-source', 'backlog-commitment']) {
+            if (existingTiddler.fields[bKey] !== undefined) {
+              fields[bKey] = existingTiddler.fields[bKey];
+            }
+          }
         } else {
           if (!fields.created) {
-            fields.created = temporaryTiddler.fields.created || new Date();
+            fields.created = draftFields.created || new Date();
           }
           fields.status = stagedStatus || defaultStatus || 'Backlog';
         }
 
-        // Merge tags: base Media tag + existing tags + global staging tags + per-item staged tags
-        const mergedTags: string[] = existingTiddler && existingTiddler.fields.tags
-          ? existingTiddler.fields.tags.slice()
-          : [];
-        if (!mergedTags.includes('$:/tags/media-importer/Media')) {
-          mergedTags.push('$:/tags/media-importer/Media');
+        if (stagedNotes) {
+          fields['backlog-notes'] = stagedNotes;
         }
-        const extraGlobalTags = $tw.utils.parseStringArray(globalCustomTags) || [];
-        const extraStagedTags = $tw.utils.parseStringArray(stagedTags) || [];
-        for (const t of [...extraGlobalTags, ...extraStagedTags]) {
-          if (t && !mergedTags.includes(t)) {
-            mergedTags.push(t);
+        if (stagedSource) {
+          fields['backlog-source'] = stagedSource;
+        }
+
+        // Mirror plot -> description so view-template.tid displays the overview
+        if (fields.plot && !fields.description) {
+          fields.description = fields.plot;
+        }
+
+        // Merge tags: existing tags + base Media tag + global staging tags + per-item staged tags + extra_tags
+        fields.tags = mergeTagLists(
+          existingTiddler ? existingTiddler.fields.tags : undefined,
+          '$:/tags/media-importer/Media',
+          fields.tags,
+          !isSilent ? globalCustomTags : undefined,
+          stagedTags,
+          draftFields.extra_tags as string | undefined,
+          event.paramObject ? (event.paramObject.extraTags as string | undefined) : undefined,
+        );
+
+        // Copy any custom non-draft, non-staged fields from the temporary draft tiddler
+        for (const key of Object.keys(draftFields)) {
+          if (!key.startsWith('draft_') && !key.startsWith('staged_') && !RESERVED_DRAFT_FIELDS.has(key)) {
+            fields[key] = draftFields[key];
           }
         }
-        fields.tags = mergedTags;
 
         // Apply custom cover URI / embedded data URI if staged
         if (stagedCoverUri) {
@@ -235,43 +310,53 @@ function registerMediaImporter(config: MediaImporterConfig) {
         // Create/Update Tiddler
         $tw.wiki.addTiddler(new $tw.Tiddler(existingTiddler, fields));
 
-        // Mark temporary search result tiddler with the resolved finalTitle and deselect from batch queue
-        const latestTemporary = $tw.wiki.getTiddler(temporaryTitle);
-        if (latestTemporary) {
-          $tw.wiki.addTiddler(
-            new $tw.Tiddler(latestTemporary, {
-              imported_title: finalTitle,
-              batch_selected: 'no',
-            }),
-          );
+        if (cleanupDraft) {
+          $tw.wiki.deleteTiddler(temporaryTitle);
+        } else {
+          // Mark temporary search result tiddler with the resolved finalTitle and deselect from batch queue
+          const latestTemporary = $tw.wiki.getTiddler(temporaryTitle);
+          if (latestTemporary) {
+            $tw.wiki.addTiddler(
+              new $tw.Tiddler(latestTemporary, {
+                imported_title: finalTitle,
+                batch_selected: 'no',
+              }),
+            );
+          }
         }
 
-        // Track last imported media for quick-jump banner
-        $tw.wiki.addTiddler(
-          new $tw.Tiddler({
-            title: '$:/temp/media-importer/last-imported',
-            text: finalTitle,
-            'media-type': type,
-            timestamp: $tw.utils.formatDateString(new Date(), '0hh:0mm:0ss'),
-          }),
-        );
+        if (!isSilent) {
+          // Track last imported media for quick-jump banner
+          $tw.wiki.addTiddler(
+            new $tw.Tiddler({
+              title: '$:/temp/media-importer/last-imported',
+              text: finalTitle,
+              'media-type': type,
+              timestamp: $tw.utils.formatDateString(new Date(), '0hh:0mm:0ss'),
+            }),
+          );
 
-        // UI Notification
-        $tw.notifier.display('$:/plugins/mblackman/media-importer/ui/notification', {
-          variables: { title: finalTitle },
-        });
+          // UI Notification
+          $tw.notifier.display('$:/plugins/mblackman/media-importer/ui/notification', {
+            variables: { title: finalTitle },
+          });
 
-        // Only open in StoryList if user explicitly enabled auto-open or passed autoOpen
-        if (autoOpen) {
-          openTiddlerInStory(finalTitle);
+          // Only open in StoryList if user explicitly enabled auto-open or passed autoOpen
+          if (autoOpen) {
+            openTiddlerInStory(finalTitle);
+          }
         }
       })
       .catch(error => {
-        $tw.wiki.deleteTiddler(fetchingStateTitle);
+        if (!isSilent) {
+          $tw.wiki.deleteTiddler(fetchingStateTitle);
+        }
         console.error(type + ' Fetch Error: ' + formatLogError(error));
-        $tw.notifier.display('$:/plugins/mblackman/media-importer/ui/error-notification', {
-          variables: { title: 'Error fetching ' + type + ' details.' },
-        });
+        if (!isSilent) {
+          $tw.notifier.display('$:/plugins/mblackman/media-importer/ui/error-notification', {
+            variables: { title: 'Error fetching ' + type + ' details.' },
+          });
+        }
       });
   });
 }
@@ -488,6 +573,11 @@ export function startup() {
         }
         if (existingFields.favorite) {
           updatedFields.favorite = existingFields.favorite;
+        }
+        for (const bKey of ['backlog-rank', 'backlog-notes', 'backlog-source', 'backlog-commitment']) {
+          if (existingFields[bKey] !== undefined) {
+            updatedFields[bKey] = existingFields[bKey];
+          }
         }
         const existingTags = (existingFields.tags || []).slice();
         if (!existingTags.includes('$:/tags/media-importer/Media')) {

@@ -188,4 +188,77 @@ describe('Media Importer UI & Workflow', function() {
     $tw.wiki.deleteTiddler('$:/state/media-importer-selected');
     $tw.wiki.deleteTiddler('OK Computer (1997)');
   });
+
+  it('supports MediaBacklog ranking, spotlight pick, and start-now workflow', function() {
+    $tw.wiki.setText('$:/state/mblackman/media-importer/backlog/type', 'text', null, 'Book');
+    const parser = $tw.wiki.parseTiddler('$:/plugins/mblackman/media-importer/ui/media-backlog');
+    const widgetNode = $tw.wiki.makeWidget(parser, { document: $tw.fakeDocument });
+    const container = $tw.fakeDocument.createElement('div');
+    widgetNode.render(container, null);
+
+    const backlogHtml = $tw.wiki.renderTiddler('text/html', '$:/plugins/mblackman/media-importer/ui/media-backlog');
+    expect(backlogHtml).toContain('Media Backlog');
+    expect(backlogHtml).toContain('Pick Next For Me');
+    expect(backlogHtml).toContain('Blood Meridian (1985)');
+    expect(backlogHtml).toContain('Infinite Jest (1996)');
+
+    // 1. Move "The Road (2006)" to #1 (Top of Queue)
+    const backlogWidget = widgetNode.children[0];
+    backlogWidget.dispatchEvent({
+      type: 'mi-backlog-move-top',
+      param: 'The Road (2006)',
+    });
+    expect($tw.wiki.getTiddler('The Road (2006)').fields['backlog-rank']).toBe('1');
+    expect($tw.wiki.getTiddler('Blood Meridian (1985)').fields['backlog-rank']).toBe('2');
+
+    // 2. Move "The Road (2006)" down one spot (#1 -> #2)
+    backlogWidget.dispatchEvent({
+      type: 'mi-backlog-move-down',
+      param: 'The Road (2006)',
+    });
+    expect($tw.wiki.getTiddler('Blood Meridian (1985)').fields['backlog-rank']).toBe('1');
+    expect($tw.wiki.getTiddler('The Road (2006)').fields['backlog-rank']).toBe('2');
+
+    // 3. Move "Grendel (1971)" to #1 and verify Pick Next recommender selects from top-ranked items
+    backlogWidget.dispatchEvent({
+      type: 'mi-backlog-move-top',
+      param: 'Grendel (1971)',
+    });
+    expect($tw.wiki.getTiddler('Grendel (1971)').fields['backlog-rank']).toBe('1');
+
+    backlogWidget.dispatchEvent({
+      type: 'mi-backlog-pick-next',
+    });
+    const picked = $tw.wiki.getTiddlerText('$:/temp/mblackman/media-importer/backlog/spotlight');
+    expect(['Grendel (1971)', 'Blood Meridian (1985)', 'The Road (2006)']).toContain(picked);
+
+    // 4. Start "Grendel (1971)" now -> transitions to Active and logs today
+    backlogWidget.dispatchEvent({
+      type: 'mi-backlog-start-now',
+      param: 'Grendel (1971)',
+    });
+    expect($tw.wiki.getTiddler('Grendel (1971)').fields.status).toBe('Active');
+
+    // Clean up test mutations
+    for (const t of [
+      'Blood Meridian (1985)',
+      "Gravity's Rainbow (1973)",
+      'Grendel (1971)',
+      'Infinite Jest (1996)',
+      'The Road (2006)',
+    ]) {
+      const tid = $tw.wiki.getTiddler(t);
+      if (tid) {
+        $tw.wiki.addTiddler(
+          new $tw.Tiddler(tid, {
+            status: 'Backlog',
+            'backlog-rank': undefined,
+          }),
+        );
+      }
+    }
+    $tw.wiki.deleteTiddler('$:/temp/mblackman/media-importer/backlog/spotlight');
+    $tw.wiki.deleteTiddler('$:/state/mblackman/media-importer/backlog/sort');
+    $tw.wiki.deleteTiddler('$:/state/mblackman/media-importer/backlog/type');
+  });
 });
