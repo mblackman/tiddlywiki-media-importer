@@ -2027,60 +2027,6 @@ select.mi-input.mi-input-sm {
 }
 
 /* --- Media Backlog Manager & Priority Queue --- */
-.mi-backlog-active-shelf {
-  margin-block-end: 18px;
-  padding: 14px 18px;
-  border-radius: var(--suite-radius-lg, 14px);
-  border: 1px solid var(--suite-border-subtle, <<colour table-border>>);
-  border-inline-start: 4px solid var(--suite-status-success-accent, #10b981);
-  background: var(--suite-surface-subtle, <<colour tiddler-editor-background>>);
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.mi-backlog-active-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-}
-
-.mi-backlog-active-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-}
-
-.mi-backlog-active-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  padding: 6px 10px 6px 12px;
-  border-radius: var(--suite-radius-md, 10px);
-  border: 1px solid var(--suite-border-subtle, <<colour table-border>>);
-  background: var(--suite-surface-card, <<colour tiddler-background>>);
-  box-shadow: var(--suite-shadow-xs);
-  font-size: 0.88em;
-}
-
-.mi-backlog-active-link {
-  font-weight: 600;
-  color: var(--suite-fg-primary, <<colour foreground>>);
-  text-decoration: none;
-}
-
-.mi-backlog-active-link:hover {
-  color: var(--suite-accent, <<colour primary>>);
-  text-decoration: underline;
-}
-
-.mi-backlog-complete-btn {
-  min-height: 28px;
-  padding: 3px 10px;
-  font-size: 0.78em;
-}
-
 /* Streamlined Backlog Top Controls */
 .mi-backlog-type-bar {
   margin-block-end: 14px;

@@ -925,7 +925,6 @@ class MediaBacklogWidget extends Widget {
     this.addEventListener('mi-backlog-drop-reorder', this.handleDropReorder.bind(this));
     this.addEventListener('mi-backlog-normalize-ranks', this.handleNormalizeRanks.bind(this));
     this.addEventListener('mi-backlog-start-now', this.handleStartNow.bind(this));
-    this.addEventListener('mi-backlog-complete-active', this.handleCompleteActive.bind(this));
     this.addEventListener('mi-backlog-pick-next', this.handlePickNext.bind(this));
     this.addEventListener('mi-backlog-toggle-drawer', this.handleToggleDrawer.bind(this));
     this.addEventListener('mi-backlog-toggle-select', this.handleToggleSelect.bind(this));
@@ -1095,21 +1094,6 @@ class MediaBacklogWidget extends Widget {
     return false;
   }
 
-  handleCompleteActive(event: any) {
-    const targetTitle = event.param;
-    if (!targetTitle) return false;
-    const tid = this.wiki.getTiddler(targetTitle);
-    if (!tid) return false;
-    this.wiki.addTiddler(
-      new $tw.Tiddler(tid, {
-        status: 'Completed',
-        modified: new Date(),
-      }),
-    );
-    this.logMediaToday(targetTitle);
-    return false;
-  }
-
   handlePickNext() {
     const items = this.getVisibleSortedItems();
     if (items.length === 0) return false;
@@ -1231,10 +1215,6 @@ class MediaBacklogWidget extends Widget {
     const backlogTitles = this.wiki.filterTiddlers(
       '[tag[$:/tags/media-importer/Media]status[Backlog]] [tag[$:/tags/media-importer/Media]!has[status]] +[unique[]]',
     );
-    const activeTitles = this.wiki.filterTiddlers('[tag[$:/tags/media-importer/Media]status[Active]]');
-    const filteredActiveTitles = currentType === 'All'
-      ? activeTitles
-      : activeTitles.filter((t: string) => this.wiki.getTiddler(t)?.fields['media-type'] === currentType);
 
     const typeOptions = this.wiki.filterTiddlers('[[$:/plugins/mblackman/media-importer/data/importers]indexes[]]');
 
@@ -1286,45 +1266,7 @@ class MediaBacklogWidget extends Widget {
       ]),
     ]);
 
-    // --- 2. Currently Active (WIP) Shelf ---
-    const activeShelfNodes: IParseTreeNode[] = [];
-    if (filteredActiveTitles.length > 0) {
-      const activeChips = filteredActiveTitles.map((title: string) => {
-        const tid = this.wiki.getTiddler(title);
-        const mType = (tid?.fields['media-type'] as string) || 'Media';
-        return h('div', { class: 'mi-backlog-active-chip' }, [
-          h('span', { class: 'mi-backlog-type-pill' }, [text(mType)]),
-          {
-            type: 'link',
-            attributes: { to: { type: 'string', value: title }, class: { type: 'string', value: 'mi-backlog-active-link' } },
-            children: [text(title)],
-          },
-          {
-            type: 'button',
-            attributes: {
-              class: { type: 'string', value: 'mi-btn mi-btn-sm mi-backlog-complete-btn' },
-              tooltip: { type: 'string', value: 'Mark as Completed and log today' },
-              message: { type: 'string', value: 'mi-backlog-complete-active' },
-              param: { type: 'string', value: title },
-            },
-            children: [text('✓ Finish')],
-          },
-        ]);
-      });
-
-      activeShelfNodes.push(
-        h('div', { class: 'mi-backlog-active-shelf' }, [
-          h('div', { class: 'mi-backlog-active-header' }, [
-            h('span', { class: 'mi-sublabel', style: 'margin-bottom: 0;' }, [
-              text(`Currently Active (${filteredActiveTitles.length} in progress)`),
-            ]),
-          ]),
-          h('div', { class: 'mi-backlog-active-list' }, activeChips),
-        ]),
-      );
-    }
-
-    // --- 3. Clean Segmented Media Type Bar (Only show populated types or active selection) ---
+    // --- 2. Clean Segmented Media Type Bar (Only show populated types or active selection) ---
     const populatedTypes = typeOptions.filter((t: string) => {
       if (currentType === t) return true;
       return backlogTitles.some((title: string) => this.wiki.getTiddler(title)?.fields['media-type'] === t);
@@ -1450,7 +1392,6 @@ class MediaBacklogWidget extends Widget {
 
     const shell = h('div', { class: 'mi-page-shell' }, [
       appHeader,
-      ...activeShelfNodes,
       h('div', { class: 'mi-segmented-bar mi-backlog-type-bar', role: 'tablist', 'aria-label': 'Filter backlog by media type' }, typePills),
       filterRow,
       { type: 'MediaBacklogList', attributes: {}, children: [] },
@@ -1476,9 +1417,8 @@ class MediaBacklogWidget extends Widget {
     const backlogTitles = this.wiki.filterTiddlers(
       '[tag[$:/tags/media-importer/Media]status[Backlog]] [tag[$:/tags/media-importer/Media]!has[status]] +[unique[]]',
     );
-    const activeTitles = this.wiki.filterTiddlers('[tag[$:/tags/media-importer/Media]status[Active]]');
 
-    return `${states}##${backlogTitles.join(';')}##${activeTitles.join(';')}`;
+    return `${states}##${backlogTitles.join(';')}`;
   }
 
   refresh(changedTiddlers: IChangedTiddlers) {
