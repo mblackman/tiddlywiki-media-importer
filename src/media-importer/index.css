@@ -5,26 +5,114 @@
 :where(:root, .tc-page-container) {
   color-scheme: light dark;
 
-  --suite-bg-canvas: var(--mn-bg-app, var(--tpc-page-background, <<colour page-background>>));
-  --suite-surface-primary: var(--mn-bg-surface, var(--tpc-tiddler-background, <<colour tiddler-background>>));
-  --suite-surface-card: var(--mn-bg-card, color-mix(in oklab, var(--tpc-tiddler-background, <<colour tiddler-background>>) 96.5%, var(--tpc-foreground, <<colour foreground>>) 3.5%));
-  --suite-surface-subtle: var(--mn-bg-subtle, color-mix(in oklab, var(--tpc-tiddler-background, <<colour tiddler-background>>) 93%, var(--tpc-foreground, <<colour foreground>>) 7%));
-  --suite-surface-elevated: var(--mn-bg-elevated, color-mix(in oklab, var(--tpc-tiddler-background, <<colour tiddler-background>>) 90%, var(--tpc-foreground, <<colour foreground>>) 10%));
-  --suite-surface-input: var(--tpc-tiddler-background, <<colour tiddler-background>>);
-  --suite-surface-hover: var(--mn-bg-hover, color-mix(in oklab, var(--tpc-foreground, <<colour foreground>>) 5.5%, var(--tpc-tiddler-background, <<colour tiddler-background>>)));
-  --suite-surface-active: var(--mn-bg-active, color-mix(in oklab, var(--tpc-foreground, <<colour foreground>>) 9%, var(--tpc-tiddler-background, <<colour tiddler-background>>)));
-  --suite-surface-selected: var(--mn-accent-soft, color-mix(in oklab, var(--tpc-primary, <<colour primary>>) 12%, var(--tpc-tiddler-background, <<colour tiddler-background>>)));
-  --suite-surface-dropzone: color-mix(in oklab, var(--tpc-primary, <<colour primary>>) 8%, var(--suite-surface-subtle));
+  --suite-bg-canvas: var(
+    --mn-bg-app,
+    var(--tpc-page-background, <<colour page-background>>)
+  );
+  --suite-surface-primary: var(
+    --mn-bg-surface,
+    var(--tpc-tiddler-background, <<colour tiddler-background>>)
+  );
+  --suite-surface-card: var(
+    --mn-bg-card,
+    color-mix(
+      in oklab,
+      var(--tpc-tiddler-background, <<colour tiddler-background>>) 96.5%,
+      var(--tpc-foreground, <<colour foreground>>) 3.5%
+    )
+  );
+  --suite-surface-subtle: var(
+    --mn-bg-subtle,
+    color-mix(
+      in oklab,
+      var(--tpc-tiddler-background, <<colour tiddler-background>>) 93%,
+      var(--tpc-foreground, <<colour foreground>>) 7%
+    )
+  );
+  --suite-surface-elevated: var(
+    --mn-bg-elevated,
+    color-mix(
+      in oklab,
+      var(--tpc-tiddler-background, <<colour tiddler-background>>) 90%,
+      var(--tpc-foreground, <<colour foreground>>) 10%
+    )
+  );
+  --suite-surface-input: var(
+    --tpc-tiddler-background,
+    <<colour tiddler-background>>
+  );
+  --suite-surface-hover: var(
+    --mn-bg-hover,
+    color-mix(
+      in oklab,
+      var(--tpc-foreground, <<colour foreground>>) 5.5%,
+      var(--tpc-tiddler-background, <<colour tiddler-background>>)
+    )
+  );
+  --suite-surface-active: var(
+    --mn-bg-active,
+    color-mix(
+      in oklab,
+      var(--tpc-foreground, <<colour foreground>>) 9%,
+      var(--tpc-tiddler-background, <<colour tiddler-background>>)
+    )
+  );
+  --suite-surface-selected: var(
+    --mn-accent-soft,
+    color-mix(
+      in oklab,
+      var(--tpc-primary, <<colour primary>>) 12%,
+      var(--tpc-tiddler-background, <<colour tiddler-background>>)
+    )
+  );
+  --suite-surface-dropzone: color-mix(
+    in oklab,
+    var(--tpc-primary, <<colour primary>>) 8%,
+    var(--suite-surface-subtle)
+  );
 
-  --suite-fg-primary: var(--mn-fg-primary, var(--tpc-foreground, <<colour foreground>>));
-  --suite-fg-secondary: var(--mn-fg-secondary, color-mix(in oklab, var(--tpc-foreground, <<colour foreground>>) 72%, var(--tpc-muted-foreground, <<colour muted-foreground>>) 28%));
-  --suite-fg-muted: var(--mn-fg-muted, color-mix(in oklab, var(--tpc-foreground, <<colour foreground>>) 58%, var(--tpc-muted-foreground, <<colour muted-foreground>>) 42%));
+  --suite-fg-primary: var(
+    --mn-fg-primary,
+    var(--tpc-foreground, <<colour foreground>>)
+  );
+  --suite-fg-secondary: var(
+    --mn-fg-secondary,
+    color-mix(
+      in oklab,
+      var(--tpc-foreground, <<colour foreground>>) 72%,
+      var(--tpc-muted-foreground, <<colour muted-foreground>>) 28%
+    )
+  );
+  --suite-fg-muted: var(
+    --mn-fg-muted,
+    color-mix(
+      in oklab,
+      var(--tpc-foreground, <<colour foreground>>) 58%,
+      var(--tpc-muted-foreground, <<colour muted-foreground>>) 42%
+    )
+  );
   --suite-fg-on-accent: #ffffff;
 
-  --suite-border-hairline: var(--mn-border-hairline, color-mix(in oklab, var(--suite-fg-primary) 7%, transparent));
-  --suite-border-subtle: var(--mn-border-subtle, color-mix(in oklab, var(--suite-fg-primary) 12%, transparent));
-  --suite-border-strong: var(--mn-border-strong, color-mix(in oklab, var(--suite-fg-primary) 22%, transparent));
-  --suite-border-control: var(--mn-border-control, color-mix(in oklab, var(--suite-fg-primary) 46%, var(--suite-surface-primary)));
+  --suite-border-hairline: var(
+    --mn-border-hairline,
+    color-mix(in oklab, var(--suite-fg-primary) 7%, transparent)
+  );
+  --suite-border-subtle: var(
+    --mn-border-subtle,
+    color-mix(in oklab, var(--suite-fg-primary) 12%, transparent)
+  );
+  --suite-border-strong: var(
+    --mn-border-strong,
+    color-mix(in oklab, var(--suite-fg-primary) 22%, transparent)
+  );
+  --suite-border-control: var(
+    --mn-border-control,
+    color-mix(
+      in oklab,
+      var(--suite-fg-primary) 46%,
+      var(--suite-surface-primary)
+    )
+  );
 
   --suite-radius-xs: 6px;
   --suite-radius-sm: 8px;
@@ -34,9 +122,18 @@
   --suite-radius-pill: 9999px;
 
   --suite-shadow-xs: 0 1px 2px rgba(15, 23, 42, 0.04);
-  --suite-shadow-sm: var(--mn-shadow-card, 0 2px 8px -2px rgba(15, 23, 42, 0.06), 0 1px 3px -1px rgba(15, 23, 42, 0.04));
-  --suite-shadow-md: 0 6px 16px -4px rgba(15, 23, 42, 0.10), 0 2px 6px -1px rgba(15, 23, 42, 0.05);
-  --suite-shadow-lg: var(--mn-shadow-popover, 0 12px 32px -4px rgba(15, 23, 42, 0.16), 0 4px 12px -2px rgba(15, 23, 42, 0.08));
+  --suite-shadow-sm: var(
+    --mn-shadow-card,
+    0 2px 8px -2px rgba(15, 23, 42, 0.06),
+    0 1px 3px -1px rgba(15, 23, 42, 0.04)
+  );
+  --suite-shadow-md:
+    0 6px 16px -4px rgba(15, 23, 42, 0.1), 0 2px 6px -1px rgba(15, 23, 42, 0.05);
+  --suite-shadow-lg: var(
+    --mn-shadow-popover,
+    0 12px 32px -4px rgba(15, 23, 42, 0.16),
+    0 4px 12px -2px rgba(15, 23, 42, 0.08)
+  );
   --suite-scrim: var(--mn-scrim, rgba(15, 23, 42, 0.45));
 
   --suite-space-1: 0.25rem;
@@ -59,8 +156,23 @@
   --suite-control-height-lg: 44px;
   --suite-touch-target: 36px;
 
-  --suite-font-sans: var(--mn-font-sans, -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif);
-  --suite-font-mono: var(--mn-font-mono, "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace);
+  --suite-font-sans: var(
+    --mn-font-sans,
+    -apple-system,
+    BlinkMacSystemFont,
+    'Inter',
+    'Segoe UI',
+    Roboto,
+    sans-serif
+  );
+  --suite-font-mono: var(
+    --mn-font-mono,
+    'JetBrains Mono',
+    ui-monospace,
+    SFMono-Regular,
+    Menlo,
+    monospace
+  );
 
   --suite-text-xs: 0.75rem;
   --suite-text-sm: 0.84rem;
@@ -69,47 +181,97 @@
   --suite-text-xl: 1.375rem;
 
   --suite-accent: var(--mn-accent, var(--tpc-primary, <<colour primary>>));
-  --suite-accent-hover: var(--mn-accent-hover, color-mix(in oklab, var(--suite-accent) 86%, var(--suite-fg-primary)));
-  --suite-accent-bg: var(--mn-accent-soft, color-mix(in oklab, var(--suite-accent) 12%, var(--suite-surface-primary)));
-  --suite-accent-border: color-mix(in oklab, var(--suite-accent) 30%, transparent);
+  --suite-accent-hover: var(
+    --mn-accent-hover,
+    color-mix(in oklab, var(--suite-accent) 86%, var(--suite-fg-primary))
+  );
+  --suite-accent-bg: var(
+    --mn-accent-soft,
+    color-mix(in oklab, var(--suite-accent) 12%, var(--suite-surface-primary))
+  );
+  --suite-accent-border: color-mix(
+    in oklab,
+    var(--suite-accent) 30%,
+    transparent
+  );
   accent-color: var(--suite-accent);
 
   --suite-status-success-accent: #10b981;
-  --suite-status-success-fg: color-mix(in oklab, #059669 82%, var(--suite-fg-primary));
-  --suite-status-success-bg: color-mix(in oklab, #10b981 13%, var(--suite-surface-primary));
+  --suite-status-success-fg: color-mix(
+    in oklab,
+    #059669 82%,
+    var(--suite-fg-primary)
+  );
+  --suite-status-success-bg: color-mix(
+    in oklab,
+    #10b981 13%,
+    var(--suite-surface-primary)
+  );
   --suite-status-success-border: color-mix(in oklab, #10b981 32%, transparent);
 
   --suite-status-warning-accent: #f59e0b;
-  --suite-status-warning-fg: color-mix(in oklab, #d97706 82%, var(--suite-fg-primary));
-  --suite-status-warning-bg: color-mix(in oklab, #f59e0b 14%, var(--suite-surface-primary));
+  --suite-status-warning-fg: color-mix(
+    in oklab,
+    #d97706 82%,
+    var(--suite-fg-primary)
+  );
+  --suite-status-warning-bg: color-mix(
+    in oklab,
+    #f59e0b 14%,
+    var(--suite-surface-primary)
+  );
   --suite-status-warning-border: color-mix(in oklab, #f59e0b 35%, transparent);
 
-  --suite-status-danger-accent: var(--mn-danger, var(--tpc-alert-highlight, #ef4444));
-  --suite-status-danger-fg: color-mix(in oklab, var(--suite-status-danger-accent) 85%, var(--suite-fg-primary));
-  --suite-status-danger-bg: color-mix(in oklab, var(--suite-status-danger-accent) 12%, var(--suite-surface-primary));
-  --suite-status-danger-border: color-mix(in oklab, var(--suite-status-danger-accent) 32%, transparent);
+  --suite-status-danger-accent: var(
+    --mn-danger,
+    var(--tpc-alert-highlight, #ef4444)
+  );
+  --suite-status-danger-fg: color-mix(
+    in oklab,
+    var(--suite-status-danger-accent) 85%,
+    var(--suite-fg-primary)
+  );
+  --suite-status-danger-bg: color-mix(
+    in oklab,
+    var(--suite-status-danger-accent) 12%,
+    var(--suite-surface-primary)
+  );
+  --suite-status-danger-border: color-mix(
+    in oklab,
+    var(--suite-status-danger-accent) 32%,
+    transparent
+  );
 
   --suite-status-info-accent: #3b82f6;
-  --suite-status-info-fg: color-mix(in oklab, #2563eb 82%, var(--suite-fg-primary));
-  --suite-status-info-bg: color-mix(in oklab, #3b82f6 12%, var(--suite-surface-primary));
+  --suite-status-info-fg: color-mix(
+    in oklab,
+    #2563eb 82%,
+    var(--suite-fg-primary)
+  );
+  --suite-status-info-bg: color-mix(
+    in oklab,
+    #3b82f6 12%,
+    var(--suite-surface-primary)
+  );
   --suite-status-info-border: color-mix(in oklab, #3b82f6 30%, transparent);
 
-  --suite-focus-ring: 0 0 0 3px color-mix(in oklab, var(--suite-accent) 28%, transparent);
+  --suite-focus-ring: 0 0 0 3px
+    color-mix(in oklab, var(--suite-accent) 28%, transparent);
 }
 
-:where([data-suite-density="compact"], .suite-density-compact) {
+:where([data-suite-density='compact'], .suite-density-compact) {
   --suite-row-padding-y: 0.25rem;
   --suite-card-padding-sm: 0.45rem 0.625rem;
   --suite-card-gap: 0.5rem;
 }
 
-:where([data-suite-density="touch"], .suite-density-touch) {
+:where([data-suite-density='touch'], .suite-density-touch) {
   --suite-control-height-sm: 36px;
   --suite-control-height-md: 44px;
   --suite-touch-target: 44px;
 }
 
-:where([data-suite-density="editorial"], .suite-density-editorial) {
+:where([data-suite-density='editorial'], .suite-density-editorial) {
   max-inline-size: var(--suite-measure-reading, 65ch);
   line-height: var(--suite-leading-relaxed, 1.68);
   text-wrap: pretty;
@@ -124,10 +286,18 @@
 }
 
 /* --- Hide Raw System Path Heading on Dashboard Tiddlers While Keeping Tiddler Controls --- */
-.tc-tiddler-frame[data-tiddler-title^="$:/plugins/mblackman/media-importer/ui"] .tc-tiddler-title .tc-title,
-.tc-tiddler-frame[data-tiddler-title="$:/plugins/mblackman/media-importer/config"] .tc-tiddler-title .tc-title,
-[data-tiddler-title^="$:/plugins/mblackman/media-importer/ui"] .tc-titlebar h2.tc-title,
-[data-tiddler-title="$:/plugins/mblackman/media-importer/config"] .tc-titlebar h2.tc-title {
+.tc-tiddler-frame[data-tiddler-title^='$:/plugins/mblackman/media-importer/ui']
+  .tc-tiddler-title
+  .tc-title,
+.tc-tiddler-frame[data-tiddler-title='$:/plugins/mblackman/media-importer/config']
+  .tc-tiddler-title
+  .tc-title,
+[data-tiddler-title^='$:/plugins/mblackman/media-importer/ui']
+  .tc-titlebar
+  h2.tc-title,
+[data-tiddler-title='$:/plugins/mblackman/media-importer/config']
+  .tc-titlebar
+  h2.tc-title {
   display: none;
 }
 
@@ -146,7 +316,8 @@
   gap: 14px;
   margin-block-end: 20px;
   padding-block-end: 14px;
-  border-block-end: 1px solid var(--suite-border-subtle, <<colour table-border>>);
+  border-block-end: 1px solid
+    var(--suite-border-subtle, <<colour table-border>>);
 }
 
 .mi-app-header-title-group {
@@ -198,7 +369,11 @@
   font-size: 0.84em;
   text-transform: none;
   letter-spacing: normal;
-  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease,
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
   cursor: pointer;
   box-sizing: border-box;
   white-space: nowrap;
@@ -218,7 +393,7 @@
 }
 
 .mi-btn:disabled,
-.mi-btn[disabled="yes"] {
+.mi-btn[disabled='yes'] {
   opacity: 0.45;
   cursor: not-allowed;
   pointer-events: none;
@@ -298,7 +473,10 @@ input.mi-input,
 textarea.mi-input,
 select.mi-input,
 .mi-input {
-  background-color: var(--suite-surface-input, <<colour tiddler-editor-background>>);
+  background-color: var(
+    --suite-surface-input,
+    <<colour tiddler-editor-background>>
+  );
   color: var(--suite-fg-primary, <<colour foreground>>);
   border: 1px solid var(--suite-border-subtle, <<colour table-border>>);
   width: 100%;
@@ -310,7 +488,10 @@ select.mi-input,
   font-size: 0.94em;
   box-shadow: none;
   box-sizing: border-box;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease,
+    background-color 0.15s ease;
 }
 
 .tc-tiddler-frame input.mi-input:focus,
@@ -336,13 +517,19 @@ select.mi-input:focus,
 select.mi-input {
   appearance: none;
   -webkit-appearance: none;
-  background-color: var(--suite-surface-input, <<colour tiddler-editor-background>>);
-  background-image: linear-gradient(45deg, transparent 50%, var(--suite-fg-muted, #888888) 50%),
-                    linear-gradient(135deg, var(--suite-fg-muted, #888888) 50%, transparent 50%);
+  background-color: var(
+    --suite-surface-input,
+    <<colour tiddler-editor-background>>
+  );
+  background-image:
+    linear-gradient(45deg, transparent 50%, var(--suite-fg-muted, #888888) 50%),
+    linear-gradient(135deg, var(--suite-fg-muted, #888888) 50%, transparent 50%);
   background-position:
     calc(100% - 16px) calc(50% - 2px),
     calc(100% - 11px) calc(50% - 2px);
-  background-size: 5px 5px, 5px 5px;
+  background-size:
+    5px 5px,
+    5px 5px;
   background-repeat: no-repeat;
   padding: 6px 32px 6px 12px;
   cursor: pointer;
@@ -512,7 +699,9 @@ select.mi-input {
   font-weight: 600;
   font-size: 0.88em;
   cursor: pointer;
-  transition: background-color 0.15s ease, color 0.15s ease;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease;
   line-height: 1.2;
 }
 
@@ -683,7 +872,9 @@ select.mi-input {
   padding: 16px 18px;
   margin-block-end: 12px;
   border-radius: var(--suite-radius-lg, 14px);
-  transition: border-color 0.16s ease, box-shadow 0.16s ease;
+  transition:
+    border-color 0.16s ease,
+    box-shadow 0.16s ease;
 }
 
 .mi-search-result-wrapper:hover {
@@ -881,7 +1072,8 @@ select.mi-input {
 }
 
 @keyframes mi-pulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 0.55;
   }
   50% {
@@ -961,7 +1153,9 @@ select.mi-input {
   border-radius: var(--suite-radius-lg, 14px);
   padding: 14px;
   background: var(--suite-surface-subtle, <<colour tiddler-editor-background>>);
-  transition: border-color 0.15s ease, background-color 0.15s ease;
+  transition:
+    border-color 0.15s ease,
+    background-color 0.15s ease;
 }
 
 .mi-dropzone:hover,
@@ -1056,7 +1250,10 @@ select.mi-input {
 .mi-storage-badge-embedded {
   border: 1px solid var(--suite-status-warning-border, #f59e0b);
   color: var(--suite-status-warning-fg, #d97706);
-  background: var(--suite-status-warning-bg, <<colour tiddler-editor-background>>);
+  background: var(
+    --suite-status-warning-bg,
+    <<colour tiddler-editor-background>>
+  );
 }
 
 .mi-manual-grid {
@@ -1210,8 +1407,13 @@ select.mi-input {
 }
 
 .tc-drop-down .mi-picker-option.mi-dropdown-item-active {
-  background-color: var(--suite-accent, <<colour primary>>);
-  color: var(--suite-fg-on-accent, <<colour background>>);
+  background-color: var(
+    --suite-surface-selected,
+    <<colour table-header-background>>
+  );
+  color: var(--suite-fg-primary, <<colour foreground>>);
+  box-shadow: inset 3px 0 0 var(--suite-accent, <<colour primary>>);
+  font-weight: 600;
 }
 
 .mi-media-picker-input-wrapper {
@@ -1274,7 +1476,10 @@ select.mi-input {
 }
 
 .mi-summary-item:hover {
-  background-color: var(--suite-surface-hover, <<colour table-header-background>>);
+  background-color: var(
+    --suite-surface-hover,
+    <<colour table-header-background>>
+  );
 }
 
 .mi-summary-link {
@@ -1285,7 +1490,10 @@ select.mi-input {
 }
 
 .mi-summary-badge {
-  background-color: var(--suite-surface-subtle, <<colour tiddler-editor-background>>);
+  background-color: var(
+    --suite-surface-subtle,
+    <<colour tiddler-editor-background>>
+  );
   color: var(--suite-fg-primary, <<colour foreground>>);
   border: 1px solid var(--suite-border-subtle, <<colour table-border>>);
   border-radius: var(--suite-radius-pill, 999px);
@@ -1617,7 +1825,10 @@ select.mi-input {
 
 .mi-delete-btn:hover {
   color: var(--suite-status-danger-fg, #ef4444);
-  background: var(--suite-status-danger-bg, <<colour tiddler-editor-background>>);
+  background: var(
+    --suite-status-danger-bg,
+    <<colour tiddler-editor-background>>
+  );
 }
 
 /* --- Log & History Helpers --- */
@@ -1758,7 +1969,9 @@ select.mi-input.mi-input-sm {
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  transition: transform 0.18s ease, border-color 0.18s ease;
+  transition:
+    transform 0.18s ease,
+    border-color 0.18s ease;
 }
 
 .mi-library-card:hover {
@@ -1911,7 +2124,10 @@ select.mi-input.mi-input-sm {
   align-items: center;
   font-size: 0.85em;
   cursor: pointer;
-  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease,
+    border-color 0.15s ease;
 }
 
 .mi-genre-pill:hover {
@@ -2069,7 +2285,8 @@ select.mi-input.mi-backlog-select {
   gap: 12px;
   padding: 4px 4px 12px;
   margin-block-end: 4px;
-  border-block-end: 1px solid var(--suite-border-hairline, <<colour table-border>>);
+  border-block-end: 1px solid
+    var(--suite-border-hairline, <<colour table-border>>);
 }
 
 .mi-backlog-list-meta-left,
@@ -2099,7 +2316,9 @@ select.mi-input.mi-backlog-select {
   cursor: pointer;
   padding: 2px 6px;
   border-radius: var(--suite-radius-xs, 6px);
-  transition: color 0.14s ease, background-color 0.14s ease;
+  transition:
+    color 0.14s ease,
+    background-color 0.14s ease;
 }
 
 .mi-backlog-meta-action:hover {
@@ -2185,7 +2404,11 @@ select.mi-input.mi-backlog-select {
   border: 1px solid var(--suite-border-subtle, <<colour table-border>>);
   background: var(--suite-surface-card, <<colour tiddler-background>>);
   box-shadow: var(--suite-shadow-xs);
-  transition: border-color 0.16s ease, background-color 0.16s ease, box-shadow 0.16s ease, transform 0.14s ease;
+  transition:
+    border-color 0.16s ease,
+    background-color 0.16s ease,
+    box-shadow 0.16s ease,
+    transform 0.14s ease;
 }
 
 .mi-backlog-row:hover {
@@ -2242,21 +2465,25 @@ select.mi-input.mi-backlog-select {
   line-height: 1;
   cursor: pointer;
   opacity: 0.65;
-  transition: opacity 0.14s ease, background-color 0.14s ease, color 0.14s ease, border-color 0.14s ease;
+  transition:
+    opacity 0.14s ease,
+    background-color 0.14s ease,
+    color 0.14s ease,
+    border-color 0.14s ease;
 }
 
-.mi-backlog-row:hover .mi-backlog-step-btn:not([disabled="yes"]),
+.mi-backlog-row:hover .mi-backlog-step-btn:not([disabled='yes']),
 .mi-backlog-step-btn:focus-visible {
   opacity: 1;
 }
 
-.mi-backlog-step-btn:hover:not([disabled="yes"]) {
+.mi-backlog-step-btn:hover:not([disabled='yes']) {
   background: var(--suite-surface-hover, <<colour table-header-background>>);
   border-color: var(--suite-border-subtle, <<colour table-border>>);
   color: var(--suite-accent, <<colour primary>>);
 }
 
-.mi-backlog-step-btn[disabled="yes"] {
+.mi-backlog-step-btn[disabled='yes'] {
   opacity: 0.2;
   cursor: not-allowed;
   pointer-events: none;
@@ -2322,7 +2549,9 @@ select.mi-input.mi-backlog-select {
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: transform 0.16s ease, border-color 0.16s ease;
+  transition:
+    transform 0.16s ease,
+    border-color 0.16s ease;
 }
 
 .mi-backlog-poster-link:hover .mi-backlog-poster {
@@ -2540,7 +2769,8 @@ select.mi-input.mi-backlog-select {
     width: 100%;
     justify-content: flex-end;
     padding-block-start: 10px;
-    border-block-start: 1px solid var(--suite-border-hairline, <<colour table-border>>);
+    border-block-start: 1px solid
+      var(--suite-border-hairline, <<colour table-border>>);
   }
 
   .mi-backlog-step-btn {
@@ -2564,7 +2794,8 @@ select.mi-input.mi-backlog-select {
     width: 100%;
     justify-content: flex-end;
     padding-block-start: 10px;
-    border-block-start: 1px solid var(--suite-border-hairline, <<colour table-border>>);
+    border-block-start: 1px solid
+      var(--suite-border-hairline, <<colour table-border>>);
   }
 
   .mi-backlog-step-btn {

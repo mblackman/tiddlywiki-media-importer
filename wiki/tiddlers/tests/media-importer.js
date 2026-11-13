@@ -199,6 +199,8 @@ describe('Media Importer UI & Workflow', function() {
     const backlogHtml = $tw.wiki.renderTiddler('text/html', '$:/plugins/mblackman/media-importer/ui/media-backlog');
     expect(backlogHtml).toContain('Media Backlog');
     expect(backlogHtml).toContain('Pick Next For Me');
+    expect(backlogHtml).not.toMatch(/mi-segmented-pill[^>]*>All\s*\(/);
+    expect(backlogHtml).toContain('Book (5)');
     expect(backlogHtml).toContain('Blood Meridian (1985)');
     expect(backlogHtml).toContain('Infinite Jest (1996)');
 
@@ -259,6 +261,33 @@ describe('Media Importer UI & Workflow', function() {
     }
     $tw.wiki.deleteTiddler('$:/temp/mblackman/media-importer/backlog/spotlight');
     $tw.wiki.deleteTiddler('$:/state/mblackman/media-importer/backlog/sort');
+    $tw.wiki.deleteTiddler('$:/state/mblackman/media-importer/backlog/type');
+  });
+
+  it('excludes All option from backlog dashboard and scopes ranks per media type', function() {
+    // 1. When type is unset or stale 'All', defaults to populated type without 'All' pill
+    $tw.wiki.setText('$:/state/mblackman/media-importer/backlog/type', 'text', null, 'All');
+    let html = $tw.wiki.renderTiddler('text/html', '$:/plugins/mblackman/media-importer/ui/media-backlog');
+    expect(html).not.toMatch(/mi-segmented-pill[^>]*>All\s*\(/);
+    expect(html).toContain('Book (5)');
+    expect(html).toContain('Manga (3)');
+    expect(html).toContain('Blood Meridian (1985)');
+    expect(html).not.toContain('BEASTARS (2016)');
+
+    // 2. Switching to Manga renders only manga and isolates rank numbers
+    $tw.wiki.setText('$:/state/mblackman/media-importer/backlog/type', 'text', null, 'Manga');
+    html = $tw.wiki.renderTiddler('text/html', '$:/plugins/mblackman/media-importer/ui/media-backlog');
+    expect(html).toContain('BEASTARS (2016)');
+    expect(html).toContain('Berserk (1989)');
+    expect(html).toContain('Goodnight Punpun (2007)');
+    expect(html).not.toContain('Blood Meridian (1985)');
+
+    // 3. Switching to an empty media type shows type-specific empty state
+    $tw.wiki.setText('$:/state/mblackman/media-importer/backlog/type', 'text', null, 'Movie');
+    html = $tw.wiki.renderTiddler('text/html', '$:/plugins/mblackman/media-importer/ui/media-backlog');
+    expect(html).toContain('Your Movie backlog is empty!');
+    expect(html).toContain('Import movies to start building and ranking your queue.');
+
     $tw.wiki.deleteTiddler('$:/state/mblackman/media-importer/backlog/type');
   });
 });

@@ -124,6 +124,35 @@ function computeLengthAndCommitment(fields: Record<string, any>): { label: strin
   return { label: '', bucket: 'Unknown' };
 }
 
+function getAvailableMediaTypes(wiki: any): string[] {
+  const importerTypes: string[] = wiki.filterTiddlers('[[$:/plugins/mblackman/media-importer/data/importers]indexes[]]');
+  const customTypes: string[] = wiki.filterTiddlers(
+    '[tag[$:/tags/media-importer/Media]has[media-type]each[media-type]get[media-type]]',
+  );
+  const combined = Array.from(new Set([...importerTypes, ...customTypes]));
+  return combined.length > 0 ? combined : ['Book'];
+}
+
+function resolveBacklogType(wiki: any): string {
+  const typeTiddler = '$:/state/mblackman/media-importer/backlog/type';
+  const rawType = (wiki.getTiddlerText(typeTiddler, '') || '').trim();
+  const typeOptions = getAvailableMediaTypes(wiki);
+
+  if (rawType && rawType !== 'All' && typeOptions.includes(rawType)) {
+    return rawType;
+  }
+
+  // Find the first populated media type in the backlog
+  const backlogTitles = wiki.filterTiddlers(
+    '[tag[$:/tags/media-importer/Media]status[Backlog]] [tag[$:/tags/media-importer/Media]!has[status]] +[unique[]]',
+  );
+  const populated = typeOptions.find((t: string) =>
+    backlogTitles.some((title: string) => wiki.getTiddler(title)?.fields['media-type'] === t),
+  );
+
+  return populated || typeOptions[0] || 'Book';
+}
+
 function buildBacklogModel(wiki: any, title: string): BacklogItemModel {
   const tiddler = wiki.getTiddler(title);
   const fields: Record<string, any> = tiddler?.fields || {};
@@ -196,7 +225,7 @@ function filterBacklogItems(
   currentSearch: string,
 ): BacklogItemModel[] {
   let result = items;
-  if (currentType !== 'All') {
+  if (currentType) {
     result = result.filter(item => item.type === currentType);
   }
   if (currentGenre !== 'All') {
@@ -225,7 +254,6 @@ class MediaBacklogListWidget extends Widget {
   private draggedTitle: string = '';
 
   private computeStructuralSignature(): string {
-    const typeTiddler = '$:/state/mblackman/media-importer/backlog/type';
     const genreTiddler = '$:/state/mblackman/media-importer/backlog/genre';
     const commitmentTiddler = '$:/state/mblackman/media-importer/backlog/commitment';
     const sortTiddler = '$:/state/mblackman/media-importer/backlog/sort';
@@ -233,7 +261,7 @@ class MediaBacklogListWidget extends Widget {
     const spotlightTiddler = '$:/temp/mblackman/media-importer/backlog/spotlight';
 
     const stateValues = [
-      this.wiki.getTiddlerText(typeTiddler, 'All'),
+      resolveBacklogType(this.wiki),
       this.wiki.getTiddlerText(genreTiddler, 'All'),
       this.wiki.getTiddlerText(commitmentTiddler, 'All'),
       this.wiki.getTiddlerText(sortTiddler, 'rank-asc'),
@@ -342,14 +370,13 @@ class MediaBacklogListWidget extends Widget {
   }
 
   execute() {
-    const typeTiddler = '$:/state/mblackman/media-importer/backlog/type';
     const genreTiddler = '$:/state/mblackman/media-importer/backlog/genre';
     const commitmentTiddler = '$:/state/mblackman/media-importer/backlog/commitment';
     const sortTiddler = '$:/state/mblackman/media-importer/backlog/sort';
     const searchTiddler = '$:/temp/mblackman/media-importer/search/backlog';
     const spotlightTiddler = '$:/temp/mblackman/media-importer/backlog/spotlight';
 
-    const currentType = this.wiki.getTiddlerText(typeTiddler, 'All');
+    const currentType = resolveBacklogType(this.wiki);
     const currentGenre = this.wiki.getTiddlerText(genreTiddler, 'All');
     const currentCommitment = this.wiki.getTiddlerText(commitmentTiddler, 'All');
     const currentSort = this.wiki.getTiddlerText(sortTiddler, 'rank-asc');
@@ -376,7 +403,11 @@ class MediaBacklogListWidget extends Widget {
     // --- 1. Spotlight "Pick For Me" Recommendation Card ---
     if (spotlightTitle) {
       const spotTiddler = this.wiki.getTiddler(spotlightTitle);
-      if (spotTiddler && (spotTiddler.fields.status === 'Backlog' || !spotTiddler.fields.status)) {
+      if (
+        spotTiddler &&
+        (spotTiddler.fields.status === 'Backlog' || !spotTiddler.fields.status) &&
+        (!spotTiddler.fields['media-type'] || spotTiddler.fields['media-type'] === currentType)
+      ) {
         const spotItem = buildBacklogModel(this.wiki, spotlightTitle);
         children.push(
           h('div', { class: 'mi-card mi-backlog-spotlight' }, [
@@ -553,21 +584,23 @@ class MediaBacklogListWidget extends Widget {
     }
 
     // --- 3. Empty State ---
+    const typeItems = allBacklogItems.filter(item => item.type === currentType);
     if (sortedItems.length === 0) {
+      const isTypeEmpty = typeItems.length === 0;
       children.push(
         h('div', { class: 'mi-empty-state' }, [
           h('div', { style: 'font-weight: 600; font-style: normal; margin-bottom: 6px; color: var(--suite-fg-primary);' }, [
-            text(allBacklogItems.length === 0 ? 'Your media backlog is empty!' : 'No backlog items match the active filters.'),
+            text(isTypeEmpty ? `Your ${currentType} backlog is empty!` : 'No backlog items match the active filters.'),
           ]),
           h('div', { style: 'margin-bottom: 12px; font-style: normal; font-size: 0.9em;' }, [
             text(
-              allBacklogItems.length === 0
-                ? 'Import books, movies, games, shows, manga, comics, or music to start building and ranking your queue.'
+              isTypeEmpty
+                ? `Import ${currentType.toLowerCase()}s to start building and ranking your queue.`
                 : 'Try resetting your backlog filters or search query.',
             ),
           ]),
           h('div', { class: 'mi-flex-row', style: 'justify-content: center; gap: 10px;' }, [
-            allBacklogItems.length > 0
+            !isTypeEmpty
               ? ({
                 type: 'button',
                 attributes: {
@@ -682,9 +715,6 @@ class MediaBacklogListWidget extends Widget {
 
       // Zone 3: Editorial Content & Metadata
       const metaPills: IParseTreeNode[] = [];
-      if (currentType === 'All') {
-        metaPills.push(h('span', { class: 'mi-backlog-type-pill' }, [text(item.type)]));
-      }
       if (item.lengthLabel) {
         metaPills.push(
           h('span', { class: 'mi-backlog-meta-pill', title: `Commitment: ${item.commitment}` }, [
@@ -936,7 +966,7 @@ class MediaBacklogWidget extends Widget {
   }
 
   private getVisibleSortedItems(): BacklogItemModel[] {
-    const currentType = this.wiki.getTiddlerText('$:/state/mblackman/media-importer/backlog/type', 'All');
+    const currentType = resolveBacklogType(this.wiki);
     const currentGenre = this.wiki.getTiddlerText('$:/state/mblackman/media-importer/backlog/genre', 'All');
     const currentCommitment = this.wiki.getTiddlerText('$:/state/mblackman/media-importer/backlog/commitment', 'All');
     const currentSort = this.wiki.getTiddlerText('$:/state/mblackman/media-importer/backlog/sort', 'rank-asc');
@@ -1189,7 +1219,6 @@ class MediaBacklogWidget extends Widget {
   }
 
   handleResetFilters() {
-    this.wiki.setText('$:/state/mblackman/media-importer/backlog/type', 'text', undefined, 'All');
     this.wiki.setText('$:/state/mblackman/media-importer/backlog/genre', 'text', undefined, 'All');
     this.wiki.setText('$:/state/mblackman/media-importer/backlog/commitment', 'text', undefined, 'All');
     this.wiki.setText('$:/state/mblackman/media-importer/backlog/sort', 'text', undefined, 'rank-asc');
@@ -1206,7 +1235,7 @@ class MediaBacklogWidget extends Widget {
     const sortTiddler = '$:/state/mblackman/media-importer/backlog/sort';
     const searchTiddler = '$:/temp/mblackman/media-importer/search/backlog';
 
-    const currentType = this.wiki.getTiddlerText(typeTiddler, 'All');
+    const currentType = resolveBacklogType(this.wiki);
     const currentGenre = this.wiki.getTiddlerText(genreTiddler, 'All');
     const currentCommitment = this.wiki.getTiddlerText(commitmentTiddler, 'All');
     const currentSort = this.wiki.getTiddlerText(sortTiddler, 'rank-asc');
@@ -1216,14 +1245,14 @@ class MediaBacklogWidget extends Widget {
       '[tag[$:/tags/media-importer/Media]status[Backlog]] [tag[$:/tags/media-importer/Media]!has[status]] +[unique[]]',
     );
 
-    const typeOptions = this.wiki.filterTiddlers('[[$:/plugins/mblackman/media-importer/data/importers]indexes[]]');
+    const typeOptions = getAvailableMediaTypes(this.wiki);
 
     // Collect Genres from Backlog
     const genreSet = new Set<string>();
     for (const title of backlogTitles) {
       const tid = this.wiki.getTiddler(title);
       if (tid && tid.fields.genres) {
-        if (currentType !== 'All' && tid.fields['media-type'] !== currentType) continue;
+        if (tid.fields['media-type'] !== currentType) continue;
         const parsed = ($tw.utils && $tw.utils.parseStringArray(tid.fields.genres as string)) || [];
         for (const g of parsed) {
           genreSet.add(g);
@@ -1266,56 +1295,33 @@ class MediaBacklogWidget extends Widget {
       ]),
     ]);
 
-    // --- 2. Clean Segmented Media Type Bar (Only show populated types or active selection) ---
-    const populatedTypes = typeOptions.filter((t: string) => {
-      if (currentType === t) return true;
-      return backlogTitles.some((title: string) => this.wiki.getTiddler(title)?.fields['media-type'] === t);
-    });
-    const visibleTypeList = populatedTypes.length > 0 ? populatedTypes : typeOptions;
-
-    const typePills: IParseTreeNode[] = [
-      {
+    // --- 2. Clean Segmented Media Type Bar ---
+    const typePills: IParseTreeNode[] = typeOptions.map((t: string) => {
+      const count = backlogTitles.filter((title: string) => this.wiki.getTiddler(title)?.fields['media-type'] === t).length;
+      return {
         type: 'button',
         attributes: {
           class: {
             type: 'string',
-            value: currentType === 'All'
+            value: currentType === t
               ? 'tc-btn-invisible mi-segmented-pill mi-segmented-pill-active'
               : 'tc-btn-invisible mi-segmented-pill',
           },
         },
         children: [
-          text(`All (${backlogTitles.length})`),
-          { type: 'action-setfield', attributes: { $tiddler: { type: 'string', value: typeTiddler }, text: { type: 'string', value: 'All' } } },
+          text(`${t} (${count})`),
+          { type: 'action-setfield', attributes: { $tiddler: { type: 'string', value: typeTiddler }, text: { type: 'string', value: t } } },
         ],
-      },
-      ...visibleTypeList.map((t: string) => {
-        const count = backlogTitles.filter((title: string) => this.wiki.getTiddler(title)?.fields['media-type'] === t).length;
-        return {
-          type: 'button',
-          attributes: {
-            class: {
-              type: 'string',
-              value: currentType === t
-                ? 'tc-btn-invisible mi-segmented-pill mi-segmented-pill-active'
-                : 'tc-btn-invisible mi-segmented-pill',
-            },
-          },
-          children: [
-            text(`${t} (${count})`),
-            { type: 'action-setfield', attributes: { $tiddler: { type: 'string', value: typeTiddler }, text: { type: 'string', value: t } } },
-          ],
-        } as IParseTreeNode;
-      }),
-    ];
+      } as IParseTreeNode;
+    });
 
     // --- 4. Streamlined Single-Row Search & Filter Bar ---
     const createOption = (value: string, label: string) => h('option', { value }, [text(label)]);
 
-    const hasActiveFilters = currentType !== 'All' ||
-      currentGenre !== 'All' ||
+    const hasActiveFilters = currentGenre !== 'All' ||
       currentCommitment !== 'All' ||
-      currentSort !== 'rank-asc';
+      currentSort !== 'rank-asc' ||
+      (this.wiki.getTiddlerText(searchTiddler, '') || '').trim() !== '';
 
     const filterRow = h('div', { class: 'mi-backlog-controls-row' }, [
       h('div', { class: 'mi-backlog-search-wrap' }, [
@@ -1402,13 +1408,12 @@ class MediaBacklogWidget extends Widget {
   }
 
   private computeShellSignature(): string {
-    const typeTiddler = '$:/state/mblackman/media-importer/backlog/type';
     const genreTiddler = '$:/state/mblackman/media-importer/backlog/genre';
     const commitmentTiddler = '$:/state/mblackman/media-importer/backlog/commitment';
     const sortTiddler = '$:/state/mblackman/media-importer/backlog/sort';
 
     const states = [
-      this.wiki.getTiddlerText(typeTiddler, 'All'),
+      resolveBacklogType(this.wiki),
       this.wiki.getTiddlerText(genreTiddler, 'All'),
       this.wiki.getTiddlerText(commitmentTiddler, 'All'),
       this.wiki.getTiddlerText(sortTiddler, 'rank-asc'),
